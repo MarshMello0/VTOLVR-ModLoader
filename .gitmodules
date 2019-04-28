@@ -1,0 +1,3 @@
+[submodule "MonoInjector"]
+	path = MonoInjector
+	url = https://github.com/MarshMello0/MonoInjector
