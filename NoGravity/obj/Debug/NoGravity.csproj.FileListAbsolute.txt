@@ -1,0 +1,11 @@
+A:\Code\VTOLVR-ModLoader\NoGravity\bin\Debug\NoGravity.dll
+A:\Code\VTOLVR-ModLoader\NoGravity\bin\Debug\NoGravity.pdb
+A:\Code\VTOLVR-ModLoader\NoGravity\bin\Debug\UnityEngine.dll
+A:\Code\VTOLVR-ModLoader\NoGravity\bin\Debug\IllusionInjector.dll
+A:\Code\VTOLVR-ModLoader\NoGravity\bin\Debug\IllusionPlugin.dll
+A:\Code\VTOLVR-ModLoader\NoGravity\bin\Debug\IllusionPlugin.xml
+A:\Code\VTOLVR-ModLoader\NoGravity\obj\Debug\NoGravity.csprojAssemblyReference.cache
+A:\Code\VTOLVR-ModLoader\NoGravity\obj\Debug\NoGravity.csproj.CoreCompileInputs.cache
+A:\Code\VTOLVR-ModLoader\NoGravity\obj\Debug\NoGravity.csproj.CopyComplete
+A:\Code\VTOLVR-ModLoader\NoGravity\obj\Debug\NoGravity.dll
+A:\Code\VTOLVR-ModLoader\NoGravity\obj\Debug\NoGravity.pdb
