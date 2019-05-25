@@ -11,7 +11,7 @@ public class MultiplayerMenu : MonoBehaviour
 {
 	public string ipAddress = "127.0.0.1";
 	public string portNumber = "15937";
-	public bool DontChangeSceneOnConnect = false;
+	public bool DontChangeSceneOnConnect = true;
 	public string masterServerHost = string.Empty;
 	public ushort masterServerPort = 15940;
 	public string natServerHost = string.Empty;

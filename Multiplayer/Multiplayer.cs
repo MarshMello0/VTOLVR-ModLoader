@@ -33,9 +33,14 @@ namespace Multiplayer
             //multiplayerMenu.ipAddress = GUI.TextField(new Rect(10, 10, 150, 100), "127.0.0.1");
             //multiplayerMenu.portNumber = GUI.TextField(new Rect(10, 120, 150, 100), "15937");
 
-            if (GUI.Button(new Rect(10,10,150,100),"Host"))
+            //if (GUI.Button(new Rect(10,10,150,100),"Host"))
+            //{
+            //    multiplayerMenu.Host();
+            //}
+
+            if (GUI.Button(new Rect(10,120,150,100), "Connect"))
             {
-                multiplayerMenu.Host();
+                multiplayerMenu.Connect();
             }
         }
 
