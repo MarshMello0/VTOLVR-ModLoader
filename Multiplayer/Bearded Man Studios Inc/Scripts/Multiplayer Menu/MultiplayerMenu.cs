@@ -9,8 +9,8 @@ using UnityEngine.UI;
 
 public class MultiplayerMenu : MonoBehaviour
 {
-	public InputField ipAddress = null;
-	public InputField portNumber = null;
+	public string ipAddress = "127.0.0.1";
+	public string portNumber = "15937";
 	public bool DontChangeSceneOnConnect = false;
 	public string masterServerHost = string.Empty;
 	public ushort masterServerPort = 15940;
@@ -37,8 +37,8 @@ public class MultiplayerMenu : MonoBehaviour
 
 	private void Start()
 	{
-		ipAddress.text = "127.0.0.1";
-		portNumber.text = "15937";
+		ipAddress = "127.0.0.1";
+		portNumber = "15937";
 
 		for (int i = 0; i < ToggledButtons.Length; ++i)
 		{
@@ -50,7 +50,7 @@ public class MultiplayerMenu : MonoBehaviour
 		if (!useTCP)
 		{
 			// Do any firewall opening requests on the operating system
-			NetWorker.PingForFirewall(ushort.Parse(portNumber.text));
+			NetWorker.PingForFirewall(ushort.Parse(portNumber));
 		}
 
 		if (useMainThreadManagerForRPCs)
@@ -59,7 +59,7 @@ public class MultiplayerMenu : MonoBehaviour
 		if (getLocalNetworkConnections)
 		{
 			NetWorker.localServerLocated += LocalServerLocated;
-			NetWorker.RefreshLocalUdpListings(ushort.Parse(portNumber.text));
+			NetWorker.RefreshLocalUdpListings(ushort.Parse(portNumber));
 		}
 	}
 
@@ -76,7 +76,7 @@ public class MultiplayerMenu : MonoBehaviour
 			return;
 		}
 		ushort port;
-		if(!ushort.TryParse(portNumber.text, out port))
+		if(!ushort.TryParse(portNumber, out port))
 		{
 			Debug.LogError("The supplied port number is not within the allowed range 0-" + ushort.MaxValue);
 		    	return;
@@ -87,15 +87,15 @@ public class MultiplayerMenu : MonoBehaviour
 		if (useTCP)
 		{
 			client = new TCPClient();
-			((TCPClient)client).Connect(ipAddress.text, (ushort)port);
+			((TCPClient)client).Connect(ipAddress, (ushort)port);
 		}
 		else
 		{
 			client = new UDPClient();
 			if (natServerHost.Trim().Length == 0)
-				((UDPClient)client).Connect(ipAddress.text, (ushort)port);
+				((UDPClient)client).Connect(ipAddress, (ushort)port);
 			else
-				((UDPClient)client).Connect(ipAddress.text, (ushort)port, natServerHost, natServerPort);
+				((UDPClient)client).Connect(ipAddress, (ushort)port, natServerHost, natServerPort);
 		}
 
 		Connected(client);
@@ -109,10 +109,11 @@ public class MultiplayerMenu : MonoBehaviour
 		SetToggledButtons(false);
 		_matchmaking = true;
 
-		if (mgr == null && networkManager == null)
-			throw new System.Exception("A network manager was not provided, this is required for the tons of fancy stuff");
+		//if (mgr == null && networkManager == null)
+		//	throw new System.Exception("A network manager was not provided, this is required for the tons of fancy stuff");
 		
-		mgr = Instantiate(networkManager).GetComponent<NetworkManager>();
+
+		//mgr = new GameObject("Network Manager").AddComponent<NetworkManager>();
 
 		mgr.MatchmakingServersFromMasterServer(masterServerHost, masterServerPort, myElo, (response) =>
 		{
@@ -143,11 +144,10 @@ public class MultiplayerMenu : MonoBehaviour
 		else
 		{
 			server = new UDPServer(64);
-
 			if (natServerHost.Trim().Length == 0)
-				((UDPServer)server).Connect(ipAddress.text, ushort.Parse(portNumber.text));
+				((UDPServer)server).Connect(ipAddress, ushort.Parse(portNumber));
 			else
-				((UDPServer)server).Connect(port: ushort.Parse(portNumber.text), natHost: natServerHost, natPort: natServerPort);
+				((UDPServer)server).Connect(port: ushort.Parse(portNumber), natHost: natServerHost, natPort: natServerPort);
 		}
 
 		server.playerTimeout += (player, sender) =>
@@ -180,6 +180,7 @@ public class MultiplayerMenu : MonoBehaviour
 
 	public void Connected(NetWorker networker)
 	{
+        Debug.Log("Connected Method");
 		if (!networker.IsBound)
 		{
 			Debug.LogError("NetWorker failed to bind");

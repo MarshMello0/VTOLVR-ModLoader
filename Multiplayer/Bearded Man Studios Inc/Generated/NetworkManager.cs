@@ -10,13 +10,13 @@ namespace BeardedManStudios.Forge.Networking.Unity
 		public event InstantiateEvent objectInitialized;
 		protected BMSByte metadata = new BMSByte();
 
-		public GameObject[] ChatManagerNetworkObject = null;
-		public GameObject[] CubeForgeGameNetworkObject = null;
-		public GameObject[] ExampleProximityPlayerNetworkObject = null;
-		public GameObject[] NetworkCameraNetworkObject = null;
-		public GameObject[] TestNetworkObject = null;
+        public GameObject[] ChatManagerNetworkObject = null;
+        public GameObject[] CubeForgeGameNetworkObject = null;
+        public GameObject[] ExampleProximityPlayerNetworkObject = null;
+        public GameObject[] NetworkCameraNetworkObject = null;
+        public GameObject[] TestNetworkObject = null;
 
-		protected virtual void SetupObjectCreatedEvent()
+        protected virtual void SetupObjectCreatedEvent()
 		{
 			Networker.objectCreated += CaptureObjects;
 		}

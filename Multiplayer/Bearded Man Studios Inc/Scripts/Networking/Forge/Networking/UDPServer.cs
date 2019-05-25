@@ -26,6 +26,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 
+
 namespace BeardedManStudios.Forge.Networking
 {
 	public class UDPServer : BaseUDP, IServer
@@ -164,7 +165,6 @@ namespace BeardedManStudios.Forge.Networking
 		{
 			if (Disposed)
 				throw new ObjectDisposedException("UDPServer", "This object has been disposed and can not be used to connect, please use a new UDPServer");
-
 			try
 			{
 				Client = new CachedUdpClient(port);
