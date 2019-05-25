@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoGravity", "Example Mods\N
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleMod", "Example Mods\ConsoleMod\ConsoleMod.csproj", "{B5A26B50-2D86-4836-8DC5-E520FE3C5BD5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Multiplayer", "Multiplayer\Multiplayer.csproj", "{15ACE916-C7D4-4D7E-A4DA-E2AE1E9CE87F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +31,10 @@ Global
 		{B5A26B50-2D86-4836-8DC5-E520FE3C5BD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B5A26B50-2D86-4836-8DC5-E520FE3C5BD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B5A26B50-2D86-4836-8DC5-E520FE3C5BD5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15ACE916-C7D4-4D7E-A4DA-E2AE1E9CE87F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15ACE916-C7D4-4D7E-A4DA-E2AE1E9CE87F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15ACE916-C7D4-4D7E-A4DA-E2AE1E9CE87F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15ACE916-C7D4-4D7E-A4DA-E2AE1E9CE87F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
