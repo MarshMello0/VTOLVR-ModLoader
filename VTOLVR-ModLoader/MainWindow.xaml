@@ -11,8 +11,8 @@
             <ColumnDefinition Width="655*"/>
             <ColumnDefinition Width="137*"/>
         </Grid.ColumnDefinitions>
-        <Button Content="Open and Inject" HorizontalAlignment="Left" VerticalAlignment="Top" Width="400" Height="419" FontSize="48" Click="Button_Click"/>
-        <Button Content="Manual Inject" HorizontalAlignment="Left" VerticalAlignment="Top" Width="387" Height="419" FontSize="48" Click="InjectButton" Grid.ColumnSpan="2" Margin="405,0,0,0"/>
+        <Button Content="Open and Inject (Not Working Well Currently)" HorizontalAlignment="Left" VerticalAlignment="Top" Width="340" Height="121" FontSize="16" Click="Button_Click"/>
+        <Button Content="Manual Inject" HorizontalAlignment="Left" VerticalAlignment="Top" Width="447" Height="419" FontSize="48" Click="InjectButton" Grid.ColumnSpan="2" Margin="345,0,0,0"/>
 
     </Grid>
 </Window>

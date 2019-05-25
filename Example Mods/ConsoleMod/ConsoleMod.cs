@@ -19,6 +19,7 @@ namespace ConsoleMod
 
     public class Console : MonoBehaviour
     {
+        public static Console _instance;
         Windows.ConsoleWindow console = new Windows.ConsoleWindow();
         Windows.ConsoleInput input = new Windows.ConsoleInput();
 
@@ -29,7 +30,16 @@ namespace ConsoleMod
         //
         void Awake()
         {
-            DontDestroyOnLoad(gameObject);
+            if (!_instance)
+            {
+                _instance = this;
+                DontDestroyOnLoad(this.gameObject);
+            }
+            else
+            {
+                Destroy(this.gameObject);
+                return;
+            }
 
             console.Initialize();
             console.SetTitle("VTOL VR Console");

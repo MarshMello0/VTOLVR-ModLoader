@@ -17,6 +17,7 @@ namespace NoGravity
 
     public class NoGravity : MonoBehaviour
     {
+        public static NoGravity _instance;
         private bool isDisabled;
 
         public static void Init()
@@ -26,7 +27,17 @@ namespace NoGravity
 
         private void Awake()
         {
-            DontDestroyOnLoad(gameObject);
+            if (!_instance)
+            {
+                _instance = this;
+                DontDestroyOnLoad(this.gameObject);
+                Debug.Log("No Gravity Mod Loaded");
+            }
+            else
+            {
+                Destroy(this.gameObject);
+                return;
+            }
         }
         private void OnGUI()
         {
