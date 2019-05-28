@@ -9,18 +9,28 @@ namespace DedicatedServer
 {
     class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             NetworkObject.Factory = new NetworkObjectFactory();
-            UDPServer udpserver = new UDPServer(32);
-            udpserver.textMessageReceived += Program.ReadTextFrame;
-            udpserver.playerAccepted += Program.PlayerAccepted;
-            udpserver.objectCreated += Program.NetworkObjectCreated;
-            udpserver.Connect("0.0.0.0", 15937, "", 15941);
-            while (!(Console.ReadLine().ToLower() == "exit"))
+
+            int playerCount = 32;
+            UDPServer networkHandle = new UDPServer(playerCount);
+            networkHandle.textMessageReceived += ReadTextFrame;
+            networkHandle.playerAccepted += PlayerAccepted;
+
+            networkHandle.objectCreated += NetworkObjectCreated;
+
+            networkHandle.Connect();
+
+            while (true)
             {
+                if (Console.ReadLine().ToLower() == "exit")
+                {
+                    break;
+                }
             }
-            udpserver.Disconnect(false);
+
+            networkHandle.Disconnect(false);
         }
 
         private static void NetworkObjectCreated(NetworkObject target)
@@ -30,10 +40,10 @@ namespace DedicatedServer
 
         private static void PlayerAccepted(NetworkingPlayer player, NetWorker sender)
         {
-            Console.WriteLine(string.Format("New player accepted with id {0}", player.NetworkId));
+            Console.WriteLine($"New player accepted with id {player.NetworkId}");
         }
 
-        private static void ReadTextFrame(NetworkingPlayer player, Text frame, NetWorker sender)
+        private static void ReadTextFrame(NetworkingPlayer player, BeardedManStudios.Forge.Networking.Frame.Text frame, NetWorker sender)
         {
             Console.WriteLine("Read: " + frame.ToString());
         }

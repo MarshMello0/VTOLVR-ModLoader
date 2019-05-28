@@ -5,14 +5,95 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VTOLVR_ModLoader"
         mc:Ignorable="d"
-        Title="VTOL VR Mod Launcher by . Marsh.Mello ." Height="450" Width="800">
+        Title="VTOLVR Modloader" Height="450" Width="800" ResizeMode="NoResize">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="655*"/>
-            <ColumnDefinition Width="137*"/>
+            <ColumnDefinition Width="0.01*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="0.01*"/>
         </Grid.ColumnDefinitions>
-        <Button Content="Open and Inject (Not Working Well Currently)" HorizontalAlignment="Left" VerticalAlignment="Top" Width="340" Height="121" FontSize="16" Click="Button_Click"/>
-        <Button Content="Manual Inject" HorizontalAlignment="Left" VerticalAlignment="Top" Width="447" Height="419" FontSize="48" Click="InjectButton" Grid.ColumnSpan="2" Margin="345,0,0,0"/>
 
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.1*"/>
+            <RowDefinition Height="0.2*"/>
+            <RowDefinition Height="0.07*"/>
+            <RowDefinition Height="0.1*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="0.1*"/>
+            <RowDefinition Height="0.1*"/>
+        </Grid.RowDefinitions>
+
+
+        <TextBlock Text="VTOL VR Mod Loader" Grid.Column="1" Grid.Row="1" TextAlignment="Center" FontWeight="Bold" FontSize="36"/>
+        <TextBlock Text="Created by . Marsh.Mello ." TextAlignment="Center" Grid.Column="1" Grid.Row="2"/>
+
+
+
+        <Grid Grid.Column="1" Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.1*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.1*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.1*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="0.1*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Unloaded Mods" TextAlignment="Center" Grid.Column="1" Grid.Row="0"/>
+            <TextBlock Text="Loaded Mods" TextAlignment="Center" Grid.Column="3" Grid.Row="0"/>
+
+            <ListBox Name="UnloadedBox"  Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Width="320">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0.1*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="0.1*"/>
+                                <ColumnDefinition Width="0.1*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="{Binding Title}" Grid.Column="1"/>
+                            <Button Click="LoadMod" DataContext="{Binding Title}" Content=">" Grid.Column="3" AutomationProperties.HelpText="Move the mod to the loaded mods for injection"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox> 
+            
+            <ListBox Name="LoadedBox"  Grid.Column="3" Grid.Row="1" HorizontalAlignment="Stretch">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Width="320">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0.1*"/>
+                                <ColumnDefinition Width="0.1*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="0.1*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="{Binding Title}" Grid.Column="2"/>
+                            <Button Click="UnloadMod" DataContext="{Binding Title}" Content="&lt;" Grid.Column="0" AutomationProperties.HelpText="Move the mod to the loaded mods for injection"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox> 
+        </Grid>
+
+        <Grid Grid.Column="1" Grid.Row="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.1*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.1*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.1*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Content="Inject (Game Must be Open)" FontSize="10" Click="InjectButton" Grid.Column="1"/>
+            <Button Content="Open Game" FontSize="10" Click="OpenGame" Grid.Column="3"/>
+        </Grid>
     </Grid>
 </Window>

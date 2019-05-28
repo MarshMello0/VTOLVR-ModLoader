@@ -24,21 +24,16 @@ namespace VTOLVR_ModLoader
         private static string injector = @"\MonoInjector64.exe";
         private string root;
 
+        private List<ModItem> unloadedMods;
+        private List<ModItem> loadedMods = new List<ModItem>();
+
         public MainWindow()
         {
             InitializeComponent();
-        }
-
-        private void Start()
-        {
             root = Directory.GetCurrentDirectory();
             CheckFolder();
-        }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            Start();
-            Task task = LaunchGame();
+            FindMods();
         }
 
         private void CheckFolder()
@@ -48,54 +43,86 @@ namespace VTOLVR_ModLoader
                 Directory.CreateDirectory(root + modsFolder);
             }
         }
-        private async Task LaunchGame()
-        {
-            Process[] processesByName = Process.GetProcessesByName("VTOLVR");
-            if (processesByName.Length != 0)
-            {
-                LoadMods();
-            }
-            else
-            {
-                Process.Start("steam://run/667970");
-                int count = 0;
-                while (Process.GetProcessesByName("VTOLVR").Length == 0)
-                {
-                    count++;
-                    await Task.Delay(1000);
-                    if (count >= 10)
-                    {
-                        Process.GetCurrentProcess().Kill();
-                        return;
-                    }
-                }
-                await Task.Delay(40000);
-                LoadMods();
-            }
-        }
 
-        private void LoadMods()
+        private void FindMods()
         {
             DirectoryInfo folder = new DirectoryInfo(root + modsFolder);
-            foreach (FileInfo file in folder.GetFiles("*.dll"))
+            FileInfo[] files = folder.GetFiles("*.dll");
+            unloadedMods = new List<ModItem>(files.Length);
+
+            foreach (FileInfo file in files)
+            {
+                unloadedMods.Add(new ModItem(file.Name));
+            }
+            UpdateLists();
+        }
+
+        private void AddMod(string name)
+        {
+            ModItem mod = unloadedMods.Find(x => x.Title == name);
+            loadedMods.Add(mod);
+            unloadedMods.Remove(mod);
+            UpdateLists();
+        }
+
+        private void RemoveMod(string name)
+        {
+            ModItem mod = loadedMods.Find(x => x.Title == name);
+            unloadedMods.Add(mod);
+            loadedMods.Remove(mod);
+            UpdateLists();
+        }
+
+        private void UpdateLists()
+        {
+            UnloadedBox.ItemsSource = unloadedMods;
+            LoadedBox.ItemsSource = loadedMods;
+            UnloadedBox.Items.Refresh();
+            LoadedBox.Items.Refresh();
+        }
+
+
+        private void OpenGame(object sender, RoutedEventArgs e)
+        {
+            Process.Start("steam://run/667970");
+        }
+
+        private void InjectButton(object sender, RoutedEventArgs e)
+        {
+            foreach (ModItem mod in loadedMods)
             {
                 try
                 {
-                    string start = string.Format(" -t {0} -d {1} -n {2} -c {3} -m {4}", "VTOLVR.exe", @"mods\" + file.Name, file.Name.ToString().Split('.')[0], "Load", "Init");
+                    string start = string.Format(" -t {0} -d {1} -n {2} -c {3} -m {4}", "VTOLVR.exe", @"mods\" + mod.Title, mod.Title.ToString().Split('.')[0], "Load", "Init");
                     Process.Start(root + injector, start);
                 }
                 catch
                 {
                 }
             }
-
-            Process.GetCurrentProcess().Kill();
         }
 
-        private void InjectButton(object sender, RoutedEventArgs e)
+        private void LoadMod(object sender, RoutedEventArgs e)
         {
-            Start();
-            LoadMods();
+            string mod = ((Button)sender).DataContext.ToString();
+            AddMod(mod);
+
+        }
+
+        private void UnloadMod(object sender, RoutedEventArgs e)
+        {
+            string mod = ((Button)sender).DataContext.ToString();
+            RemoveMod(mod);
+        }
+    }
+
+    public class ModItem
+    {
+        public string Title { get; set; }
+
+        public ModItem (string Title)
+        {
+            this.Title = Title;
         }
     }
 }
