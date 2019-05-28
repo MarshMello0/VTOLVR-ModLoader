@@ -28,3 +28,9 @@ A:\Code\VTOLVR-ModLauncher\VTOLVR-ModLoader\obj\Debug\VTOLVR-ModLoader.csproj.Co
 A:\Code\VTOLVR-ModLauncher\VTOLVR-ModLoader\obj\Debug\VTOLVR-ModLoader.exe
 A:\Code\VTOLVR-ModLauncher\VTOLVR-ModLoader\obj\Debug\VTOLVR-ModLoader.pdb
 A:\Code\VTOLVR-ModLauncher\VTOLVR-ModLoader\obj\Debug\VTOLVR-ModLoader.csprojAssemblyReference.cache
+A:\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR-ModLoader.exe.config
+A:\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR-ModLoader.exe
+A:\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR-ModLoader.pdb
+C:\bin\Debug\VTOLVR-ModLoader.exe.config
+C:\bin\Debug\VTOLVR-ModLoader.exe
+C:\bin\Debug\VTOLVR-ModLoader.pdb

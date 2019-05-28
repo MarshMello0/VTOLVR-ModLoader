@@ -70,17 +70,33 @@ namespace VTOLVR_ModLoader
 
         private void AddMod(string name)
         {
-            ModItem mod = unloadedMods.Find(x => x.Title == name);
-            loadedMods.Add(mod);
-            unloadedMods.Remove(mod);
+            try
+            {
+                Console.WriteLine("Addding Mod: " + name);
+                ModItem mod = unloadedMods.Find(x => x.Title == name);
+                loadedMods.Add(mod);
+                unloadedMods.Remove(mod);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString(), "Error when added mod");
+            }
             UpdateLists();
         }
 
         private void RemoveMod(string name)
         {
-            ModItem mod = loadedMods.Find(x => x.Title == name);
-            unloadedMods.Add(mod);
-            loadedMods.Remove(mod);
+            try
+            {
+                Console.WriteLine("Removing Mod: " + name);
+                ModItem mod = loadedMods.Find(x => x.Title == name);
+                unloadedMods.Add(mod);
+                loadedMods.Remove(mod);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString(), "Error when removing mod");
+            }
             UpdateLists();
         }
 
@@ -107,9 +123,11 @@ namespace VTOLVR_ModLoader
                     string start = string.Format(" -t {0} -d {1} -n {2} -c {3} -m {4}", "VTOLVR.exe", @"mods\" + mod.Title, mod.Title.ToString().Split('.')[0], "Load", "Init");
                     Process.Start(root + injector, start);
                 }
-                catch
+                catch (Exception error)
                 {
+                    MessageBox.Show(error.ToString(), "Error when starting process");
                 }
+                UpdateLists();
             }
         }
 
