@@ -38,10 +38,21 @@ namespace VTOLVR_ModLoader
 
         private void CheckFolder()
         {
+            if (!File.Exists(root + @"\VTOLVR.exe"))
+            {
+                WrongFolder();
+                return;
+            }
             if (!Directory.Exists(root + modsFolder))
             {
                 Directory.CreateDirectory(root + modsFolder);
             }
+        }
+
+        private void WrongFolder()
+        {
+            MessageBox.Show("I can't seem to find VTOLVR.exe in my folder. Make sure you place me in the same folder as the game.", "Missing Exe");
+            Process.GetCurrentProcess().Kill();
         }
 
         private void FindMods()

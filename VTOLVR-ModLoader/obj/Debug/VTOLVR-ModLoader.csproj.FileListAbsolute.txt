@@ -16,7 +16,6 @@ A:\Code\VTOLVR-ModLoader\VTOLVR-ModLoader\bin\Debug\VTOLVR-ModLoader.exe.config
 A:\Code\VTOLVR-ModLauncher\VTOLVR-ModLoader\bin\Debug\VTOLVR-ModLoader.exe.config
 A:\Code\VTOLVR-ModLauncher\VTOLVR-ModLoader\bin\Debug\VTOLVR-ModLoader.exe
 A:\Code\VTOLVR-ModLauncher\VTOLVR-ModLoader\bin\Debug\VTOLVR-ModLoader.pdb
-A:\Code\VTOLVR-ModLauncher\VTOLVR-ModLoader\obj\Debug\VTOLVR-ModLoader.csprojAssemblyReference.cache
 A:\Code\VTOLVR-ModLauncher\VTOLVR-ModLoader\obj\Debug\MainWindow.g.cs
 A:\Code\VTOLVR-ModLauncher\VTOLVR-ModLoader\obj\Debug\App.g.cs
 A:\Code\VTOLVR-ModLauncher\VTOLVR-ModLoader\obj\Debug\VTOLVR-ModLoader_MarkupCompile.cache
@@ -28,3 +27,4 @@ A:\Code\VTOLVR-ModLauncher\VTOLVR-ModLoader\obj\Debug\VTOLVR-ModLoader.csproj.Ge
 A:\Code\VTOLVR-ModLauncher\VTOLVR-ModLoader\obj\Debug\VTOLVR-ModLoader.csproj.CoreCompileInputs.cache
 A:\Code\VTOLVR-ModLauncher\VTOLVR-ModLoader\obj\Debug\VTOLVR-ModLoader.exe
 A:\Code\VTOLVR-ModLauncher\VTOLVR-ModLoader\obj\Debug\VTOLVR-ModLoader.pdb
+A:\Code\VTOLVR-ModLauncher\VTOLVR-ModLoader\obj\Debug\VTOLVR-ModLoader.csprojAssemblyReference.cache

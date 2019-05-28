@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VTOLVR_ModLoader"
         mc:Ignorable="d"
-        Title="VTOLVR Modloader" Height="450" Width="800" ResizeMode="NoResize">
+        Title="VTOLVR Modloader" Height="450" Width="800" ResizeMode="NoResize" Icon="Icon.ico">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="0.01*"/>
