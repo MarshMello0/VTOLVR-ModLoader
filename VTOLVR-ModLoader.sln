@@ -9,8 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example Mods", "Example Mod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoGravity", "Example Mods\NoGravity\NoGravity.csproj", "{5471978C-53E1-45FE-AE70-9861A71CCB77}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleMod", "Example Mods\ConsoleMod\ConsoleMod.csproj", "{B5A26B50-2D86-4836-8DC5-E520FE3C5BD5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Multiplayer", "Multiplayer\Multiplayer.csproj", "{15ACE916-C7D4-4D7E-A4DA-E2AE1E9CE87F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DedicatedServer", "DedicatedServer\DedicatedServer.csproj", "{22D83222-28D5-4B3E-AEB3-D5FF9373E6D0}"
@@ -29,10 +27,6 @@ Global
 		{5471978C-53E1-45FE-AE70-9861A71CCB77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5471978C-53E1-45FE-AE70-9861A71CCB77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5471978C-53E1-45FE-AE70-9861A71CCB77}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B5A26B50-2D86-4836-8DC5-E520FE3C5BD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B5A26B50-2D86-4836-8DC5-E520FE3C5BD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B5A26B50-2D86-4836-8DC5-E520FE3C5BD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B5A26B50-2D86-4836-8DC5-E520FE3C5BD5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{15ACE916-C7D4-4D7E-A4DA-E2AE1E9CE87F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{15ACE916-C7D4-4D7E-A4DA-E2AE1E9CE87F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15ACE916-C7D4-4D7E-A4DA-E2AE1E9CE87F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -47,7 +41,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{5471978C-53E1-45FE-AE70-9861A71CCB77} = {F0B75EBE-57E6-44F2-B89C-96F7ED56AD8C}
-		{B5A26B50-2D86-4836-8DC5-E520FE3C5BD5} = {F0B75EBE-57E6-44F2-B89C-96F7ED56AD8C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C8C92F2A-8D42-4CD3-8DF9-49B06621ABC6}
