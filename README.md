@@ -20,8 +20,8 @@ Just move them back to the unloaded side or close the application and reopen it 
 ## Mods List
 |Mod Name | Description|Version | Download Link | Author |
 |--|--|--|--|--|
-|No Gravity|Adds a basic button to disable/enable gravity|1.0 | (To be added)| . Marsh.Mello . |
-|Console Mod|Displays the Unity Console in a sperate window|1.0 | (To be added)| . Marsh.Mello . |
+|No Gravity|Adds a basic button to disable/enable gravity|1.0 | [Download](https://github.com/MarshMello0/VTOLVR-ModLoader/blob/master/Example%20Mods/NoGravity/NoGravity.dll?raw=true)| . Marsh.Mello . |
+|Console Mod|Displays the Unity Console in a sperate window|1.0 | [Download](https://github.com/MarshMello0/MarshMellos_VTOLVR_Mods/blob/master/ConsoleMod/ConsoleMod.dll?raw=true)| . Marsh.Mello . |
 
 ## How to create mods
 
