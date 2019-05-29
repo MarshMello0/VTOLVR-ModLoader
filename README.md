@@ -25,5 +25,5 @@ Just move them back to the unloaded side or close the application and reopen it 
 
 ## How to create mods
 
-Mods are created in C# in Visual Studio using the .net framework. Creating these mods are just like creating your own script in Unity, so if you have experience in writing C# scripts in Unity you can check out my more detailed post in the Wiki (When I get round to writing it).
+Mods are created in C# in Visual Studio using the .net framework. Creating these mods are just like creating your own script in Unity, so if you have experience in writing C# scripts in Unity you can check out my more detailed post in the [Wiki](https://github.com/MarshMello0/VTOLVR-ModLoader/wiki).
 
