@@ -3,7 +3,7 @@ VTOL VR Mod Loader is a basic mod loader to help people get custom scripts/asset
 
 ## How to install VTOL VR Mod Loader
 
- 1. Download the zip from the releases tab
+ 1. Download the zip from the [releases tab](https://github.com/MarshMello0/VTOLVR-ModLoader/releases)
  2. Extract the contents to the root of your game folder
  3. Run VTOLVR-ModLoader.exe to launch the mod loader
 
