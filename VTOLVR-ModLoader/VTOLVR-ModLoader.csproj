@@ -120,6 +120,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(ProjectDir)\bin\Release\VTOLVR-ModLoader.exe" "A:\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR-ModLoader.exe"</PostBuildEvent>
+    <PostBuildEvent>if EXIST "A:\Program Files\Steam\steamapps\common\VTOL VR\" (
+copy "$(ProjectDir)\bin\Release\VTOLVR-ModLoader.exe" "A:\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR-ModLoader.exe"
+)</PostBuildEvent>
   </PropertyGroup>
 </Project>
