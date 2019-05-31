@@ -38,6 +38,12 @@ public class MultiplayerScript : MonoBehaviour
     private void Connected()
     {
         Log("Connected!");
+        /*
+         * To Do
+         * Search for players hands and head
+         * Place something which sends information to the server of their location on them
+         * Get the server plugin to relay that information down to the clients
+         */
     }
 
     private void Disconnected(object sender, DisconnectedEventArgs e)
