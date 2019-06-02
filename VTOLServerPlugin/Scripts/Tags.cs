@@ -5,5 +5,6 @@
     PlayerHandRight_Movement, PlayerHandRight_Rotation,
     PlayerHead_Movement, PlayerHead_Rotation,
     ServerInfo,
-    DestroyPlayer
+    DestroyPlayer,
+    PlayersInfo
 }

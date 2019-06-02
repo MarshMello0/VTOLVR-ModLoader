@@ -24,9 +24,15 @@ namespace Multiplayer
 public class MultiplayerScript : MonoBehaviour
 {
     private UnityClient client;
-    private bool isConnected;
 
-    private string debugInfo;
+    private enum ConnectionState { Offline,Loading,Connecting,Connected, Failed}
+    private ConnectionState state = ConnectionState.Offline;
+
+    private enum Vehicle { FA26B,AV42C}
+    private Vehicle vehicle  = Vehicle.AV42C;
+    private string pilotName = "Pilot Name";
+
+    private string debugInfo, playersInfo;
     private string serverName;
     private int playerCount;
 
@@ -49,17 +55,199 @@ public class MultiplayerScript : MonoBehaviour
         client = gameObject.AddComponent<UnityClient>();
         client.MessageReceived += MessageReceived;
         client.Disconnected += Disconnected;
-    }
 
+        PilotSaveManager.LoadPilotsFromFile();
+    }
     private void Update()
     {
         debugInfo = @"Multiplayer Info
 Server Name: " + serverName + @"
 Player Count: " + playerCount.ToString();
     }
+    private void Disconnected(object sender, DisconnectedEventArgs e)
+    {
+        Console.Log("Disconnecting");
+
+        Receiver[] receivers = FindObjectsOfType<Receiver>();
+        Console.Log("Receivers Count:" + receivers.Length);
+        for (int i = 0; i < receivers.Length; i++)
+        {
+            receivers[i].DestoryReceiver();
+        }
+
+        Sender[] senders = FindObjectsOfType<Sender>();
+        Console.Log("Senders Count:" + senders.Length);
+        for (int i = 0; i < senders.Length; i++)
+        {
+            Destroy(senders[i].gameObject);
+        }
+        Console.Log("Disconnected");
+    }
+    private void OnGUI()
+    {
+        switch (state)
+        {
+            case ConnectionState.Offline:
+                GUIOffline();
+                break;
+            case ConnectionState.Loading:
+                GUILoading();
+                break;
+            case ConnectionState.Connecting:
+                GUIConnecting();
+                break;
+            case ConnectionState.Connected:
+                GUIConnected();
+                break;
+            case ConnectionState.Failed:
+                GUIFailed();
+                break;
+        }
+    }
+
+    private void GUIOffline()
+    {
+        GUI.Label(new Rect(0, 0, 100, 20), "Offline");
+        if (vehicle == Vehicle.AV42C && GUI.Button(new Rect(100, 0, 100, 20), "AV-42C"))
+        {
+            vehicle = Vehicle.FA26B;
+            Console.Log("Switched player's vehicle to F/A-26B");
+        }
+        else if (vehicle == Vehicle.FA26B && GUI.Button(new Rect(100, 0, 100, 20), "F/A-26B"))
+        {
+            vehicle = Vehicle.AV42C;
+            Console.Log("Switched player's vehicle to AV-42C");
+        }
+
+        pilotName = GUI.TextField(new Rect(210, 0, 100, 20), pilotName);
+
+        if (GUI.Button(new Rect(320, 0, 100, 20), "Connect"))
+        {
+            if (!CheckIfPilotExists(pilotName))
+            {
+                Console.Log("Pilot \"" + pilotName + "\" doesn't exist");
+                return;
+            }
+            StartCoroutine(LoadLevel());
+        }
+    }
+
+    private void GUILoading()
+    {
+        GUI.Label(new Rect(0, 0, 100, 20), "Game Loading");
+    }
+
+    private void GUIConnecting()
+    {
+        GUI.Label(new Rect(0, 0, 100, 20), "Connecting To Server");
+    }
+
+    private void GUIConnected()
+    {
+        GUI.Label(new Rect(0, 0, Screen.width, Screen.height), "Connected \n" + debugInfo + "\n" + playersInfo);
+    }
+
+    private void GUIFailed()
+    {
+        GUI.Label(new Rect(0, 0, 100, 20), "Failed Connecting, please restart your game");
+    }
+
+    private bool CheckIfPilotExists(string name)
+    {
+        return PilotSaveManager.pilots.ContainsKey(name);
+    }
+
+    private IEnumerator LoadLevel()
+    {
+        state = ConnectionState.Loading;
+        Console.Log("Connection State == Loading");
+        VTMapManager.nextLaunchMode = VTMapManager.MapLaunchModes.Scenario;
+        LoadingSceneController.LoadScene(7);
+
+        yield return new WaitForSeconds(5);
+        Console.Log("Setting Information");
+
+
+        Console.Log("Setting Pilot");
+        PilotSaveManager.current = PilotSaveManager.pilots[pilotName];
+        Console.Log("Going though All built in campaigns");
+        if (VTResources.GetBuiltInCampaigns() != null)
+        {
+            foreach (VTCampaignInfo info in VTResources.GetBuiltInCampaigns())
+            {
+
+                if (vehicle == Vehicle.AV42C && info.campaignID == "av42cQuickFlight")
+                {
+                    Console.Log("Setting Campaign");
+                    PilotSaveManager.currentCampaign = info.ToIngameCampaign();
+                    Console.Log("Setting Vehicle");
+                    PilotSaveManager.currentVehicle = VTResources.GetPlayerVehicle(info.vehicle);
+                    break;
+                }
+
+                if (vehicle == Vehicle.FA26B && info.campaignID == "fa26bFreeFlight")
+                {
+                    Console.Log("Setting Campaign");
+                    PilotSaveManager.currentCampaign = info.ToIngameCampaign();
+                    Console.Log("Setting Vehicle");
+                    PilotSaveManager.currentVehicle = VTResources.GetPlayerVehicle(info.vehicle);
+                    break;
+                }
+            }
+        }
+        else
+            Console.Log("Campaigns are null");
+
+        Console.Log("Going though All missions in that campaign");
+        foreach (CampaignScenario cs in PilotSaveManager.currentCampaign.missions)
+        {
+            Console.Log("CampaignScenario == " + cs.scenarioID);
+            if (cs.scenarioID == "freeFlight" || cs.scenarioID == "Free Flight")
+            {
+                Console.Log("Setting Scenario");
+                PilotSaveManager.currentScenario = cs;
+                break;
+            }
+        }
+
+        VTScenario.currentScenarioInfo = VTResources.GetScenario(PilotSaveManager.currentScenario.scenarioID, PilotSaveManager.currentCampaign);
+
+        Console.Log(string.Format("Loading into game, Pilot:{3}, Campaign:{0}, Scenario:{1}, Vehicle:{2}",
+            PilotSaveManager.currentCampaign.campaignName, PilotSaveManager.currentScenario.scenarioName,
+            PilotSaveManager.currentVehicle.vehicleName, pilotName));
+
+        LoadingSceneController.instance.PlayerReady(); //<< Auto Ready
+        StartCoroutine(ConnectToServer());
+    }
+
+    private IEnumerator ConnectToServer()
+    {
+        while (SceneManager.GetActiveScene().buildIndex != 7)
+        {
+            //Loop to wait till the active scene is switched
+            yield return null;
+        }
+        state = ConnectionState.Connecting;
+        Console.Log("Connection State == Connecting");
+
+        try
+        {
+            client.Connect(IPAddress.Parse("109.158.178.214"), 4296, DarkRift.IPVersion.IPv4);
+        }
+        catch (Exception e)
+        {
+            Console.Log("Failed to Connect to server \n" + e.Message);
+            state = ConnectionState.Failed;
+            Console.Log("Connection State == Failed");
+        }
+        Connected();
+    }
 
     private void Connected()
     {
+        state = ConnectionState.Connected;
+        Console.Log("Connection State == Connected");
+
         if (VRDevice.model.Contains("Oculus"))
         {
             Console.Log("This is a Oculus User");
@@ -72,23 +260,37 @@ Player Count: " + playerCount.ToString();
         }
 
         VRHead camera = FindObjectOfType<VRHead>();
-        if (!camera)
+        if (camera)
         {
             Console.Log("Found the VR Camera");
             camera.gameObject.AddComponent<PlayerHeadNetworkedObjectSender>().client = client;
         }
         else
         {
-            Console.Log("Looking for normal Camera as VR one is missing");
+            Console.Log("Looking for cameras");
             Camera[] cameras = FindObjectsOfType<Camera>();
             foreach (Camera item in cameras)
             {
-                if (item.enabled)
+                if (item.enabled && item.gameObject.activeInHierarchy)
                 {
-                    Console.Log("Found a normal camera which is enabled, using that one");
+                    Console.Log("Found a camera, lets use this one");
                     item.gameObject.AddComponent<PlayerHeadNetworkedObjectSender>().client = client;
                 }
             }
+        }
+
+        //Sending the players information to the server
+
+        using (DarkRiftWriter writer = DarkRiftWriter.Create())
+        {
+            writer.Write(pilotName);
+            writer.Write(vehicle == Vehicle.AV42C ? "AV-42c" : "F/A-26B");
+            using (Message message = Message.Create((ushort)Tags.PlayersInfo, writer))
+            {
+                client.SendMessage(message, SendMode.Reliable);
+                Console.Log("Told the server about our player");
+            }
+                
         }
     }
 
@@ -112,103 +314,6 @@ Player Count: " + playerCount.ToString();
             controllers[0].gameObject.AddComponent<PlayerHandLeftNetworkedObjectSender>().client = client;
         if (controllers.Length >= 2)
             controllers[1].gameObject.AddComponent<PlayerHandRightNetworkedObjectSender>().client = client;
-    }
-
-    private void Disconnected(object sender, DisconnectedEventArgs e)
-    {
-        Console.Log("Disconnecting");
-
-        Receiver[] receivers = FindObjectsOfType<Receiver>();
-        Console.Log("Receivers Count:" + receivers.Length);
-        for (int i = 0; i < receivers.Length; i++)
-        {
-            receivers[i].DestoryReceiver();
-        }
-
-        Sender[] senders = FindObjectsOfType<Sender>();
-        Console.Log("Senders Count:" + senders.Length);
-        for (int i = 0; i < senders.Length; i++)
-        {
-            Destroy(senders[i].gameObject);
-        }
-        Console.Log("Disconnected");
-    }
-
-    private void OnGUI()
-    {
-        if (false && GUI.Button(new Rect(500,500,100,100), "Info"))
-        {
-            Debug.Log(SceneManager.sceneCountInBuildSettings);
-            Debug.Log("Current Scene Name " + SceneManager.GetActiveScene().name + " : " + SceneManager.GetActiveScene().buildIndex);
-            Console.Log(string.Format("Pilot:{3}, Campaign:{0}, Scenario:{1}, Vehicle{2}",
-               PilotSaveManager.currentCampaign.campaignID, PilotSaveManager.currentScenario.scenarioID,
-               PilotSaveManager.currentVehicle.name, PilotSaveManager.current.pilotName));
-
-        }
-        if (false && GUI.Button(new Rect(600, 500, 100, 100), "7"))
-        {
-            Console.Log("Setting Pilot");
-            PilotSaveManager.LoadPilotsFromFile();
-            PilotSaveManager.current = PilotSaveManager.pilots["Ben"];
-            Console.Log("Going though All built in campaigns");
-            foreach (VTCampaignInfo info in VTResources.GetBuiltInCampaigns())
-            {
-                if (info != null && info.campaignID != null && info.campaignID == "Quick Flight")
-                {
-                    Console.Log("Setting Campaign");
-                    PilotSaveManager.currentCampaign = info.ToIngameCampaign();
-                    Console.Log("Setting Vehicle");
-                    PilotSaveManager.currentVehicle = VTResources.GetPlayerVehicle(info.vehicle);
-                }
-            }
-            Console.Log("Going though All missions in that campaign");
-            foreach (CampaignScenario cs in PilotSaveManager.currentCampaign.missions)
-            {
-                if (cs != null && cs.scenarioID != null && cs.scenarioID == "Free Flight")
-                {
-                    Console.Log("Setting Scenario");
-                    PilotSaveManager.currentScenario = cs;
-                }
-            }
-           
-            Console.Log(string.Format("Loading into Scene 7 with Test Pilot, Campaign:{0}, Scenario:{1}, Vehicle{2}",
-                PilotSaveManager.currentCampaign.campaignName, PilotSaveManager.currentScenario.scenarioName,
-                PilotSaveManager.currentVehicle.vehicleName));
-            SceneManager.LoadScene(7);
-        }
-
-        if (isConnected)
-        {
-            GUI.Label(new Rect(110, 0, 100, 20), "Connected");
-            if (GUI.Button(new Rect(0,0,100,20),"Disconnect"))
-            {
-                client.Disconnect();
-                isConnected = false;
-            }
-
-            GUI.Label(new Rect(0, 30, Screen.width, 400), debugInfo);
-        }
-        else
-        {
-            GUI.Label(new Rect(110, 0, 100, 20), "Not Connected");
-            if (GUI.Button(new Rect(0, 0, 100, 20), "Retry"))
-            {
-                try
-                {
-                    Console.Log("Connecting");
-                    client.Connect(IPAddress.Parse("109.158.178.214"), 4296, DarkRift.IPVersion.IPv4);
-                    Console.Log("Connected");
-                    isConnected = true;
-                }
-                catch (Exception e)
-                {
-                    Console.Log("Error when Connecting \n " + e.Message);
-                }
-                
-                if (isConnected)
-                    Connected();
-            }
-        }
     }
 
     private void MessageReceived(object sender, MessageReceivedEventArgs e)
@@ -278,7 +383,26 @@ Player Count: " + playerCount.ToString();
                             Console.Log("Received Updated Server Info");
                         }
                         break;
+                    case (ushort)Tags.PlayersInfo:
+                        ReceivedPlayerInfo(reader);
+                        break;
                 }
+            }
+        }
+    }
+
+    private void ReceivedPlayerInfo(DarkRiftReader reader)
+    {
+        Console.Log("Received Players Info");
+        while (reader.Position < reader.Length)
+        {
+            int playersCount = reader.ReadInt32();
+            playersInfo = "\nPlayers Info:";
+            for (int i = 0; i < playersCount; i++)
+            {
+                string playerName = reader.ReadString();
+                string playerVehicle = reader.ReadString();
+                playersInfo += "\n" + playerName + "\nVehicle: " + playerVehicle + "\n";
             }
         }
     }
@@ -298,5 +422,6 @@ public enum Tags
     PlayerHandRight_Movement, PlayerHandRight_Rotation,
     PlayerHead_Movement, PlayerHead_Rotation,
     ServerInfo,
-    DestroyPlayer
+    DestroyPlayer,
+    PlayersInfo
 }

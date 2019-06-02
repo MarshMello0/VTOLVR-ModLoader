@@ -12,7 +12,7 @@ public class VTOLServerPlugin : Plugin
 
     public override Version Version => new Version(0, 0, 1);
 
-    //Dictionary<IClient, Player> players = new Dictionary<IClient, Player>();
+    private List<Player> players = new List<Player>();
 
 
     //Sever Info
@@ -26,18 +26,25 @@ public class VTOLServerPlugin : Plugin
         ClientManager.ClientConnected += ClientConnected;
         ClientManager.ClientDisconnected += ClientDisconnected;
     }
-
     public override Command[] Commands => new Command[]
     {
         new Command("set", "Sets variables in the server", "set VariableToChange", SetSettings),
-        new Command("players", "Says how many players there are", "players", Players)
+        new Command("players", "Says how many players there are", "players", Players),
+        new Command("playersinfo", "Displays all the information stored about the players","playersinfo", PlayersInfo)
     };
-
+    private void PlayersInfo(object sender, CommandEventArgs e)
+    {
+        string playersInfo = "There are " + PlayerCount + " players.";
+        foreach (Player player in players)
+        {
+            playersInfo += "\nName:" + player.name + " Vehicle:" + player.vehicle;
+        }
+        WriteEvent(playersInfo, LogType.Info);
+    }
     private void Players(object sender, CommandEventArgs e)
     {
         WriteEvent("There are " + PlayerCount + " players", LogType.Info);
     }
-
     private void SetSettings(object sender, CommandEventArgs e)
     {
         string[] args = e.RawArguments;
@@ -56,7 +63,6 @@ public class VTOLServerPlugin : Plugin
 
         SendServerInfo();
     }
-
     private void SendServerInfo()
     {
         using (DarkRiftWriter writer = DarkRiftWriter.Create())
@@ -75,7 +81,6 @@ public class VTOLServerPlugin : Plugin
                 
         }
     }
-
     private void SendServerInfo(IClient client)
     {
         using (DarkRiftWriter writer = DarkRiftWriter.Create())
@@ -91,7 +96,6 @@ public class VTOLServerPlugin : Plugin
 
         }
     }
-
     private void ClientConnected(object sender, ClientConnectedEventArgs e)
     {
         WriteEvent("Player " + e.Client.ID + " has joined", LogType.Warning);
@@ -133,11 +137,21 @@ public class VTOLServerPlugin : Plugin
                 
         }
     }
-
     private void ClientDisconnected(object sender, ClientDisconnectedEventArgs e)
     {
         PlayerCount -= 1;
         SendServerInfo();
+
+        for (int i = 0; i < players.Count; i++)
+        {
+            if (players[i].ID == e.Client.ID)
+            {
+                players.RemoveAt(i);
+                break;
+            }
+        }
+
+        SendPlayerInfo();
 
         using (DarkRiftWriter writer = DarkRiftWriter.Create())
         {
@@ -150,10 +164,8 @@ public class VTOLServerPlugin : Plugin
                     client.SendMessage(message, SendMode.Reliable);
                 }
             }
-
         }
     }
-
     private void ClientMessageReceived(object sender, MessageReceivedEventArgs e)
     {
         using (Message message = e.GetMessage() as Message)
@@ -180,6 +192,38 @@ public class VTOLServerPlugin : Plugin
                     //Removed .Where(x => x != e.Client)
                     foreach (IClient c in ClientManager.GetAllClients())
                         c.SendMessage(message, e.SendMode);
+                }
+            }
+            else if (message.Tag == (ushort)Tags.PlayersInfo)
+            {
+                using (DarkRiftReader reader = message.GetReader())
+                {
+                    string name = reader.ReadString();
+                    string vehicle = reader.ReadString();
+                    players.Add(new Player(e.Client.ID, e.Client, vehicle, name));
+                    WriteEvent(name + " joined using " + vehicle,LogType.Warning);
+                }
+                SendPlayerInfo();
+            }
+        }
+    }
+    private void SendPlayerInfo()
+    {
+        using (DarkRiftWriter writer = DarkRiftWriter.Create())
+        {
+            writer.Write(players.Count);
+
+            foreach (Player player in players)
+            {
+                writer.Write(player.name);
+                writer.Write(player.vehicle);
+            }
+
+            using (Message message = Message.Create((ushort)Tags.PlayersInfo, writer))
+            {
+                foreach (IClient client in ClientManager.GetAllClients())
+                {
+                    client.SendMessage(message, SendMode.Reliable);
                 }
             }
         }
