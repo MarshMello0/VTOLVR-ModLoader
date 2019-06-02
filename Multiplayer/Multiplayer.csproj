@@ -54,6 +54,15 @@
   <ItemGroup>
     <Compile Include="Multiplayer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scripts\Player Network Scripts\PlayerHandLeftNetworkedObjectReceiver.cs" />
+    <Compile Include="Scripts\Player Network Scripts\PlayerHandLeftNetworkedObjectSender.cs" />
+    <Compile Include="Scripts\Player Network Scripts\PlayerHandRightNetworkedObjectReceiver.cs" />
+    <Compile Include="Scripts\Player Network Scripts\PlayerHandRightNetworkedObjectSender.cs" />
+    <Compile Include="Scripts\Player Network Scripts\PlayerHeadNetworkedObjectReceiver.cs" />
+    <Compile Include="Scripts\Player Network Scripts\PlayerHeadNetworkedObjectSender.cs" />
+    <Compile Include="Scripts\Receiver.cs" />
+    <Compile Include="Scripts\Sender.cs" />
+    <Compile Include="Scripts\UnityClient.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

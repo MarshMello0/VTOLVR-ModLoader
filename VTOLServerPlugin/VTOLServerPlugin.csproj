@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy &quot;$(ProjectDir)bin\Debug\netstandard2.0\VTOLServerPlugin.dll&quot; &quot;A:\Code\VTOLVR-ModLauncher\StandaloneServer\Plugins\VTOLServerPlugin.dll&quot;&#xD;&#xA;start  /d &quot;A:\Code\VTOLVR-ModLauncher\StandaloneServer&quot; Server.exe" />
+    <Exec Command="copy &quot;$(ProjectDir)bin\Debug\netstandard2.0\VTOLServerPlugin.dll&quot; &quot;A:\Code\VTOLVR-ModLauncher\StandaloneServer\Plugins\VTOLServerPlugin.dll&quot;&#xD;&#xA;start  /d &quot;A:\Code\VTOLVR-ModLauncher\StandaloneServer&quot; DedicatedServer.exe" />
   </Target>
 
 </Project>
