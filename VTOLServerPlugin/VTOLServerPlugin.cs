@@ -23,7 +23,7 @@ public class VTOLServerPlugin : Plugin
     public VTOLServerPlugin(PluginLoadData pluginLoadData) : base(pluginLoadData)
     {
         ServerName = "VTOL VR Dedicated Server";
-        ClientManager.ClientConnected += ClientConnected;
+        //ClientManager.ClientConnected += ClientConnected;
         ClientManager.ClientDisconnected += ClientDisconnected;
     }
     public override Command[] Commands => new Command[]
@@ -201,10 +201,12 @@ public class VTOLServerPlugin : Plugin
                     string name = reader.ReadString();
                     string vehicle = reader.ReadString();
                     players.Add(new Player(e.Client.ID, e.Client, vehicle, name));
-                    WriteEvent(name + " joined using " + vehicle,LogType.Warning);
+                    WriteEvent(name + " joined using " + vehicle, LogType.Warning);
                 }
                 SendPlayerInfo();
             }
+            else if (message.Tag == (ushort)Tags.SpawnPlayerTag)
+                ReceivedSpawnPlayerTag(e,message);
         }
     }
     private void SendPlayerInfo()
@@ -225,6 +227,24 @@ public class VTOLServerPlugin : Plugin
                 {
                     client.SendMessage(message, SendMode.Reliable);
                 }
+            }
+        }
+    }
+
+    private void ReceivedSpawnPlayerTag(MessageReceivedEventArgs e, Message message)
+    {
+        //Adding my own on client connected so that we only start sending them information when their game is ready
+        using (DarkRiftReader reader = message.GetReader())
+        {
+            while(reader.Position > reader.Length)
+            {
+                string name = reader.ReadString();
+                string vehicle = reader.ReadString();
+                players.Add(new Player(e.Client.ID, e.Client, vehicle, name));
+                WriteEvent(name + " joined using " + vehicle, LogType.Warning);
+
+                //Tell all other clients that this person has joined using x
+                //Remove the PlayersInfo Tag as this will be replacing that
             }
         }
     }

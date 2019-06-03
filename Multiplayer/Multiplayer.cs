@@ -6,6 +6,7 @@ using DarkRift.Client;
 using DarkRift;
 using System.Net;
 using NetworkedObjects.Player;
+using NetworkedObjects.Vehicles;
 using System.Collections;
 using DarkRift.Client.Unity;
 using UnityEngine.VR;
@@ -31,6 +32,8 @@ public class MultiplayerScript : MonoBehaviour
     private enum Vehicle { FA26B,AV42C}
     private Vehicle vehicle  = Vehicle.AV42C;
     private string pilotName = "Pilot Name";
+
+    private GameObject av42cPrefab, fa26bPrefab;
 
     private string debugInfo, playersInfo;
     private string serverName;
@@ -104,7 +107,6 @@ Player Count: " + playerCount.ToString();
                 break;
         }
     }
-
     private void GUIOffline()
     {
         GUI.Label(new Rect(0, 0, 100, 20), "Offline");
@@ -131,32 +133,26 @@ Player Count: " + playerCount.ToString();
             StartCoroutine(LoadLevel());
         }
     }
-
     private void GUILoading()
     {
         GUI.Label(new Rect(0, 0, 100, 20), "Game Loading");
     }
-
     private void GUIConnecting()
     {
         GUI.Label(new Rect(0, 0, 100, 20), "Connecting To Server");
     }
-
     private void GUIConnected()
     {
         GUI.Label(new Rect(0, 0, Screen.width, Screen.height), "Connected \n" + debugInfo + "\n" + playersInfo);
     }
-
     private void GUIFailed()
     {
         GUI.Label(new Rect(0, 0, 100, 20), "Failed Connecting, please restart your game");
     }
-
     private bool CheckIfPilotExists(string name)
     {
         return PilotSaveManager.pilots.ContainsKey(name);
     }
-
     private IEnumerator LoadLevel()
     {
         state = ConnectionState.Loading;
@@ -219,7 +215,6 @@ Player Count: " + playerCount.ToString();
         LoadingSceneController.instance.PlayerReady(); //<< Auto Ready
         StartCoroutine(ConnectToServer());
     }
-
     private IEnumerator ConnectToServer()
     {
         while (SceneManager.GetActiveScene().buildIndex != 7)
@@ -242,11 +237,46 @@ Player Count: " + playerCount.ToString();
         }
         Connected();
     }
-
     private void Connected()
     {
         state = ConnectionState.Connected;
         Console.Log("Connection State == Connected");
+
+       
+        //Sending the players information to the server
+
+        using (DarkRiftWriter writer = DarkRiftWriter.Create())
+        {
+            writer.Write(pilotName);
+            writer.Write(vehicle == Vehicle.AV42C ? "AV-42c" : "F/A-26B");
+            using (Message message = Message.Create((ushort)Tags.PlayersInfo, writer))
+            {
+                client.SendMessage(message, SendMode.Reliable);
+                Console.Log("Told the server about our player");
+            }
+                
+        }
+
+        StartCoroutine(DelayFindBody());
+        SetPrefabs();
+    }
+    /// <summary>
+    /// Sets the prefabs which are used to spawn other clients in who connect
+    /// </summary>
+    private void SetPrefabs()
+    {
+        av42cPrefab = VTResources.GetPlayerVehicle("AV-42C").vehiclePrefab;
+        fa26bPrefab = VTResources.GetPlayerVehicle("F/A-26B").vehiclePrefab;
+        if (!av42cPrefab)
+            Console.Log("Couldn't find the prefab for the AV-42C");
+        if (!fa26bPrefab)
+            Console.Log("Couldn't find the prefab for the F/A-26B");
+    }
+    private IEnumerator DelayFindBody()
+    {
+        //This has a delay to wait for everything to spawn in the game world first,so then we can find it
+        yield return new WaitForSeconds(3);
+        //The scene should be loaded by then
 
         if (VRDevice.model.Contains("Oculus"))
         {
@@ -279,21 +309,20 @@ Player Count: " + playerCount.ToString();
             }
         }
 
-        //Sending the players information to the server
-
-        using (DarkRiftWriter writer = DarkRiftWriter.Create())
+        //Finding Vehicle
+        FindPlayersObjects();
+    }
+    private void FindPlayersObjects()
+    {
+        //This is going to be searching for object in the scene that needed to be spawned in by the game
+        //and the found to sync across the network
+        GameObject vehicle = GameObject.Find("VTOL4(Clone)");
+        if (vehicle)
         {
-            writer.Write(pilotName);
-            writer.Write(vehicle == Vehicle.AV42C ? "AV-42c" : "F/A-26B");
-            using (Message message = Message.Create((ushort)Tags.PlayersInfo, writer))
-            {
-                client.SendMessage(message, SendMode.Reliable);
-                Console.Log("Told the server about our player");
-            }
-                
+            Console.Log("Found Vehicle");
+            vehicle.AddComponent<BasicVehicleNetworkedObjectSender>().client = client;
         }
     }
-
     private void FindViveWands()
     {
         SteamVR_TrackedController[] controllers = FindObjectsOfType<SteamVR_TrackedController>();
@@ -304,7 +333,6 @@ Player Count: " + playerCount.ToString();
         if (controllers.Length >= 2)
             controllers[1].gameObject.AddComponent<PlayerHandRightNetworkedObjectSender>().client = client;
     }
-
     private void FindRiftTouch()
     {
         RiftTouchController[] controllers = FindObjectsOfType<RiftTouchController>();
@@ -315,7 +343,6 @@ Player Count: " + playerCount.ToString();
         if (controllers.Length >= 2)
             controllers[1].gameObject.AddComponent<PlayerHandRightNetworkedObjectSender>().client = client;
     }
-
     private void MessageReceived(object sender, MessageReceivedEventArgs e)
     {
         using (Message message = e.GetMessage())
@@ -342,6 +369,10 @@ Player Count: " + playerCount.ToString();
                             GameObject HandRight = GameObject.CreatePrimitive(PrimitiveType.Cube);
                             GameObject Head = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
+                            HandLeft.GetComponent<Collider>().enabled = false;
+                            HandRight.GetComponent<Collider>().enabled = false;
+                            Head.GetComponent<Collider>().enabled = false;
+
                             PlayerHandLeftNetworkedObjectReceiver leftReceiver = HandLeft.AddComponent<PlayerHandLeftNetworkedObjectReceiver>();
                             PlayerHandRightNetworkedObjectReceiver rightRecevier = HandRight.AddComponent<PlayerHandRightNetworkedObjectReceiver>();
                             PlayerHeadNetworkedObjectReceiver headReceiver = Head.AddComponent<PlayerHeadNetworkedObjectReceiver>();
@@ -358,11 +389,9 @@ Player Count: " + playerCount.ToString();
                             rightRecevier.id = id;
                             headReceiver.id = id;
 
-
-
                             HandLeft.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
                             HandRight.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-                            Head.transform.localScale = new Vector3(0.1f, 1f, 0.1f);
+                            Head.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
 
                             Console.Log(string.Format("Spawned Player, ID:{0}", id));
                         }
@@ -390,7 +419,6 @@ Player Count: " + playerCount.ToString();
             }
         }
     }
-
     private void ReceivedPlayerInfo(DarkRiftReader reader)
     {
         Console.Log("Received Players Info");
@@ -423,5 +451,6 @@ public enum Tags
     PlayerHead_Movement, PlayerHead_Rotation,
     ServerInfo,
     DestroyPlayer,
-    PlayersInfo
+    PlayersInfo,
+    BasicVehicle_Movement, BasicVehicle_Rotation
 }

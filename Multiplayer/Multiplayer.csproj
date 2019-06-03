@@ -63,6 +63,8 @@
     <Compile Include="Scripts\Receiver.cs" />
     <Compile Include="Scripts\Sender.cs" />
     <Compile Include="Scripts\UnityClient.cs" />
+    <Compile Include="Scripts\Vehicle Network Scripts\BasicVehicleNetworkedObjectReceiver.cs" />
+    <Compile Include="Scripts\Vehicle Network Scripts\BasicVehicleNetworkedObjectSender.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
