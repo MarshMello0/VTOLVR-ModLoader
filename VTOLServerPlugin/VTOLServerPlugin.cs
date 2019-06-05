@@ -110,8 +110,6 @@ public class VTOLServerPlugin : Plugin
             }
         }
 
-        SendPlayerInfo();
-
         using (DarkRiftWriter writer = DarkRiftWriter.Create())
         {
             writer.Write(e.Client.ID);
@@ -153,40 +151,8 @@ public class VTOLServerPlugin : Plugin
                         c.SendMessage(message, e.SendMode);
                 }
             }
-            else if (message.Tag == (ushort)Tags.PlayersInfo)
-            {
-                using (DarkRiftReader reader = message.GetReader())
-                {
-                    string name = reader.ReadString();
-                    string vehicle = reader.ReadString();
-                    players.Add(new Player(e.Client.ID, e.Client, vehicle, name));
-                    WriteEvent(name + " joined using " + vehicle, LogType.Warning);
-                }
-                SendPlayerInfo();
-            }
             else if (message.Tag == (ushort)Tags.SpawnPlayerTag)
                 ReceivedSpawnPlayerTag(e,message);
-        }
-    }
-    private void SendPlayerInfo()
-    {
-        using (DarkRiftWriter writer = DarkRiftWriter.Create())
-        {
-            writer.Write(players.Count);
-
-            foreach (Player player in players)
-            {
-                writer.Write(player.name);
-                writer.Write(player.vehicle);
-            }
-
-            using (Message message = Message.Create((ushort)Tags.PlayersInfo, writer))
-            {
-                foreach (IClient client in ClientManager.GetAllClients())
-                {
-                    client.SendMessage(message, SendMode.Reliable);
-                }
-            }
         }
     }
     private void ReceivedSpawnPlayerTag(MessageReceivedEventArgs e, Message message)
