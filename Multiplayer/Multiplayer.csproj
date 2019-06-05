@@ -53,6 +53,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Multiplayer.cs" />
+    <Compile Include="Scripts\Console.cs" />
+    <Compile Include="Scripts\NetworkingManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scripts\Player Network Scripts\PlayerHandLeftNetworkedObjectReceiver.cs" />
     <Compile Include="Scripts\Player Network Scripts\PlayerHandLeftNetworkedObjectSender.cs" />
@@ -62,6 +64,7 @@
     <Compile Include="Scripts\Player Network Scripts\PlayerHeadNetworkedObjectSender.cs" />
     <Compile Include="Scripts\Receiver.cs" />
     <Compile Include="Scripts\Sender.cs" />
+    <Compile Include="Scripts\Tags.cs" />
     <Compile Include="Scripts\UnityClient.cs" />
     <Compile Include="Scripts\Vehicle Network Scripts\BasicVehicleNetworkedObjectReceiver.cs" />
     <Compile Include="Scripts\Vehicle Network Scripts\BasicVehicleNetworkedObjectSender.cs" />

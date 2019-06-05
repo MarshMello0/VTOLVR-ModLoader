@@ -2,14 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using DarkRift.Client;
-using DarkRift;
-using System.Net;
-using NetworkedObjects.Player;
-using NetworkedObjects.Vehicles;
 using System.Collections;
-using DarkRift.Client.Unity;
-using UnityEngine.VR;
 using UnityEngine.SceneManagement;
 
 namespace Multiplayer
@@ -18,30 +11,27 @@ namespace Multiplayer
     {
         public static void Init()
         {
-            new GameObject("Multiplayer", typeof(MultiplayerScript));
+            new GameObject("Multiplayer", typeof(MultiplayerMod));
         }
     }
 }
-public class MultiplayerScript : MonoBehaviour
+public class MultiplayerMod : MonoBehaviour
 {
-    private UnityClient client;
+    //This is the main script which handles when the mod is injected and when the player is in the main menu
+    public static MultiplayerMod _instance;
 
-    private enum ConnectionState { Offline,Loading,Connecting,Connected, Failed}
-    private ConnectionState state = ConnectionState.Offline;
+    //This is the state which the client is currently in
+    public enum ConnectionState { Offline, Loading, Connecting, Connected, Failed }
+    public ConnectionState state = ConnectionState.Offline;
 
-    private enum Vehicle { FA26B,AV42C}
-    private Vehicle vehicle  = Vehicle.AV42C;
-    private string pilotName = "Pilot Name";
+    //This is the information about what the player has chosen
+    public enum Vehicle { FA26B, AV42C }
+    public Vehicle vehicle = Vehicle.AV42C;
+    public string pilotName = "Pilot Name";
 
-    private GameObject av42cPrefab, fa26bPrefab;
-
-    private string debugInfo, playersInfo;
-    private string serverName;
-    private int playerCount;
-
-    public static MultiplayerScript _instance;
     private void Awake()
     {
+        //This awake method is just to make sure we only have one instance of this script
         if (!_instance)
         {
             _instance = this;
@@ -55,39 +45,12 @@ public class MultiplayerScript : MonoBehaviour
     }
     private void Start()
     {
-        client = gameObject.AddComponent<UnityClient>();
-        client.MessageReceived += MessageReceived;
-        client.Disconnected += Disconnected;
-
+        //Just loading all the pilots in so that we can check that the one they pick exists
         PilotSaveManager.LoadPilotsFromFile();
-    }
-    private void Update()
-    {
-        debugInfo = @"Multiplayer Info
-Server Name: " + serverName + @"
-Player Count: " + playerCount.ToString();
-    }
-    private void Disconnected(object sender, DisconnectedEventArgs e)
-    {
-        Console.Log("Disconnecting");
-
-        Receiver[] receivers = FindObjectsOfType<Receiver>();
-        Console.Log("Receivers Count:" + receivers.Length);
-        for (int i = 0; i < receivers.Length; i++)
-        {
-            receivers[i].DestoryReceiver();
-        }
-
-        Sender[] senders = FindObjectsOfType<Sender>();
-        Console.Log("Senders Count:" + senders.Length);
-        for (int i = 0; i < senders.Length; i++)
-        {
-            Destroy(senders[i].gameObject);
-        }
-        Console.Log("Disconnected");
     }
     private void OnGUI()
     {
+        //Displaying different UI at different states
         switch (state)
         {
             case ConnectionState.Offline:
@@ -95,15 +58,6 @@ Player Count: " + playerCount.ToString();
                 break;
             case ConnectionState.Loading:
                 GUILoading();
-                break;
-            case ConnectionState.Connecting:
-                GUIConnecting();
-                break;
-            case ConnectionState.Connected:
-                GUIConnected();
-                break;
-            case ConnectionState.Failed:
-                GUIFailed();
                 break;
         }
     }
@@ -135,19 +89,7 @@ Player Count: " + playerCount.ToString();
     }
     private void GUILoading()
     {
-        GUI.Label(new Rect(0, 0, 100, 20), "Game Loading");
-    }
-    private void GUIConnecting()
-    {
-        GUI.Label(new Rect(0, 0, 100, 20), "Connecting To Server");
-    }
-    private void GUIConnected()
-    {
-        GUI.Label(new Rect(0, 0, Screen.width, Screen.height), "Connected \n" + debugInfo + "\n" + playersInfo);
-    }
-    private void GUIFailed()
-    {
-        GUI.Label(new Rect(0, 0, 100, 20), "Failed Connecting, please restart your game");
+        GUI.Label(new Rect(0, 0, 100, 20), "Loading...");
     }
     private bool CheckIfPilotExists(string name)
     {
@@ -161,8 +103,7 @@ Player Count: " + playerCount.ToString();
         LoadingSceneController.LoadScene(7);
 
         yield return new WaitForSeconds(5);
-        Console.Log("Setting Information");
-
+        //After here we should be in the loader scene
 
         Console.Log("Setting Pilot");
         PilotSaveManager.current = PilotSaveManager.pilots[pilotName];
@@ -213,244 +154,14 @@ Player Count: " + playerCount.ToString();
             PilotSaveManager.currentVehicle.vehicleName, pilotName));
 
         LoadingSceneController.instance.PlayerReady(); //<< Auto Ready
-        StartCoroutine(ConnectToServer());
-    }
-    private IEnumerator ConnectToServer()
-    {
+
         while (SceneManager.GetActiveScene().buildIndex != 7)
         {
-            //Loop to wait till the active scene is switched
+            //Pausing this method till the loader scene is unloaded
             yield return null;
         }
-        state = ConnectionState.Connecting;
-        Console.Log("Connection State == Connecting");
 
-        try
-        {
-            client.Connect(IPAddress.Parse("109.158.178.214"), 4296, DarkRift.IPVersion.IPv4);
-        }
-        catch (Exception e)
-        {
-            Console.Log("Failed to Connect to server \n" + e.Message);
-            state = ConnectionState.Failed;
-            Console.Log("Connection State == Failed");
-        }
-        Connected();
+        //Adding the networking script to the game which will handle all of the other stuff
+        gameObject.AddComponent<NetworkingManager>().mod = this;
     }
-    private void Connected()
-    {
-        state = ConnectionState.Connected;
-        Console.Log("Connection State == Connected");
-
-       
-        //Sending the players information to the server
-
-        using (DarkRiftWriter writer = DarkRiftWriter.Create())
-        {
-            writer.Write(pilotName);
-            writer.Write(vehicle == Vehicle.AV42C ? "AV-42c" : "F/A-26B");
-            using (Message message = Message.Create((ushort)Tags.PlayersInfo, writer))
-            {
-                client.SendMessage(message, SendMode.Reliable);
-                Console.Log("Told the server about our player");
-            }
-                
-        }
-
-        StartCoroutine(DelayFindBody());
-        SetPrefabs();
-    }
-    /// <summary>
-    /// Sets the prefabs which are used to spawn other clients in who connect
-    /// </summary>
-    private void SetPrefabs()
-    {
-        av42cPrefab = VTResources.GetPlayerVehicle("AV-42C").vehiclePrefab;
-        fa26bPrefab = VTResources.GetPlayerVehicle("F/A-26B").vehiclePrefab;
-        if (!av42cPrefab)
-            Console.Log("Couldn't find the prefab for the AV-42C");
-        if (!fa26bPrefab)
-            Console.Log("Couldn't find the prefab for the F/A-26B");
-    }
-    private IEnumerator DelayFindBody()
-    {
-        //This has a delay to wait for everything to spawn in the game world first,so then we can find it
-        yield return new WaitForSeconds(3);
-        //The scene should be loaded by then
-
-        if (VRDevice.model.Contains("Oculus"))
-        {
-            Console.Log("This is a Oculus User");
-            FindRiftTouch();
-        }
-        else
-        {
-            Console.Log("This is a Vive User");
-            FindViveWands();
-        }
-
-        VRHead camera = FindObjectOfType<VRHead>();
-        if (camera)
-        {
-            Console.Log("Found the VR Camera");
-            camera.gameObject.AddComponent<PlayerHeadNetworkedObjectSender>().client = client;
-        }
-        else
-        {
-            Console.Log("Looking for cameras");
-            Camera[] cameras = FindObjectsOfType<Camera>();
-            foreach (Camera item in cameras)
-            {
-                if (item.enabled && item.gameObject.activeInHierarchy)
-                {
-                    Console.Log("Found a camera, lets use this one");
-                    item.gameObject.AddComponent<PlayerHeadNetworkedObjectSender>().client = client;
-                }
-            }
-        }
-
-        //Finding Vehicle
-        FindPlayersObjects();
-    }
-    private void FindPlayersObjects()
-    {
-        //This is going to be searching for object in the scene that needed to be spawned in by the game
-        //and the found to sync across the network
-        GameObject vehicle = GameObject.Find("VTOL4(Clone)");
-        if (vehicle)
-        {
-            Console.Log("Found Vehicle");
-            vehicle.AddComponent<BasicVehicleNetworkedObjectSender>().client = client;
-        }
-    }
-    private void FindViveWands()
-    {
-        SteamVR_TrackedController[] controllers = FindObjectsOfType<SteamVR_TrackedController>();
-        Console.Log("There are " + controllers.Length + " vive controllers found");
-
-        if (controllers.Length >= 1)
-            controllers[0].gameObject.AddComponent<PlayerHandLeftNetworkedObjectSender>().client = client;
-        if (controllers.Length >= 2)
-            controllers[1].gameObject.AddComponent<PlayerHandRightNetworkedObjectSender>().client = client;
-    }
-    private void FindRiftTouch()
-    {
-        RiftTouchController[] controllers = FindObjectsOfType<RiftTouchController>();
-        Console.Log("There are " + controllers.Length + " rift controllers found");
-
-        if (controllers.Length >= 1)
-            controllers[0].gameObject.AddComponent<PlayerHandLeftNetworkedObjectSender>().client = client;
-        if (controllers.Length >= 2)
-            controllers[1].gameObject.AddComponent<PlayerHandRightNetworkedObjectSender>().client = client;
-    }
-    private void MessageReceived(object sender, MessageReceivedEventArgs e)
-    {
-        using (Message message = e.GetMessage())
-        {
-            using (DarkRiftReader reader = message.GetReader())
-            {
-                ushort tag = (ushort)message.Tag;
-                switch (tag)
-                {
-                    case (ushort)Tags.SpawnPlayerTag:
-                        while (reader.Position < reader.Length)
-                        {
-                            ushort id = 0;
-                            try
-                            {
-                                id = reader.ReadUInt16();
-                            }
-                            catch (Exception error)
-                            {
-                                Console.Log("Reading the ID of the new player to spawn caused an error \n" + error.Message);
-                            }
-
-                            GameObject HandLeft = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                            GameObject HandRight = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                            GameObject Head = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
-                            HandLeft.GetComponent<Collider>().enabled = false;
-                            HandRight.GetComponent<Collider>().enabled = false;
-                            Head.GetComponent<Collider>().enabled = false;
-
-                            PlayerHandLeftNetworkedObjectReceiver leftReceiver = HandLeft.AddComponent<PlayerHandLeftNetworkedObjectReceiver>();
-                            PlayerHandRightNetworkedObjectReceiver rightRecevier = HandRight.AddComponent<PlayerHandRightNetworkedObjectReceiver>();
-                            PlayerHeadNetworkedObjectReceiver headReceiver = Head.AddComponent<PlayerHeadNetworkedObjectReceiver>();
-
-                            leftReceiver.client = client;
-                            rightRecevier.client = client;
-                            headReceiver.client = client;
-
-                            leftReceiver.SetReceiver();
-                            rightRecevier.SetReceiver();
-                            headReceiver.SetReceiver();
-
-                            leftReceiver.id = id;
-                            rightRecevier.id = id;
-                            headReceiver.id = id;
-
-                            HandLeft.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-                            HandRight.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-                            Head.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-
-                            Console.Log(string.Format("Spawned Player, ID:{0}", id));
-                        }
-                        break;
-                    case (ushort)Tags.ServerInfo:
-                        while (reader.Position < reader.Length)
-                        {
-                            try
-                            {
-                                serverName = reader.ReadString();
-                                playerCount = reader.ReadInt32();
-                            }
-                            catch (Exception error)
-                            {
-                                Console.Log("Reading the server info caused an error (TAG = " + (ushort)Tags.ServerInfo + " \n" + error.Message);
-                            }
-      
-                            Console.Log("Received Updated Server Info");
-                        }
-                        break;
-                    case (ushort)Tags.PlayersInfo:
-                        ReceivedPlayerInfo(reader);
-                        break;
-                }
-            }
-        }
-    }
-    private void ReceivedPlayerInfo(DarkRiftReader reader)
-    {
-        Console.Log("Received Players Info");
-        while (reader.Position < reader.Length)
-        {
-            int playersCount = reader.ReadInt32();
-            playersInfo = "\nPlayers Info:";
-            for (int i = 0; i < playersCount; i++)
-            {
-                string playerName = reader.ReadString();
-                string playerVehicle = reader.ReadString();
-                playersInfo += "\n" + playerName + "\nVehicle: " + playerVehicle + "\n";
-            }
-        }
-    }
-}
-
-public static class Console
-{
-    public static void Log(object message)
-    {
-        Debug.Log("Multiplayer Mod: " + message);
-    }
-}
-public enum Tags
-{
-    SpawnPlayerTag,
-    PlayerHandLeft_Movement, PlayerHandLeft_Rotation,
-    PlayerHandRight_Movement, PlayerHandRight_Rotation,
-    PlayerHead_Movement, PlayerHead_Rotation,
-    ServerInfo,
-    DestroyPlayer,
-    PlayersInfo,
-    BasicVehicle_Movement, BasicVehicle_Rotation
 }
