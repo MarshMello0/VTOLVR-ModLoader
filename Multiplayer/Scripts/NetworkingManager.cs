@@ -23,7 +23,7 @@ public class NetworkingManager : MonoBehaviour
     private GameObject av42cPrefab, fa26bPrefab;
 
     //Information collected from the server to store on the client
-    private string debugInfo;
+    private string debugInfo, playerListString;
     private List<Player> playersInfo = new List<Player>();
     private string serverName;
     private int playerCount;
@@ -69,11 +69,19 @@ Player Count: " + playerCount.ToString();
     }
     private void GUIConnected()
     {
-        GUI.Label(new Rect(0, 0, Screen.width, Screen.height), "Connected \n" + debugInfo + "\n" + playersInfo);
+        GUI.Label(new Rect(0, 0, Screen.width, Screen.height), "Connected \n" + debugInfo + "\n" + playerListString);
     }
     private void GUIFailed()
     {
         GUI.Label(new Rect(0, 0, 100, 20), "Failed Connecting, please restart your game");
+    }
+    private void UpdatePlayerListString()
+    {
+        playerListString = "Player List:";
+        foreach (Player player in playersInfo)
+        {
+            playerListString += "\n" + player.pilotName + " [" + player.id + "] : " + player.vehicle.ToString();
+        }
     }
     private void Disconnected(object sender, DisconnectedEventArgs e)
     {
@@ -243,9 +251,6 @@ Player Count: " + playerCount.ToString();
                             Console.Log("Received Updated Server Info");
                         }
                         break;
-                    case (ushort)Tags.PlayersInfo:
-                        ReceivedPlayerInfo(reader);
-                        break;
                 }
             }
         }
@@ -268,7 +273,7 @@ Player Count: " + playerCount.ToString();
 
                 SpawnPlayer(id, pilotName, vehicleEnum);
             }
-            
+            UpdatePlayerListString();
         }
     }
     private void SpawnPlayer(ushort id, string pilotName, MultiplayerMod.Vehicle vehicle)
@@ -276,6 +281,8 @@ Player Count: " + playerCount.ToString();
         playersInfo.Add(new Player(id, pilotName, vehicle));
 
         //This will spawn all of the correct assets needed to display a player over the network
+
+        //Spawning the players Body
         GameObject HandLeft = GameObject.CreatePrimitive(PrimitiveType.Cube);
         GameObject HandRight = GameObject.CreatePrimitive(PrimitiveType.Cube);
         GameObject Head = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -305,6 +312,23 @@ Player Count: " + playerCount.ToString();
         HandRight.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
         Head.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
 
-        Console.Log(string.Format("Spawned Player, ID:{0}", id));
+        //Spawning the Vehicle
+        GameObject vehicleGO = Instantiate(vehicle == MultiplayerMod.Vehicle.AV42C ? av42cPrefab : fa26bPrefab); //Probally cause null errors
+
+        vehicleGO.GetComponent<Rigidbody>().interpolation = RigidbodyInterpolation.None;
+        Actor actor = vehicleGO.GetComponent<Actor>();
+        actor.actorName = pilotName;
+        
+
+        BasicVehicleNetworkedObjectReceiver vehicleReceiver = vehicleGO.AddComponent<BasicVehicleNetworkedObjectReceiver>();
+
+        vehicleReceiver.client = client;
+
+        vehicleReceiver.SetReceiver();
+
+        vehicleReceiver.id = id;
+
+
+        Console.Log(string.Format("Spawned {0} [{1}] with vehicle {2}", pilotName, id, vehicle.ToString()));
     }
 }

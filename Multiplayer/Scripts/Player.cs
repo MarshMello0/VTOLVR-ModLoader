@@ -2,9 +2,9 @@
 
 public class Player
 {
-    ushort id { get; }
-    string pilotName { get; }
-    MultiplayerMod.Vehicle vehicle { get; }
+    public ushort id { get; }
+    public string pilotName { get; }
+    public MultiplayerMod.Vehicle vehicle { get; }
 
     public Player (ushort id, string pilotName, MultiplayerMod.Vehicle vehicle)
     {

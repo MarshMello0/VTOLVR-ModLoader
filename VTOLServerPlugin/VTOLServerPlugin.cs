@@ -23,7 +23,6 @@ public class VTOLServerPlugin : Plugin
     public VTOLServerPlugin(PluginLoadData pluginLoadData) : base(pluginLoadData)
     {
         ServerName = "VTOL VR Dedicated Server";
-        //ClientManager.ClientConnected += ClientConnected;
         ClientManager.ClientDisconnected += ClientDisconnected;
     }
     public override Command[] Commands => new Command[]
@@ -127,8 +126,11 @@ public class VTOLServerPlugin : Plugin
     {
         using (Message message = e.GetMessage() as Message)
         {
+            
+            if (message.Tag == (ushort)Tags.SpawnPlayerTag)
+                ReceivedSpawnPlayerTag(e, message);
             //This is sending the information back to all the other clients, all movement is the same, two vector3s
-            if (message.Tag == (ushort)Tags.PlayerHandLeft_Movement || message.Tag == (ushort)Tags.PlayerHandRight_Movement
+            else if (message.Tag == (ushort)Tags.PlayerHandLeft_Movement || message.Tag == (ushort)Tags.PlayerHandRight_Movement
                 || message.Tag == (ushort)Tags.PlayerHead_Movement || message.Tag == (ushort)Tags.PlayerHandLeft_Rotation || message.Tag == (ushort)Tags.PlayerHandRight_Rotation
                 || message.Tag == (ushort)Tags.PlayerHead_Rotation)
             {
@@ -151,8 +153,6 @@ public class VTOLServerPlugin : Plugin
                         c.SendMessage(message, e.SendMode);
                 }
             }
-            else if (message.Tag == (ushort)Tags.SpawnPlayerTag)
-                ReceivedSpawnPlayerTag(e,message);
         }
     }
     private void ReceivedSpawnPlayerTag(MessageReceivedEventArgs e, Message message)
