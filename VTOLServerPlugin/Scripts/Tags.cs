@@ -6,6 +6,6 @@
     PlayerHead_Movement, PlayerHead_Rotation,
     ServerInfo,
     DestroyPlayer,
-    PlayersInfo,
+    NOTUSED,
     BasicVehicle_Movement, BasicVehicle_Rotation
 }

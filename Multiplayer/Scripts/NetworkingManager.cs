@@ -255,14 +255,20 @@ Player Count: " + playerCount.ToString();
         Console.Log("Received New Player");
         while (reader.Position < reader.Length)
         {
-            ushort id = reader.ReadUInt16();
-            string pilotName = reader.ReadString();
-            string vehicle = reader.ReadString();
-            MultiplayerMod.Vehicle vehicleEnum = MultiplayerMod.Vehicle.FA26B;
-            if (vehicle == "AV-42c")
-                vehicleEnum = MultiplayerMod.Vehicle.AV42C;
+            int amount = reader.ReadInt32();
 
-            SpawnPlayer(id, pilotName, vehicleEnum);
+            for (int i = 0; i < amount; i++)
+            {
+                ushort id = reader.ReadUInt16();
+                string pilotName = reader.ReadString();
+                string vehicle = reader.ReadString();
+                MultiplayerMod.Vehicle vehicleEnum = MultiplayerMod.Vehicle.FA26B;
+                if (vehicle == "AV-42c")
+                    vehicleEnum = MultiplayerMod.Vehicle.AV42C;
+
+                SpawnPlayer(id, pilotName, vehicleEnum);
+            }
+            
         }
     }
     private void SpawnPlayer(ushort id, string pilotName, MultiplayerMod.Vehicle vehicle)

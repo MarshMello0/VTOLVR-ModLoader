@@ -96,47 +96,6 @@ public class VTOLServerPlugin : Plugin
 
         }
     }
-    private void ClientConnected(object sender, ClientConnectedEventArgs e)
-    {
-        WriteEvent("Player " + e.Client.ID + " has joined", LogType.Warning);
-        PlayerCount += 1;
-        SendServerInfo(e.Client);
-        e.Client.MessageReceived += ClientMessageReceived;
-        //Player newPlayer = new Player(e.Client.ID);
-
-        //This sends to everyone but the person who joined, the new persons ID
-        using (DarkRiftWriter newPlayerWriter = DarkRiftWriter.Create())
-        {
-            newPlayerWriter.Write(e.Client.ID);
-
-            using (Message newPlayerMessage = Message.Create((ushort)Tags.SpawnPlayerTag, newPlayerWriter))
-            {
-                //.Where(x => x != e.Client)
-                foreach (IClient client in ClientManager.GetAllClients())
-                {
-                    client.SendMessage(newPlayerMessage, SendMode.Reliable);
-                    
-                }
-            }
-        }
-
-        //players.Add(e.Client, newPlayer);
-
-        //This sends backto the player who joined, everyones ID
-        using (DarkRiftWriter playerWriter = DarkRiftWriter.Create())
-        {
-            foreach (IClient client in ClientManager.GetAllClients().Where(x => x != e.Client))
-            {
-                playerWriter.Write(client.ID);
-            }
-
-            using (Message playerMessage = Message.Create((ushort)Tags.SpawnPlayerTag, playerWriter))
-            {
-                e.Client.SendMessage(playerMessage, SendMode.Reliable);
-            }
-                
-        }
-    }
     private void ClientDisconnected(object sender, ClientDisconnectedEventArgs e)
     {
         PlayerCount -= 1;
@@ -230,9 +189,12 @@ public class VTOLServerPlugin : Plugin
             }
         }
     }
-
     private void ReceivedSpawnPlayerTag(MessageReceivedEventArgs e, Message message)
     {
+        PlayerCount += 1;
+        SendServerInfo(e.Client);
+        e.Client.MessageReceived += ClientMessageReceived;
+
         //Adding my own on client connected so that we only start sending them information when their game is ready
         using (DarkRiftReader reader = message.GetReader())
         {
@@ -243,8 +205,45 @@ public class VTOLServerPlugin : Plugin
                 players.Add(new Player(e.Client.ID, e.Client, vehicle, name));
                 WriteEvent(name + " joined using " + vehicle, LogType.Warning);
 
-                //Tell all other clients that this person has joined using x
-                //Remove the PlayersInfo Tag as this will be replacing that
+                //This sends to everyone but the person who joined, the new persons ID
+                using (DarkRiftWriter writer = DarkRiftWriter.Create())
+                {
+                    //First send how many new players to spawn
+                    writer.Write(1);
+
+                    writer.Write(e.Client.ID);
+                    writer.Write(name);
+                    writer.Write(vehicle);
+
+                    using (Message newPlayerMessage = Message.Create((ushort)Tags.SpawnPlayerTag, writer))
+                    {
+                        //.Where(x => x != e.Client)
+                        foreach (IClient client in ClientManager.GetAllClients())
+                        {
+                            client.SendMessage(newPlayerMessage, SendMode.Reliable);
+                        }
+                    }
+                }
+
+                //This sends backto the player who joined, everyones ID
+                using (DarkRiftWriter writer = DarkRiftWriter.Create())
+                {
+                    //First send how many new players to spawn
+                    writer.Write(players.Count - 1);
+
+                    foreach (Player player in players.Where(x => x.client.ID != e.Client.ID))
+                    {
+                        writer.Write(player.ID);
+                        writer.Write(player.name);
+                        writer.Write(player.vehicle);
+                    }
+
+                    using (Message playerMessage = Message.Create((ushort)Tags.SpawnPlayerTag, writer))
+                    {
+                        e.Client.SendMessage(playerMessage, SendMode.Reliable);
+                    }
+
+                }
             }
         }
     }
