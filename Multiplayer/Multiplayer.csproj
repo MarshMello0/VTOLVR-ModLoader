@@ -62,6 +62,7 @@
     <Compile Include="Scripts\Player Network Scripts\PlayerHandRightNetworkedObjectSender.cs" />
     <Compile Include="Scripts\Player Network Scripts\PlayerHeadNetworkedObjectReceiver.cs" />
     <Compile Include="Scripts\Player Network Scripts\PlayerHeadNetworkedObjectSender.cs" />
+    <Compile Include="Scripts\Player.cs" />
     <Compile Include="Scripts\Receiver.cs" />
     <Compile Include="Scripts\Sender.cs" />
     <Compile Include="Scripts\Tags.cs" />
