@@ -132,7 +132,6 @@ public class VTOLServerPlugin : Plugin
     {
         using (Message message = e.GetMessage() as Message)
         {
-            WriteEvent("New Message Received : " + message.Tag, LogType.Warning);
             if (message.Tag == (ushort)Tags.SpawnPlayerTag)
                 ReceivedSpawnPlayerTag(e, message);
             //This is sending the information back to all the other clients, all movement is the same, two vector3s
@@ -170,7 +169,7 @@ public class VTOLServerPlugin : Plugin
         //Adding my own on client connected so that we only start sending them information when their game is ready
         using (DarkRiftReader reader = message.GetReader())
         {
-            while(reader.Position > reader.Length)
+            while(reader.Position < reader.Length)
             {
                 string name = reader.ReadString();
                 string vehicle = reader.ReadString();
