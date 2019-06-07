@@ -24,6 +24,12 @@ public class VTOLServerPlugin : Plugin
     {
         ServerName = "VTOL VR Dedicated Server";
         ClientManager.ClientDisconnected += ClientDisconnected;
+        ClientManager.ClientConnected += ClientFirstConnect;
+    }
+    private void ClientFirstConnect(object sender, ClientConnectedEventArgs e)
+    {
+        //Just got to add the listern when the first connect
+        e.Client.MessageReceived += ClientMessageReceived;
     }
     public override Command[] Commands => new Command[]
     {
@@ -126,7 +132,7 @@ public class VTOLServerPlugin : Plugin
     {
         using (Message message = e.GetMessage() as Message)
         {
-            
+            WriteEvent("New Message Received : " + message.Tag, LogType.Warning);
             if (message.Tag == (ushort)Tags.SpawnPlayerTag)
                 ReceivedSpawnPlayerTag(e, message);
             //This is sending the information back to all the other clients, all movement is the same, two vector3s
@@ -159,7 +165,7 @@ public class VTOLServerPlugin : Plugin
     {
         PlayerCount += 1;
         SendServerInfo(e.Client);
-        e.Client.MessageReceived += ClientMessageReceived;
+        
 
         //Adding my own on client connected so that we only start sending them information when their game is ready
         using (DarkRiftReader reader = message.GetReader())
