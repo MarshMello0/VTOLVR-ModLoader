@@ -126,9 +126,17 @@ Player Count: " + playerCount.ToString();
     }
     private void SetPrefabs()
     {
+        #region Players Vehicles Prefabs
+        /*
         //We need these prefabs to spawn the other players in for this client
         av42cPrefab = VTResources.GetPlayerVehicle("AV-42C").vehiclePrefab;
         fa26bPrefab = VTResources.GetPlayerVehicle("F/A-26B").vehiclePrefab;
+        */
+        #endregion
+
+        UnitCatalogue.UpdateCatalogue();
+        av42cPrefab = UnitCatalogue.GetUnitPrefab("AV-42CAI");
+        fa26bPrefab = UnitCatalogue.GetUnitPrefab("FA-26B AI");
         if (!av42cPrefab)
             Console.Log("Couldn't find the prefab for the AV-42C");
         if (!fa26bPrefab)
@@ -315,9 +323,13 @@ Player Count: " + playerCount.ToString();
         //Spawning the Vehicle
         GameObject vehicleGO = Instantiate(vehicle == MultiplayerMod.Vehicle.AV42C ? av42cPrefab : fa26bPrefab); //Probally cause null errors
 
+        /*
+        //Trying to stop the player moving there
+        vehicleGO.GetComponent<FloatingOriginShifter>().enabled = false;
+        vehicleGO.GetComponent<FloatingOriginTransform>().enabled = false;
+        */
+
         vehicleGO.GetComponent<Rigidbody>().interpolation = RigidbodyInterpolation.None;
-        Actor actor = vehicleGO.GetComponent<Actor>();
-        actor.actorName = pilotName;
         
 
         BasicVehicleNetworkedObjectReceiver vehicleReceiver = vehicleGO.AddComponent<BasicVehicleNetworkedObjectReceiver>();
@@ -327,7 +339,6 @@ Player Count: " + playerCount.ToString();
         vehicleReceiver.SetReceiver();
 
         vehicleReceiver.id = id;
-
 
         Console.Log(string.Format("Spawned {0} [{1}] with vehicle {2}", pilotName, id, vehicle.ToString()));
     }
