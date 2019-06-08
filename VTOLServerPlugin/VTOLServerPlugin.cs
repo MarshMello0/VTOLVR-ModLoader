@@ -137,7 +137,7 @@ public class VTOLServerPlugin : Plugin
             //This is sending the information back to all the other clients, all movement is the same, two vector3s
             else if (message.Tag == (ushort)Tags.PlayerHandLeft_Movement || message.Tag == (ushort)Tags.PlayerHandRight_Movement
                 || message.Tag == (ushort)Tags.PlayerHead_Movement || message.Tag == (ushort)Tags.PlayerHandLeft_Rotation || message.Tag == (ushort)Tags.PlayerHandRight_Rotation
-                || message.Tag == (ushort)Tags.PlayerHead_Rotation)
+                || message.Tag == (ushort)Tags.PlayerHead_Rotation || message.Tag == (ushort)Tags.BasicVehicle_Movement || message.Tag == (ushort)Tags.BasicVehicle_Rotation)
             {
                 using (DarkRiftReader reader = message.GetReader())
                 {

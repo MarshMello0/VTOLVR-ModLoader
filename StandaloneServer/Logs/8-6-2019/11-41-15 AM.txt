@@ -8,8 +8,10 @@
 [Info]    PluginManagerBase     Loaded plugin VTOLServerPlugin version 0.0.1
 [Trace]   NetworkListener       Starting standard listener.
 [Info]    DarkRiftServer        Server mounted, listening on port 4296.
-[Trace]   NetworkListener       Accepted TCP connection from 109.158.178.214:54940.
-[Trace]   NetworkListener       Accepted UDP connection from 109.158.178.214:56522.
-[Info]    ClientManager         New client [0] connected [109.158.178.214:54940|56522].
+[Trace]   NetworkListener       Accepted TCP connection from 109.158.178.214:57143.
+[Trace]   NetworkListener       Accepted UDP connection from 109.158.178.214:62837.
+[Info]    ClientManager         New client [0] connected [109.158.178.214:57143|62837].
 [Info]    VTOLServerPlugin      Sent Server Info to 0 (TAG = 7)
 [Warning] VTOLServerPlugin      Ben joined using AV-42c
+[Info]    VTOLServerPlugin      Sent New Server Info to Clients
+[Info]    ClientManager         Client [0] disconnected.

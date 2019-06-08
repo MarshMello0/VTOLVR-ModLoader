@@ -28,6 +28,8 @@ public class NetworkingManager : MonoBehaviour
     private string serverName;
     private int playerCount;
 
+    //Settings - These are settings which should be changed only when doing an update to the mod, so everyone has the same
+    private bool syncBody = false;
 
     private void Start()
     {
@@ -147,38 +149,39 @@ Player Count: " + playerCount.ToString();
         //This has a delay to wait for everything to spawn in the game world first,so then we can find it
         yield return new WaitForSeconds(3);
         //The scene should be loaded by then
-
-        if (VRDevice.model.Contains("Oculus"))
+        if (syncBody)
         {
-            Console.Log("This is a Oculus User");
-            FindRiftTouch();
-        }
-        else
-        {
-            Console.Log("This is a Vive User");
-            FindViveWands();
-        }
-
-        VRHead camera = FindObjectOfType<VRHead>();
-        if (camera)
-        {
-            Console.Log("Found the VR Camera");
-            camera.gameObject.AddComponent<PlayerHeadNetworkedObjectSender>().client = client;
-        }
-        else
-        {
-            Console.Log("Looking for cameras");
-            Camera[] cameras = FindObjectsOfType<Camera>();
-            foreach (Camera item in cameras)
+            if (VRDevice.model.Contains("Oculus"))
             {
-                if (item.enabled && item.gameObject.activeInHierarchy)
+                Console.Log("This is a Oculus User");
+                FindRiftTouch();
+            }
+            else
+            {
+                Console.Log("This is a Vive User");
+                FindViveWands();
+            }
+
+            VRHead camera = FindObjectOfType<VRHead>();
+            if (camera)
+            {
+                Console.Log("Found the VR Camera");
+                camera.gameObject.AddComponent<PlayerHeadNetworkedObjectSender>().client = client;
+            }
+            else
+            {
+                Console.Log("Looking for cameras");
+                Camera[] cameras = FindObjectsOfType<Camera>();
+                foreach (Camera item in cameras)
                 {
-                    Console.Log("Found a camera, lets use this one");
-                    item.gameObject.AddComponent<PlayerHeadNetworkedObjectSender>().client = client;
+                    if (item.enabled && item.gameObject.activeInHierarchy)
+                    {
+                        Console.Log("Found a camera, lets use this one");
+                        item.gameObject.AddComponent<PlayerHeadNetworkedObjectSender>().client = client;
+                    }
                 }
             }
         }
-
         //Finding Vehicle
         FindPlayersObjects();
     }
@@ -290,47 +293,52 @@ Player Count: " + playerCount.ToString();
 
         //This will spawn all of the correct assets needed to display a player over the network
 
-        //Spawning the players Body
-        GameObject HandLeft = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        GameObject HandRight = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        GameObject Head = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        if (syncBody)
+        {
+            //Spawning the players Body
+            GameObject HandLeft = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            GameObject HandRight = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            GameObject Head = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
-        //During testing these colliders, where colliding with the plane and insta killing me
-        HandLeft.GetComponent<Collider>().enabled = false;
-        HandRight.GetComponent<Collider>().enabled = false;
-        Head.GetComponent<Collider>().enabled = false;
+            //During testing these colliders, where colliding with the plane and insta killing me
+            HandLeft.GetComponent<Collider>().enabled = false;
+            HandRight.GetComponent<Collider>().enabled = false;
+            Head.GetComponent<Collider>().enabled = false;
 
-        PlayerHandLeftNetworkedObjectReceiver leftReceiver = HandLeft.AddComponent<PlayerHandLeftNetworkedObjectReceiver>();
-        PlayerHandRightNetworkedObjectReceiver rightRecevier = HandRight.AddComponent<PlayerHandRightNetworkedObjectReceiver>();
-        PlayerHeadNetworkedObjectReceiver headReceiver = Head.AddComponent<PlayerHeadNetworkedObjectReceiver>();
+            PlayerHandLeftNetworkedObjectReceiver leftReceiver = HandLeft.AddComponent<PlayerHandLeftNetworkedObjectReceiver>();
+            PlayerHandRightNetworkedObjectReceiver rightRecevier = HandRight.AddComponent<PlayerHandRightNetworkedObjectReceiver>();
+            PlayerHeadNetworkedObjectReceiver headReceiver = Head.AddComponent<PlayerHeadNetworkedObjectReceiver>();
 
-        leftReceiver.client = client;
-        rightRecevier.client = client;
-        headReceiver.client = client;
+            leftReceiver.client = client;
+            rightRecevier.client = client;
+            headReceiver.client = client;
 
-        leftReceiver.SetReceiver();
-        rightRecevier.SetReceiver();
-        headReceiver.SetReceiver();
+            leftReceiver.SetReceiver();
+            rightRecevier.SetReceiver();
+            headReceiver.SetReceiver();
 
-        leftReceiver.id = id;
-        rightRecevier.id = id;
-        headReceiver.id = id;
+            leftReceiver.id = id;
+            rightRecevier.id = id;
+            headReceiver.id = id;
 
-        HandLeft.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-        HandRight.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-        Head.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            HandLeft.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            HandRight.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            Head.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+        }
 
         //Spawning the Vehicle
-        GameObject vehicleGO = Instantiate(vehicle == MultiplayerMod.Vehicle.AV42C ? av42cPrefab : fa26bPrefab); //Probally cause null errors
-
+        //GameObject vehicleGO = Instantiate(vehicle == MultiplayerMod.Vehicle.AV42C ? av42cPrefab : fa26bPrefab); //Probally cause null errors
+        GameObject vehicleGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        vehicleGO.GetComponent<BoxCollider>().enabled = false;
+        vehicleGO.transform.localScale = new Vector3(10, 10, 10);
         /*
         //Trying to stop the player moving there
         vehicleGO.GetComponent<FloatingOriginShifter>().enabled = false;
         vehicleGO.GetComponent<FloatingOriginTransform>().enabled = false;
-        */
+        
 
         vehicleGO.GetComponent<Rigidbody>().interpolation = RigidbodyInterpolation.None;
-        
+        */
 
         BasicVehicleNetworkedObjectReceiver vehicleReceiver = vehicleGO.AddComponent<BasicVehicleNetworkedObjectReceiver>();
 

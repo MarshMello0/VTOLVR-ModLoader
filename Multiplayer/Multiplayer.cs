@@ -46,20 +46,7 @@ public class MultiplayerMod : MonoBehaviour
     private void Start()
     {
         //Just loading all the pilots in so that we can check that the one they pick exists
-        PilotSaveManager.LoadPilotsFromFile();
-
-        UnitCatalogue.UpdateCatalogue();
-        foreach (Teams teams in UnitCatalogue.catalogue.Keys)
-        {
-            string text = "Units/" + teams.ToString() + "/";
-            GameObject[] array = Resources.LoadAll<GameObject>(text);
-
-            foreach (GameObject gameObject in array)
-            {
-                Console.Log(gameObject.name);
-            }
-        }
-            
+        PilotSaveManager.LoadPilotsFromFile();            
     }
     private void OnGUI()
     {
