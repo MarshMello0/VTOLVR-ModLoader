@@ -14,7 +14,7 @@ namespace NetworkedObjects.Vehicles
     {
         public UnityClient client;
         public NetworkingManager manager;
-        
+        public Player player;
         public ushort id;
 
         public void SetReceiver()
@@ -58,19 +58,12 @@ namespace NetworkedObjects.Vehicles
                     float flaps = reader.ReadSingle();
                     float thrusterAngle = reader.ReadSingle();
 
-                    for (int i = 0; i < manager.playersInfo.Count; i++)
-                    {
-                        if (manager.playersInfo[i].id == id)
-                        {
-                            manager.playersInfo[i].SetPosition(positionX, positionY, positionZ);
-                            manager.playersInfo[i].SetRotation(rotationX, rotationY, rotationZ);
-                            manager.playersInfo[i].speed = speed;
-                            manager.playersInfo[i].landingGear = landingGear;
-                            manager.playersInfo[i].flaps = flaps;
-                            manager.playersInfo[i].thrusterAngle = thrusterAngle;
-                            break;
-                        }
-                    }
+                    player.SetPosition(positionX, positionY, positionZ);
+                    player.SetRotation(rotationX, rotationY, rotationZ);
+                    player.speed = speed;
+                    player.landingGear = landingGear;
+                    player.flaps = flaps;
+                    player.thrusterAngle = thrusterAngle;
 
                     manager.UpdatePlayerListString();
                 }

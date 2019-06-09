@@ -292,7 +292,8 @@ Player Count: " + playerCount.ToString();
     }
     private void SpawnPlayer(ushort id, string pilotName, MultiplayerMod.Vehicle vehicle)
     {
-        playersInfo.Add(new Player(id, pilotName, vehicle));
+        Player newPlayer = new Player(id, pilotName, vehicle);
+        playersInfo.Add(newPlayer);
 
         //This will spawn all of the correct assets needed to display a player over the network
 
@@ -413,6 +414,7 @@ Player Count: " + playerCount.ToString();
 
         vehicleReceiver.client = client;
         vehicleReceiver.manager = this;
+        vehicleReceiver.player = newPlayer;
 
         vehicleReceiver.SetReceiver();
 
