@@ -67,6 +67,8 @@
     <Compile Include="Scripts\Sender.cs" />
     <Compile Include="Scripts\Tags.cs" />
     <Compile Include="Scripts\UnityClient.cs" />
+    <Compile Include="Scripts\Vehicle Network Scripts\AV42cNetworkedObjectReceiver.cs" />
+    <Compile Include="Scripts\Vehicle Network Scripts\AV42cNetworkedObjectSender.cs" />
     <Compile Include="Scripts\Vehicle Network Scripts\BasicVehicleNetworkedObjectReceiver.cs" />
     <Compile Include="Scripts\Vehicle Network Scripts\BasicVehicleNetworkedObjectSender.cs" />
   </ItemGroup>

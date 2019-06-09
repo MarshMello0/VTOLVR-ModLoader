@@ -145,6 +145,9 @@ public class VTOLServerPlugin : Plugin
                     float newY = reader.ReadSingle();
                     float newZ = reader.ReadSingle();
 
+                    newZ += 50;
+                    newX += 50;
+
                     using (DarkRiftWriter writer = DarkRiftWriter.Create())
                     {
                         writer.Write(e.Client.ID);
