@@ -7,7 +7,7 @@ using DarkRift;
 using DarkRift.Client;
 using DarkRift.Client.Unity;
 
-namespace NetworkedObjects.Player
+namespace NetworkedObjects.Players
 {
     public class PlayerHandLeftNetworkedObjectReceiver : Receiver
     {

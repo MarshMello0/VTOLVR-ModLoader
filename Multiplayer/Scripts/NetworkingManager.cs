@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 using DarkRift;
 using DarkRift.Client;
 using DarkRift.Client.Unity;
-using NetworkedObjects.Player;
+using NetworkedObjects.Players;
 using NetworkedObjects.Vehicles;
 
 

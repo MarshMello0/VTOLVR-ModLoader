@@ -7,12 +7,14 @@ using DarkRift;
 using DarkRift.Client;
 using DarkRift.Client.Unity;
 
+
 namespace NetworkedObjects.Vehicles
 {
     public class AV42cNetworkedObjectReceiver : MonoBehaviour
     {
         public UnityClient client;
         public NetworkingManager manager;
+        
         public ushort id;
 
         public void SetReceiver()
