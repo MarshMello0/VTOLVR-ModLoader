@@ -234,7 +234,6 @@ public class VTOLServerPlugin : Plugin
                 float positionX = reader.ReadSingle();
                 float positionY = reader.ReadSingle();
                 float positionZ = reader.ReadSingle();
-
                 float rotationX = reader.ReadSingle();
                 float rotationY = reader.ReadSingle();
                 float rotationZ = reader.ReadSingle();
@@ -244,9 +243,6 @@ public class VTOLServerPlugin : Plugin
                 float flaps = reader.ReadSingle();
                 float thrusterAngle = reader.ReadSingle();
 
-                WriteEvent("Received Player AV42C General" + string.Format("positionX:{1} positionY:{2} positionZ:{3} rotationX:{4} rotationY:{5} rotationZ:{6} speed:{7} landing gear:{8} flaps:{9} thruster angle:{10}",
-                    positionX, positionY, positionZ, rotationX, rotationY, rotationZ, speed,landingGear, flaps, thrusterAngle),
-                    LogType.Warning);
                 //Sending the information to all other clients
 
                 using (DarkRiftWriter writer = DarkRiftWriter.Create())

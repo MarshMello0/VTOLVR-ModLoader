@@ -24,7 +24,7 @@ public class NetworkingManager : MonoBehaviour
 
     //Information collected from the server to store on the client
     private string debugInfo, playerListString;
-    private List<Player> playersInfo = new List<Player>();
+    public List<Player> playersInfo = new List<Player>();
     private string serverName;
     private int playerCount;
 
@@ -77,12 +77,15 @@ Player Count: " + playerCount.ToString();
     {
         GUI.Label(new Rect(0, 0, 100, 20), "Failed Connecting, please restart your game");
     }
-    private void UpdatePlayerListString()
+    public void UpdatePlayerListString()
     {
         playerListString = "Player List:";
         foreach (Player player in playersInfo)
         {
-            playerListString += "\n" + player.pilotName + " [" + player.id + "] : " + player.vehicle.ToString();
+            playerListString += "\n" + player.pilotName + " [" + player.id + "] : " + player.vehicle.ToString() +
+                "\nPosition:" + player.GetPosition() + " Rotation:" + player.GetRotation().eulerAngles +
+                "\nSpeed:" + player.speed + " Land Gear:" + player.landingGear + " Flaps:" + player.flaps + 
+                "\nThrusters Angle:" + player.thrusterAngle;
         }
     }
     private void Disconnected(object sender, DisconnectedEventArgs e)
@@ -406,9 +409,10 @@ Player Count: " + playerCount.ToString();
         vehicleGO.GetComponent<Rigidbody>().interpolation = RigidbodyInterpolation.None;
         */
 
-        BasicVehicleNetworkedObjectReceiver vehicleReceiver = vehicleGO.AddComponent<BasicVehicleNetworkedObjectReceiver>();
+        AV42cNetworkedObjectReceiver vehicleReceiver = vehicleGO.AddComponent<AV42cNetworkedObjectReceiver>();
 
         vehicleReceiver.client = client;
+        vehicleReceiver.manager = this;
 
         vehicleReceiver.SetReceiver();
 
