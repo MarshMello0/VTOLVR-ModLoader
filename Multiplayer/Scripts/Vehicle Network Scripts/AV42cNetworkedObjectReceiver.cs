@@ -45,7 +45,7 @@ namespace NetworkedObjects.Vehicles
                     Quaternion newrotation = Quaternion.Euler(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
                     float speed = reader.ReadSingle();
                     bool landingGear = reader.ReadBoolean();
-                    int flaps = reader.ReadInt32();
+                    float flaps = reader.ReadSingle();
                     float thrusterAngle = reader.ReadSingle();
                 }
                 else
