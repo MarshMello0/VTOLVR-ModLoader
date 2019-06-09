@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using Steamworks;
 
 namespace Multiplayer
 {
@@ -46,7 +47,8 @@ public class MultiplayerMod : MonoBehaviour
     private void Start()
     {
         //Just loading all the pilots in so that we can check that the one they pick exists
-        PilotSaveManager.LoadPilotsFromFile();            
+        PilotSaveManager.LoadPilotsFromFile();
+        SteamAPI.Init();
     }
     private void OnGUI()
     {

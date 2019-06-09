@@ -332,6 +332,7 @@ Player Count: " + playerCount.ToString();
 
         //Spawning the Vehicle
         GameObject vehicleGO = Instantiate(vehicle == MultiplayerMod.Vehicle.AV42C ? av42cPrefab : fa26bPrefab); //Probally cause null errors
+
         try
         {
             vehicleGO.GetComponent<AIAircraftSpawn>().enabled = false;
@@ -419,6 +420,16 @@ Player Count: " + playerCount.ToString();
         vehicleReceiver.SetReceiver();
 
         vehicleReceiver.id = id;
+
+        //Spawning Players Name
+
+        GameObject text = new GameObject(pilotName, typeof(TextMesh));
+        TextMesh tm = text.GetComponent<TextMesh>();
+        tm.text = pilotName;
+        tm.characterSize = 100;
+        text.transform.position = new Vector3(vehicleGO.transform.position.x, vehicleGO.transform.position.y + 10, vehicleGO.transform.position.z);
+        text.transform.SetParent(vehicleGO.transform);
+
 
         Console.Log(string.Format("Spawned {0} [{1}] with vehicle {2}", pilotName, id, vehicle.ToString()));
     }
