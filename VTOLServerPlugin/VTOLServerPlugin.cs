@@ -134,6 +134,8 @@ public class VTOLServerPlugin : Plugin
         {
             if (message.Tag == (ushort)Tags.SpawnPlayerTag)
                 ReceivedSpawnPlayerTag(e, message);
+            else if (message.Tag == (ushort)Tags.AV42c_General)
+                ReceivedAV42CGeneral(e, message);
             //This is sending the information back to all the other clients, all movement is the same, two vector3s
             else if (message.Tag == (ushort)Tags.PlayerHandLeft_Movement || message.Tag == (ushort)Tags.PlayerHandRight_Movement
                 || message.Tag == (ushort)Tags.PlayerHead_Movement || message.Tag == (ushort)Tags.PlayerHandLeft_Rotation || message.Tag == (ushort)Tags.PlayerHandRight_Rotation
@@ -218,6 +220,62 @@ public class VTOLServerPlugin : Plugin
                     }
 
                 }
+            }
+        }
+    }
+    private void ReceivedAV42CGeneral(MessageReceivedEventArgs e, Message message)
+    {
+        using (DarkRiftReader reader = message.GetReader())
+        {
+            while (reader.Position < reader.Length)
+            {
+                ushort id = e.Client.ID;
+
+                float positionX = reader.ReadSingle();
+                float positionY = reader.ReadSingle();
+                float positionZ = reader.ReadSingle();
+
+                float rotationX = reader.ReadSingle();
+                float rotationY = reader.ReadSingle();
+                float rotationZ = reader.ReadSingle();
+
+                float speed = reader.ReadSingle();
+                bool landingGear = reader.ReadBoolean();
+                float flaps = reader.ReadSingle();
+                float thrusterAngle = reader.ReadSingle();
+
+                WriteEvent("Received Player AV42C General" + string.Format("positionX:{1} positionY:{2} positionZ:{3} rotationX:{4} rotationY:{5} rotationZ:{6} speed:{7} landing gear:{8} flaps:{9} thruster angle:{10}",
+                    positionX, positionY, positionZ, rotationX, rotationY, rotationZ, speed,landingGear, flaps, thrusterAngle),
+                    LogType.Warning);
+                //Sending the information to all other clients
+
+                using (DarkRiftWriter writer = DarkRiftWriter.Create())
+                {
+                    writer.Write(id);
+                    writer.Write(positionX);
+                    writer.Write(positionY);
+                    writer.Write(positionZ);
+
+                    writer.Write(rotationX);
+                    writer.Write(rotationY);
+                    writer.Write(rotationZ);
+
+                    writer.Write(speed);
+                    writer.Write(landingGear);
+                    writer.Write(flaps);
+                    writer.Write(thrusterAngle);
+
+                    using (Message newMessage = Message.Create((ushort)Tags.AV42c_General, writer))
+                    {
+                        //.Where(x => x != e.Client)
+                        foreach (IClient client in ClientManager.GetAllClients())
+                        {
+                            client.SendMessage(newMessage, SendMode.Unreliable);
+                        }
+                    }
+
+                }
+
             }
         }
     }
