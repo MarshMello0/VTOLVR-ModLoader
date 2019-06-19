@@ -3,7 +3,7 @@ using System.Net;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.VR;
+using UnityEngine.XR;
 using UnityEngine.SceneManagement;
 using DarkRift;
 using DarkRift.Client;
@@ -75,6 +75,7 @@ Player Count: " + playerCount.ToString();
     }
     private void GUIFailed()
     {
+        
         GUI.Label(new Rect(0, 0, 100, 20), "Failed Connecting, please restart your game");
     }
     public void UpdatePlayerListString()
@@ -154,7 +155,7 @@ Player Count: " + playerCount.ToString();
         //The scene should be loaded by then
         if (syncBody)
         {
-            if (VRDevice.model.Contains("Oculus"))
+            if (XRDevice.model.Contains("Oculus"))
             {
                 Console.Log("This is a Oculus User");
                 FindRiftTouch();
@@ -217,6 +218,10 @@ Player Count: " + playerCount.ToString();
         {
             Console.Log("Found Vehicle");
             vehicle.AddComponent<AV42cNetworkedObjectSender>().client = client;
+
+            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.GetComponent<BoxCollider>().enabled = false;
+            cube.transform.position = vehicle.transform.position;
         }
         PlayerReady();
     }
@@ -331,10 +336,12 @@ Player Count: " + playerCount.ToString();
         }
 
         //Spawning the Vehicle
-        GameObject vehicleGO = Instantiate(vehicle == MultiplayerMod.Vehicle.AV42C ? av42cPrefab : fa26bPrefab); //Probally cause null errors
+
+        //GameObject vehicleGO = Instantiate(vehicle == MultiplayerMod.Vehicle.AV42C ? av42cPrefab : fa26bPrefab); //Probally cause null errors
 
         try
         {
+            /*
             vehicleGO.GetComponent<AIAircraftSpawn>().enabled = false;
             vehicleGO.GetComponent<Actor>().enabled = false;
             vehicleGO.GetComponent<Health>().enabled = false;
@@ -361,7 +368,7 @@ Player Count: " + playerCount.ToString();
             vehicleGO.GetComponent<AIPilot>().enabled = false;
             vehicleGO.GetComponent<KinematicPlane>().enabled = false;
             vehicleGO.GetComponent<AIPlaneConfigurator>().enabled = false;
-            //vehicleGO.GetComponent<WheelsController>().enabled = false;
+            vehicleGO.GetComponent<WheelsController>().enabled = false;
             vehicleGO.GetComponent<VTOLAutoPilot>().enabled = false;
             vehicleGO.GetComponent<LODBase>().enabled = false;
             vehicleGO.GetComponent<LODRenderer>().enabled = false;
@@ -369,7 +376,7 @@ Player Count: " + playerCount.ToString();
             vehicleGO.GetComponent<AudioUpdateModeSetter>().enabled = false;
             vehicleGO.GetComponent<WingMaster>().enabled = false;
             vehicleGO.GetComponent<RadarCrossSection>().enabled = false;
-            
+            */
             /*
             Console.Log("Searching for Colldiers on vehicle");
 
@@ -396,11 +403,14 @@ Player Count: " + playerCount.ToString();
             Console.Log("Error: " + e.Message);
         }
         
-        /* Spawning Cube
+
+
+        // Spawning Cube
         GameObject vehicleGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
         vehicleGO.GetComponent<BoxCollider>().enabled = false;
         vehicleGO.transform.localScale = new Vector3(10, 10, 10);
-        */
+        vehicleGO.AddComponent<FloatingOriginTransform>();
+        
 
         /*
         //Trying to stop the player moving there
@@ -426,10 +436,9 @@ Player Count: " + playerCount.ToString();
         GameObject text = new GameObject(pilotName, typeof(TextMesh));
         TextMesh tm = text.GetComponent<TextMesh>();
         tm.text = pilotName;
-        tm.characterSize = 100;
+        tm.characterSize = 10;
         text.transform.position = new Vector3(vehicleGO.transform.position.x, vehicleGO.transform.position.y + 10, vehicleGO.transform.position.z);
         text.transform.SetParent(vehicleGO.transform);
-
 
         Console.Log(string.Format("Spawned {0} [{1}] with vehicle {2}", pilotName, id, vehicle.ToString()));
     }
