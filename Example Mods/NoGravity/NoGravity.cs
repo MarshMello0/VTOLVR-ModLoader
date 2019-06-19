@@ -20,11 +20,6 @@ namespace NoGravity
         public static NoGravity _instance;
         private bool isDisabled;
 
-        public static void Init()
-        {
-            new GameObject("No Gravity", typeof(NoGravity));
-        }
-
         private void Awake()
         {
             if (!_instance)
