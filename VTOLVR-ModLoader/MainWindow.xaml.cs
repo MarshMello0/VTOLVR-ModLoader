@@ -21,11 +21,12 @@ namespace VTOLVR_ModLoader
     public partial class MainWindow : Window
     {
         private static string modsFolder = @"\mods";
-        private static string injector = @"\MonoInjector64.exe";
+        private static string injector = @"\smi.exe";
         private string root;
 
         private List<ModItem> unloadedMods;
         private List<ModItem> loadedMods = new List<ModItem>();
+        private string[] needFiles = new string[] { "SharpMonoInjector.dll", "smi.exe" }; 
 
         public MainWindow()
         {
@@ -38,10 +39,13 @@ namespace VTOLVR_ModLoader
 
         private void CheckFolder()
         {
-            if (!File.Exists(root + @"\VTOLVR.exe"))
+            foreach (string file in needFiles)
             {
-                WrongFolder();
-                return;
+                if (!File.Exists(root + @"\" + file))
+                {
+                    WrongFolder(file);
+                    return;
+                }
             }
             if (!Directory.Exists(root + modsFolder))
             {
@@ -49,9 +53,9 @@ namespace VTOLVR_ModLoader
             }
         }
 
-        private void WrongFolder()
+        private void WrongFolder(string file)
         {
-            MessageBox.Show("I can't seem to find VTOLVR.exe in my folder. Make sure you place me in the same folder as the game.", "Missing Exe");
+            MessageBox.Show("I can't seem to find " + file + " in my folder. Make sure you place me in the same folder as this file.", "Missing File");
             Process.GetCurrentProcess().Kill();
         }
 
@@ -120,7 +124,7 @@ namespace VTOLVR_ModLoader
             {
                 try
                 {
-                    string start = string.Format(" -t {0} -d {1} -n {2} -c {3} -m {4}", "VTOLVR.exe", @"mods\" + mod.Title, mod.Title.ToString().Split('.')[0], "Load", "Init");
+                    string start = string.Format("inject -p {0} -a {1} -n {2} -c {3} -m {4}", "vtolvr", @"mods\" + mod.Title, mod.Title.ToString().Split('.')[0], "Load", "Init");
                     Process.Start(root + injector, start);
                 }
                 catch (Exception error)
