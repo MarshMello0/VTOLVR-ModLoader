@@ -490,5 +490,6 @@ Player Count: " + playerCount.ToString();
         
 
         Console.Log(string.Format("Spawned {0} [{1}] with vehicle {2}", pilotName, id, vehicle.ToString()));
+        FlightLogger.Log(pilotName + " has joined the game using " + vehicle.ToString());
     }
 }
