@@ -10,7 +10,7 @@ using System.Collections;
 
 namespace NetworkedObjects.Vehicles
 {
-    public class AV42cNetworkedObjectSender : MonoBehaviour
+    public class FA26BNetworkedObjectSender : MonoBehaviour
     {
         public UnityClient client;
         public Transform worldCenter;
@@ -19,7 +19,6 @@ namespace NetworkedObjects.Vehicles
         private FlightInfo flightInfo;
         private WheelsController wheelsController;
         private AeroController aeroController;
-        private TiltController tiltController;
 
         //Information which gets sent over the network 
         //(These variables are also the last sent ones over the network which is compaired in CheckVariabes() )
@@ -28,7 +27,6 @@ namespace NetworkedObjects.Vehicles
         private float speed = 0;
         private bool landingGear = true;
         private float flaps; //0 = 0, 0.5 = 1, 1 = 1
-        private float thrusterAngle = 90;
 
         private float minDistance = 0.1f;
         private float minRotation = 0.1f;
@@ -38,8 +36,6 @@ namespace NetworkedObjects.Vehicles
             flightInfo = GetComponent<FlightInfo>();
             wheelsController = GetComponent<WheelsController>();
             aeroController = GetComponent<AeroController>();
-            //At this state there should only just be the player in the game, hopefully with 1 tilt controller
-            tiltController = FindObjectOfType<TiltController>();
         }
 
         private void Update()
@@ -53,8 +49,7 @@ namespace NetworkedObjects.Vehicles
                 Vector3.Distance(new Vector3(rotationX, rotationY, rotationZ), transform.rotation.eulerAngles) >= minRotation ||
                 Mathf.Abs(speed - flightInfo.airspeed) >= minSpeed ||
                 landingGear != LandingGearState() ||
-                flaps != aeroController.flaps ||
-                thrusterAngle != tiltController.currentTilt)
+                flaps != aeroController.flaps)
             {
                 UpdateVariables(true);
             }
@@ -84,8 +79,6 @@ namespace NetworkedObjects.Vehicles
 
             flaps = aeroController.flaps;
 
-            thrusterAngle = tiltController.currentTilt;
-
             if (sendInfo)
                 SendVariables();
         }
@@ -103,9 +96,8 @@ namespace NetworkedObjects.Vehicles
                 writer.Write(speed);
                 writer.Write(landingGear);
                 writer.Write(flaps);
-                writer.Write(thrusterAngle);
 
-                using (Message message = Message.Create((ushort)Tags.AV42c_General, writer))
+                using (Message message = Message.Create((ushort)Tags.FA26B_General, writer))
                     client.SendMessage(message, SendMode.Unreliable);
             }
         }

@@ -79,11 +79,11 @@ public class VTOLServerPlugin : Plugin
             {
                 foreach (IClient client in ClientManager.GetAllClients())
                 {
-                    client.SendMessage(message,SendMode.Reliable);
+                    client.SendMessage(message, SendMode.Reliable);
                 }
                 WriteEvent("Sent New Server Info to Clients", LogType.Info);
             }
-                
+
         }
     }
     private void SendServerInfo(IClient client)
@@ -136,10 +136,12 @@ public class VTOLServerPlugin : Plugin
                 ReceivedSpawnPlayerTag(e, message);
             else if (message.Tag == (ushort)Tags.AV42c_General)
                 ReceivedAV42CGeneral(e, message);
+            else if (message.Tag == (ushort)Tags.FA26B_General)
+                ReceivedFA26BGeneral(e, message);
             //This is sending the information back to all the other clients, all movement is the same, two vector3s
             else if (message.Tag == (ushort)Tags.PlayerHandLeft_Movement || message.Tag == (ushort)Tags.PlayerHandRight_Movement
                 || message.Tag == (ushort)Tags.PlayerHead_Movement || message.Tag == (ushort)Tags.PlayerHandLeft_Rotation || message.Tag == (ushort)Tags.PlayerHandRight_Rotation
-                || message.Tag == (ushort)Tags.PlayerHead_Rotation || message.Tag == (ushort)Tags.BasicVehicle_Movement || message.Tag == (ushort)Tags.BasicVehicle_Rotation)
+                || message.Tag == (ushort)Tags.PlayerHead_Rotation)
             {
                 using (DarkRiftReader reader = message.GetReader())
                 {
@@ -147,8 +149,8 @@ public class VTOLServerPlugin : Plugin
                     float newY = reader.ReadSingle();
                     float newZ = reader.ReadSingle();
 
-                    newZ += 50;
-                    newX += 50;
+                    //newZ += 50;
+                    //newX += 50;
 
                     using (DarkRiftWriter writer = DarkRiftWriter.Create())
                     {
@@ -169,12 +171,12 @@ public class VTOLServerPlugin : Plugin
     {
         PlayerCount += 1;
         SendServerInfo(e.Client);
-        
+
 
         //Adding my own on client connected so that we only start sending them information when their game is ready
         using (DarkRiftReader reader = message.GetReader())
         {
-            while(reader.Position < reader.Length)
+            while (reader.Position < reader.Length)
             {
                 string name = reader.ReadString();
                 string vehicle = reader.ReadString();
@@ -272,6 +274,55 @@ public class VTOLServerPlugin : Plugin
 
                 }
 
+            }
+        }
+    }
+    private void ReceivedFA26BGeneral(MessageReceivedEventArgs e, Message message)
+    {
+        using (DarkRiftReader reader = message.GetReader())
+        {
+            while (reader.Position < reader.Length)
+            {
+                ushort id = e.Client.ID;
+
+                float positionX = reader.ReadSingle();
+                float positionY = reader.ReadSingle();
+                float positionZ = reader.ReadSingle();
+                float rotationX = reader.ReadSingle();
+                float rotationY = reader.ReadSingle();
+                float rotationZ = reader.ReadSingle();
+
+                float speed = reader.ReadSingle();
+                bool landingGear = reader.ReadBoolean();
+                float flaps = reader.ReadSingle();
+
+                //Sending the information to all other clients
+
+                using (DarkRiftWriter writer = DarkRiftWriter.Create())
+                {
+                    writer.Write(id);
+                    writer.Write(positionX);
+                    writer.Write(positionY);
+                    writer.Write(positionZ);
+
+                    writer.Write(rotationX);
+                    writer.Write(rotationY);
+                    writer.Write(rotationZ);
+
+                    writer.Write(speed);
+                    writer.Write(landingGear);
+                    writer.Write(flaps);
+
+                    using (Message newMessage = Message.Create((ushort)Tags.FA26B_General, writer))
+                    {
+                        //.Where(x => x != e.Client)
+                        foreach (IClient client in ClientManager.GetAllClients())
+                        {
+                            client.SendMessage(newMessage, SendMode.Unreliable);
+                        }
+                    }
+
+                }
             }
         }
     }

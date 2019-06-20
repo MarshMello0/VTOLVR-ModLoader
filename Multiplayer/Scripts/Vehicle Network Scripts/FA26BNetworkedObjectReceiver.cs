@@ -10,7 +10,7 @@ using DarkRift.Client.Unity;
 
 namespace NetworkedObjects.Vehicles
 {
-    public class AV42cNetworkedObjectReceiver : MonoBehaviour
+    public class FA26BNetworkedObjectReceiver : MonoBehaviour
     {
         public UnityClient client;
         public Transform worldCenter;
@@ -29,16 +29,16 @@ namespace NetworkedObjects.Vehicles
             using (Message message = e.GetMessage() as Message)
             {
                 ushort tag = message.Tag;
-                switch(tag)
+                switch (tag)
                 {
-                    case (ushort)Tags.AV42c_General:
-                        AV42CGeneralReceived(message.GetReader());
+                    case (ushort)Tags.FA26B_General:
+                        FA26BGeneralReceived(message.GetReader());
                         break;
                 }
             }
         }
 
-        private void AV42CGeneralReceived(DarkRiftReader reader)
+        private void FA26BGeneralReceived(DarkRiftReader reader)
         {
             while (reader.Position < reader.Length)
             {
@@ -57,14 +57,12 @@ namespace NetworkedObjects.Vehicles
                     float speed = reader.ReadSingle();
                     bool landingGear = reader.ReadBoolean();
                     float flaps = reader.ReadSingle();
-                    float thrusterAngle = reader.ReadSingle();
 
                     player.SetPosition(positionX, positionY, positionZ);
                     player.SetRotation(rotationX, rotationY, rotationZ);
                     player.speed = speed;
                     player.landingGear = landingGear;
                     player.flaps = flaps;
-                    player.thrusterAngle = thrusterAngle;
 
                     manager.UpdatePlayerListString();
 

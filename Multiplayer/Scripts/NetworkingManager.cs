@@ -10,7 +10,7 @@ using DarkRift.Client;
 using DarkRift.Client.Unity;
 using NetworkedObjects.Players;
 using NetworkedObjects.Vehicles;
-
+using TMPro;
 
 public class NetworkingManager : MonoBehaviour
 {
@@ -19,8 +19,9 @@ public class NetworkingManager : MonoBehaviour
     private UnityClient client;
     public MultiplayerMod mod;
 
-    //These are things used to spawn other clients in
+    //These are things used to spawn other clients in and update them
     private GameObject av42cPrefab, fa26bPrefab;
+    private Transform worldCenter;
 
     //Information collected from the server to store on the client
     private string debugInfo, playerListString;
@@ -75,7 +76,6 @@ Player Count: " + playerCount.ToString();
     }
     private void GUIFailed()
     {
-        
         GUI.Label(new Rect(0, 0, 100, 20), "Failed Connecting, please restart your game");
     }
     public void UpdatePlayerListString()
@@ -83,10 +83,20 @@ Player Count: " + playerCount.ToString();
         playerListString = "Player List:";
         foreach (Player player in playersInfo)
         {
-            playerListString += "\n" + player.pilotName + " [" + player.id + "] : " + player.vehicle.ToString() +
+            if (player.vehicle == MultiplayerMod.Vehicle.AV42C)
+            {
+                playerListString += "\n" + player.pilotName + " [" + player.id + "] : " + player.vehicle.ToString() +
+                                "\nPosition:" + player.GetPosition() + " Rotation:" + player.GetRotation().eulerAngles +
+                                "\nSpeed:" + player.speed + " Land Gear:" + player.landingGear + " Flaps:" + player.flaps +
+                                "\nThrusters Angle:" + player.thrusterAngle;
+            }
+            else
+            {
+                playerListString += "\n" + player.pilotName + " [" + player.id + "] : " + player.vehicle.ToString() +
                 "\nPosition:" + player.GetPosition() + " Rotation:" + player.GetRotation().eulerAngles +
-                "\nSpeed:" + player.speed + " Land Gear:" + player.landingGear + " Flaps:" + player.flaps + 
-                "\nThrusters Angle:" + player.thrusterAngle;
+                "\nSpeed:" + player.speed + " Land Gear:" + player.landingGear + " Flaps:" + player.flaps;
+            }
+            
         }
     }
     private void Disconnected(object sender, DisconnectedEventArgs e)
@@ -113,7 +123,7 @@ Player Count: " + playerCount.ToString();
         mod.state = MultiplayerMod.ConnectionState.Connecting;
         try
         {
-            client.Connect(IPAddress.Parse("109.158.178.214"), 4296, DarkRift.IPVersion.IPv4); //This causes an error if it doesn't connect
+            client.Connect(IPAddress.Parse("86.181.254.209"), 4296, DarkRift.IPVersion.IPv4); //This causes an error if it doesn't connect
             //If it errros it won't get to the connected method
             Connected();
         }
@@ -186,8 +196,16 @@ Player Count: " + playerCount.ToString();
                 }
             }
         }
+        CreateZeroReference();
         //Finding Vehicle
         FindPlayersObjects();
+    }
+    private void CreateZeroReference()
+    {
+        //Used to workout the offset when sending pos over network and receiving
+        GameObject cube = new GameObject("[Multiplayer] World Center",typeof(FloatingOriginTransform));
+        cube.transform.position = new Vector3(0, 0, 0);
+        worldCenter = cube.transform;
     }
     private void FindViveWands()
     {
@@ -213,15 +231,24 @@ Player Count: " + playerCount.ToString();
     {
         //This is going to be searching for object in the scene that needed to be spawned in by the game
         //and the found to sync across the network
-        GameObject vehicle = GameObject.Find("VTOL4(Clone)");
+        GameObject vehicle = GameObject.Find(mod.vehicle == MultiplayerMod.Vehicle.AV42C ? "VTOL4(Clone)" : "FA-26B(Clone)");
         if (vehicle)
         {
-            Console.Log("Found Vehicle");
-            vehicle.AddComponent<AV42cNetworkedObjectSender>().client = client;
+            if (mod.vehicle == MultiplayerMod.Vehicle.AV42C)
+            {
+                AV42cNetworkedObjectSender sender = vehicle.AddComponent<AV42cNetworkedObjectSender>();
+                sender.client = client;
+                sender.worldCenter = worldCenter;
+                Console.Log("Found the AV42C");
+            }
+            else
+            {
+                FA26BNetworkedObjectSender sender = vehicle.AddComponent<FA26BNetworkedObjectSender>();
+                sender.client = client;
+                sender.worldCenter = worldCenter;
+                Console.Log("Found the FA26B");
+            }
 
-            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            cube.GetComponent<BoxCollider>().enabled = false;
-            cube.transform.position = vehicle.transform.position;
         }
         PlayerReady();
     }
@@ -402,43 +429,65 @@ Player Count: " + playerCount.ToString();
         {
             Console.Log("Error: " + e.Message);
         }
-        
+
 
 
         // Spawning Cube
+        Console.Log("Spawning New Players Body");
         GameObject vehicleGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        vehicleGO.name = "[Multiplayer] Player: " + pilotName;
         vehicleGO.GetComponent<BoxCollider>().enabled = false;
         vehicleGO.transform.localScale = new Vector3(10, 10, 10);
         vehicleGO.AddComponent<FloatingOriginTransform>();
+
+        if (vehicle == MultiplayerMod.Vehicle.AV42C)
+        {
+            Console.Log("This new player is using AV42-c");
+            AV42cNetworkedObjectReceiver vehicleReceiver = vehicleGO.AddComponent<AV42cNetworkedObjectReceiver>();
+
+            vehicleReceiver.client = client;
+            vehicleReceiver.manager = this;
+            vehicleReceiver.player = newPlayer;
+            vehicleReceiver.worldCenter = worldCenter;
+
+            vehicleReceiver.SetReceiver();
+
+            vehicleReceiver.id = id;
+        }
+        else
+        {
+            Console.Log("This new player is using FA26-B");
+            FA26BNetworkedObjectReceiver vehicleReceiver = vehicleGO.AddComponent<FA26BNetworkedObjectReceiver>();
+
+            vehicleReceiver.client = client;
+            vehicleReceiver.manager = this;
+            vehicleReceiver.player = newPlayer;
+            vehicleReceiver.worldCenter = worldCenter;
+
+            vehicleReceiver.SetReceiver();
+
+            vehicleReceiver.id = id;
+        }
         
-
-        /*
-        //Trying to stop the player moving there
-        vehicleGO.GetComponent<FloatingOriginShifter>().enabled = false;
-        vehicleGO.GetComponent<FloatingOriginTransform>().enabled = false;
-        
-
-        vehicleGO.GetComponent<Rigidbody>().interpolation = RigidbodyInterpolation.None;
-        */
-
-        AV42cNetworkedObjectReceiver vehicleReceiver = vehicleGO.AddComponent<AV42cNetworkedObjectReceiver>();
-
-        vehicleReceiver.client = client;
-        vehicleReceiver.manager = this;
-        vehicleReceiver.player = newPlayer;
-
-        vehicleReceiver.SetReceiver();
-
-        vehicleReceiver.id = id;
 
         //Spawning Players Name
 
-        GameObject text = new GameObject(pilotName, typeof(TextMesh));
-        TextMesh tm = text.GetComponent<TextMesh>();
-        tm.text = pilotName;
-        tm.characterSize = 10;
-        text.transform.position = new Vector3(vehicleGO.transform.position.x, vehicleGO.transform.position.y + 10, vehicleGO.transform.position.z);
-        text.transform.SetParent(vehicleGO.transform);
+        /*
+        try
+        {
+            GameObject text = new GameObject(pilotName);
+            TextMeshPro tm = text.AddComponent<TextMeshPro>();
+            tm.text = pilotName;
+            tm.fontSize = 100;
+            text.transform.position = new Vector3(vehicleGO.transform.position.x, vehicleGO.transform.position.y + 10, vehicleGO.transform.position.z);
+            text.transform.SetParent(vehicleGO.transform);
+        }
+        catch (Exception )
+        {
+            Console.Log("Error on text");
+        }
+        */
+        
 
         Console.Log(string.Format("Spawned {0} [{1}] with vehicle {2}", pilotName, id, vehicle.ToString()));
     }

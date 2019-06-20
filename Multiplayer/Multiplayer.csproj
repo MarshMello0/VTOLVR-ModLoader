@@ -49,6 +49,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\DarkRift.Client.dll</HintPath>
     </Reference>
+    <Reference Include="netstandard">
+      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\netstandard.dll</HintPath>
+    </Reference>
     <Reference Include="SteamVR">
       <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\SteamVR.dll</HintPath>
     </Reference>
@@ -108,11 +111,11 @@
     <Compile Include="Scripts\UnityClient.cs" />
     <Compile Include="Scripts\Vehicle Network Scripts\AV42cNetworkedObjectReceiver.cs" />
     <Compile Include="Scripts\Vehicle Network Scripts\AV42cNetworkedObjectSender.cs" />
-    <Compile Include="Scripts\Vehicle Network Scripts\BasicVehicleNetworkedObjectReceiver.cs" />
-    <Compile Include="Scripts\Vehicle Network Scripts\BasicVehicleNetworkedObjectSender.cs" />
+    <Compile Include="Scripts\Vehicle Network Scripts\FA26BNetworkedObjectReceiver.cs" />
+    <Compile Include="Scripts\Vehicle Network Scripts\FA26BNetworkedObjectSender.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(ProjectDir)bin\Debug\Multiplayer.dll" "A:\Program Files\Steam\steamapps\common\VTOL VR\mods\Multiplayer.dll"</PostBuildEvent>
+    <PostBuildEvent>copy "$(ProjectDir)bin\Debug\Multiplayer.dll" "A:\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_ModLoader\mods\Multiplayer.dll"</PostBuildEvent>
   </PropertyGroup>
 </Project>

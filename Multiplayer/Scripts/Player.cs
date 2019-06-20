@@ -11,7 +11,7 @@ public class Player
     public float speed;
     public bool landingGear;
     public float flaps;
-    public float thrusterAngle;
+    public float thrusterAngle = -1;
     public Player (ushort id, string pilotName, MultiplayerMod.Vehicle vehicle)
     {
         this.id = id;
