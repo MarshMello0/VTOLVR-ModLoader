@@ -255,8 +255,12 @@ public class VTOLServerPlugin : Plugin
                 float flaps = reader.ReadSingle();
                 float thrusterAngle = reader.ReadSingle();
 
-                //Sending the information to all other clients
+                float pitch = reader.ReadSingle();
+                float yaw = reader.ReadSingle();
+                float roll = reader.ReadSingle();
 
+                //Sending the information to all other clients
+                positionX += 50;
                 using (DarkRiftWriter writer = DarkRiftWriter.Create())
                 {
                     writer.Write(id);
@@ -272,6 +276,10 @@ public class VTOLServerPlugin : Plugin
                     writer.Write(landingGear);
                     writer.Write(flaps);
                     writer.Write(thrusterAngle);
+
+                    writer.Write(pitch);
+                    writer.Write(yaw);
+                    writer.Write(roll);
 
                     using (Message newMessage = Message.Create((ushort)Tags.AV42c_General, writer))
                     {
@@ -308,6 +316,8 @@ public class VTOLServerPlugin : Plugin
 
                 //Sending the information to all other clients
 
+
+                positionX += 50;
                 using (DarkRiftWriter writer = DarkRiftWriter.Create())
                 {
                     writer.Write(id);

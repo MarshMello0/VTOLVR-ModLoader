@@ -83,18 +83,13 @@ Player Count: " + playerCount.ToString();
         playerListString = "Player List:";
         foreach (Player player in playersInfo)
         {
+            playerListString += "\n" + player.pilotName + " [" + player.id + "] : " + player.vehicle.ToString() +
+                "\nPosition:" + player.GetPosition() + " Rotation:" + player.GetRotation().eulerAngles +
+                "\nSpeed:" + player.speed + " Land Gear:" + player.landingGear + " Flaps:" + player.flaps + 
+                "\nPitch, Yaw, Roll" + player.GetPitchYawRoll();
             if (player.vehicle == MultiplayerMod.Vehicle.AV42C)
             {
-                playerListString += "\n" + player.pilotName + " [" + player.id + "] : " + player.vehicle.ToString() +
-                                "\nPosition:" + player.GetPosition() + " Rotation:" + player.GetRotation().eulerAngles +
-                                "\nSpeed:" + player.speed + " Land Gear:" + player.landingGear + " Flaps:" + player.flaps +
-                                "\nThrusters Angle:" + player.thrusterAngle;
-            }
-            else
-            {
-                playerListString += "\n" + player.pilotName + " [" + player.id + "] : " + player.vehicle.ToString() +
-                "\nPosition:" + player.GetPosition() + " Rotation:" + player.GetRotation().eulerAngles +
-                "\nSpeed:" + player.speed + " Land Gear:" + player.landingGear + " Flaps:" + player.flaps;
+                playerListString += "\nThrusters Angle:" + player.thrusterAngle;
             }
             
         }
@@ -149,10 +144,11 @@ Player Count: " + playerCount.ToString();
         fa26bPrefab = VTResources.GetPlayerVehicle("F/A-26B").vehiclePrefab;
         */
         #endregion
-
+        
         UnitCatalogue.UpdateCatalogue();
         av42cPrefab = UnitCatalogue.GetUnitPrefab("AV-42CAI");
         fa26bPrefab = UnitCatalogue.GetUnitPrefab("FA-26B AI");
+        
         if (!av42cPrefab)
             Console.Log("Couldn't find the prefab for the AV-42C");
         if (!fa26bPrefab)
@@ -250,6 +246,7 @@ Player Count: " + playerCount.ToString();
             }
 
         }
+        vehicle.GetComponent<Health>().minDamage = float.MaxValue;//God Mode
         PlayerReady();
     }
     private void PlayerReady()
@@ -364,7 +361,11 @@ Player Count: " + playerCount.ToString();
 
         //Spawning the Vehicle
 
-        //GameObject vehicleGO = Instantiate(vehicle == MultiplayerMod.Vehicle.AV42C ? av42cPrefab : fa26bPrefab); //Probally cause null errors
+        GameObject vehicleGO = Instantiate(vehicle == MultiplayerMod.Vehicle.AV42C ? av42cPrefab : fa26bPrefab); //Probally cause null errors
+
+        Console.Log("Enabling God Mode");
+        vehicleGO.GetComponent<Health>().minDamage = float.MaxValue; //God Mode for this vehicle
+        
 
         try
         {
@@ -433,12 +434,16 @@ Player Count: " + playerCount.ToString();
 
 
         // Spawning Cube
+        /*
         Console.Log("Spawning New Players Body");
         GameObject vehicleGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        vehicleGO.name = "[Multiplayer] Player: " + pilotName;
         vehicleGO.GetComponent<BoxCollider>().enabled = false;
         vehicleGO.transform.localScale = new Vector3(10, 10, 10);
         vehicleGO.AddComponent<FloatingOriginTransform>();
+        */
+
+        vehicleGO.name = "[Multiplayer] Player: " + pilotName;
+        
 
         if (vehicle == MultiplayerMod.Vehicle.AV42C)
         {

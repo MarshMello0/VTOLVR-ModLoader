@@ -12,6 +12,7 @@ public class Player
     public bool landingGear;
     public float flaps;
     public float thrusterAngle = -1;
+    public float pitch, roll, yaw;
     public Player (ushort id, string pilotName, MultiplayerMod.Vehicle vehicle)
     {
         this.id = id;
@@ -41,5 +42,10 @@ public class Player
     public Quaternion GetRotation()
     {
         return Quaternion.Euler(rotationX, rotationY, rotationZ);
+    }
+
+    public Vector3 GetPitchYawRoll()
+    {
+        return new Vector3(pitch, yaw, roll);
     }
 }

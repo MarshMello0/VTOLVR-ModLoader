@@ -17,6 +17,21 @@ namespace NetworkedObjects.Vehicles
         public NetworkingManager manager;
         public Player player;
         public ushort id;
+        public bool isAI;
+
+        //Classes we use to set the information
+        private FlightInfo flightInfo;
+        private WheelsController wheelsController;
+        private AeroController aeroController;
+        private TiltController tiltController;
+
+        private void Start()
+        {
+            flightInfo = GetComponent<FlightInfo>();
+            wheelsController = GetComponent<WheelsController>();
+            aeroController = GetComponent<AeroController>();
+            tiltController = GetComponent<TiltController>();
+        }
 
         public void SetReceiver()
         {
@@ -59,21 +74,49 @@ namespace NetworkedObjects.Vehicles
                     float flaps = reader.ReadSingle();
                     float thrusterAngle = reader.ReadSingle();
 
+                    float pitch = reader.ReadSingle();
+                    float yaw = reader.ReadSingle();
+                    float roll = reader.ReadSingle();
+
                     player.SetPosition(positionX, positionY, positionZ);
                     player.SetRotation(rotationX, rotationY, rotationZ);
                     player.speed = speed;
                     player.landingGear = landingGear;
                     player.flaps = flaps;
                     player.thrusterAngle = thrusterAngle;
+                    player.pitch = pitch;
+                    player.yaw = yaw;
+                    player.roll = roll;
 
                     manager.UpdatePlayerListString();
 
                     transform.position = worldCenter.position - new Vector3(positionX, positionY, positionZ);
                     transform.rotation = Quaternion.Euler(rotationX, rotationY, rotationZ);
+
+                    UpdateAI();
                 }
                 else
                     return;
             }
+        }
+
+        private void UpdateAI()
+        {
+            Vector3 input = player.GetPitchYawRoll();
+            bool landingGear = player.landingGear;
+            float flaps = player.flaps;
+            float thrusterAngle = player.thrusterAngle;
+            if (wheelsController.gearAnimator.GetCurrentState() == (landingGear ? GearAnimator.GearStates.Extended : GearAnimator.GearStates.Retracted))
+            {
+                wheelsController.SetGear(landingGear);
+            }
+
+            if (aeroController.flaps != flaps)
+                aeroController.SetFlaps(flaps);
+            if (tiltController.currentTilt != thrusterAngle)
+                tiltController.SetTiltImmediate(thrusterAngle);
+            if (aeroController.input != input)
+                aeroController.input = input;
         }
     }
 }

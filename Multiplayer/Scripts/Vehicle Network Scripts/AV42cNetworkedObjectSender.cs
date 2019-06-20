@@ -29,6 +29,7 @@ namespace NetworkedObjects.Vehicles
         private bool landingGear = true;
         private float flaps; //0 = 0, 0.5 = 1, 1 = 1
         private float thrusterAngle = 90;
+        private float pitch, roll, yaw;
 
         private float minDistance = 0.1f;
         private float minRotation = 0.1f;
@@ -38,8 +39,7 @@ namespace NetworkedObjects.Vehicles
             flightInfo = GetComponent<FlightInfo>();
             wheelsController = GetComponent<WheelsController>();
             aeroController = GetComponent<AeroController>();
-            //At this state there should only just be the player in the game, hopefully with 1 tilt controller
-            tiltController = FindObjectOfType<TiltController>();
+            tiltController = GetComponent<TiltController>();
         }
 
         private void Update()
@@ -54,7 +54,8 @@ namespace NetworkedObjects.Vehicles
                 Mathf.Abs(speed - flightInfo.airspeed) >= minSpeed ||
                 landingGear != LandingGearState() ||
                 flaps != aeroController.flaps ||
-                thrusterAngle != tiltController.currentTilt)
+                thrusterAngle != tiltController.currentTilt ||
+                pitch != aeroController.input.x || yaw != aeroController.input.y || roll != aeroController.input.z)
             {
                 UpdateVariables(true);
             }
@@ -81,10 +82,13 @@ namespace NetworkedObjects.Vehicles
 
             landingGear = LandingGearState();
 
-
             flaps = aeroController.flaps;
 
             thrusterAngle = tiltController.currentTilt;
+
+            pitch = aeroController.input.x;
+            yaw = aeroController.input.y;
+            roll = aeroController.input.z;
 
             if (sendInfo)
                 SendVariables();
@@ -104,6 +108,9 @@ namespace NetworkedObjects.Vehicles
                 writer.Write(landingGear);
                 writer.Write(flaps);
                 writer.Write(thrusterAngle);
+                writer.Write(pitch);
+                writer.Write(yaw);
+                writer.Write(roll);
 
                 using (Message message = Message.Create((ushort)Tags.AV42c_General, writer))
                     client.SendMessage(message, SendMode.Unreliable);
