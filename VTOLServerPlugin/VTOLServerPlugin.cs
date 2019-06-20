@@ -56,14 +56,24 @@ public class VTOLServerPlugin : Plugin
         if (args.Length <= 1)
             return;
 
-        args[0] = args[0].ToLowerInvariant();
+        string command = args[0].ToLowerInvariant();
 
-        switch (args[0])
+        string[] argsBroken = new string[e.RawArguments.Length - 1];
+        Array.Copy(e.RawArguments, 1, argsBroken, 0, e.RawArguments.Length - 1);
+
+        switch (command)
         {
             case "servername":
-                ServerName = args[1];
+                ServerName = "";
+                foreach (string word in argsBroken)
+                {
+                    ServerName += word + " ";
+                }
                 WriteEvent("Server Name has Changed to \"" + ServerName + "\"", LogType.Info);
                 break;
+            default:
+                WriteEvent("Couldn't find command " + command, LogType.Warning);
+                return;
         }
 
         SendServerInfo();
