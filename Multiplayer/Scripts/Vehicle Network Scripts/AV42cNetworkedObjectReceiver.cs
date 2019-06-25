@@ -24,6 +24,7 @@ namespace NetworkedObjects.Vehicles
         private WheelsController wheelsController;
         private AeroController aeroController;
         private TiltController tiltController;
+        private ModuleEngine[] engines;
 
         private void Start()
         {
@@ -31,6 +32,7 @@ namespace NetworkedObjects.Vehicles
             wheelsController = GetComponent<WheelsController>();
             aeroController = GetComponent<AeroController>();
             tiltController = GetComponent<TiltController>();
+            engines = GetComponentsInChildren<ModuleEngine>();
         }
 
         public void SetReceiver()
@@ -77,6 +79,8 @@ namespace NetworkedObjects.Vehicles
                     float pitch = reader.ReadSingle();
                     float yaw = reader.ReadSingle();
                     float roll = reader.ReadSingle();
+                    float breaks = reader.ReadSingle();
+                    float throttle = reader.ReadSingle();
 
                     player.SetPosition(positionX, positionY, positionZ);
                     player.SetRotation(rotationX, rotationY, rotationZ);
@@ -87,6 +91,8 @@ namespace NetworkedObjects.Vehicles
                     player.pitch = pitch;
                     player.yaw = yaw;
                     player.roll = roll;
+                    player.breaks = breaks;
+                    player.throttle = throttle;
 
                     manager.UpdatePlayerListString();
 
@@ -103,9 +109,11 @@ namespace NetworkedObjects.Vehicles
         private void UpdateAI()
         {
             Vector3 input = player.GetPitchYawRoll();
+            float breaks = player.breaks;
             bool landingGear = player.landingGear;
             float flaps = player.flaps;
             float thrusterAngle = player.thrusterAngle;
+            float throttle = player.throttle;
             if (wheelsController.gearAnimator.GetCurrentState() == (landingGear ? GearAnimator.GearStates.Extended : GearAnimator.GearStates.Retracted))
             {
                 wheelsController.SetGear(landingGear);
@@ -117,6 +125,13 @@ namespace NetworkedObjects.Vehicles
                 tiltController.SetTiltImmediate(thrusterAngle);
             if (aeroController.input != input)
                 aeroController.input = input;
+            if (aeroController.brake != breaks)
+                aeroController.SetBrakes(breaks);
+
+            foreach (ModuleEngine engine in engines)
+            {
+                engine.SetThrottle(throttle);
+            }
         }
     }
 }

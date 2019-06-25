@@ -20,6 +20,7 @@ namespace NetworkedObjects.Vehicles
         private WheelsController wheelsController;
         private AeroController aeroController;
         private TiltController tiltController;
+        private VRThrottle vRThrottle;
 
         //Information which gets sent over the network 
         //(These variables are also the last sent ones over the network which is compaired in CheckVariabes() )
@@ -30,6 +31,7 @@ namespace NetworkedObjects.Vehicles
         private float flaps; //0 = 0, 0.5 = 1, 1 = 1
         private float thrusterAngle = 90;
         private float pitch, roll, yaw;
+        private float breaks, throttle;
 
         private float minDistance = 0.1f;
         private float minRotation = 0.1f;
@@ -40,6 +42,11 @@ namespace NetworkedObjects.Vehicles
             wheelsController = GetComponent<WheelsController>();
             aeroController = GetComponent<AeroController>();
             tiltController = GetComponent<TiltController>();
+            vRThrottle = gameObject.GetComponentInChildren<VRThrottle>();
+            if (vRThrottle == null)
+                Console.Log("Cound't find throttle");
+            else
+                vRThrottle.OnSetThrottle.AddListener(SetThrottle);
         }
 
         private void Update()
@@ -55,7 +62,8 @@ namespace NetworkedObjects.Vehicles
                 landingGear != LandingGearState() ||
                 flaps != aeroController.flaps ||
                 thrusterAngle != tiltController.currentTilt ||
-                pitch != aeroController.input.x || yaw != aeroController.input.y || roll != aeroController.input.z)
+                pitch != aeroController.input.x || yaw != aeroController.input.y || roll != aeroController.input.z ||
+                breaks != aeroController.brake)
             {
                 UpdateVariables(true);
             }
@@ -65,6 +73,12 @@ namespace NetworkedObjects.Vehicles
         {
             return wheelsController.gearAnimator.GetCurrentState() == GearAnimator.GearStates.Extended;
         }
+
+        public void SetThrottle(float t)
+        {
+            throttle = t;
+        }
+        
 
         private void UpdateVariables(bool sendInfo = false)
         {
@@ -89,6 +103,8 @@ namespace NetworkedObjects.Vehicles
             pitch = aeroController.input.x;
             yaw = aeroController.input.y;
             roll = aeroController.input.z;
+            breaks = aeroController.brake;
+            
 
             if (sendInfo)
                 SendVariables();
@@ -111,6 +127,8 @@ namespace NetworkedObjects.Vehicles
                 writer.Write(pitch);
                 writer.Write(yaw);
                 writer.Write(roll);
+                writer.Write(breaks);
+                writer.Write(throttle);
 
                 using (Message message = Message.Create((ushort)Tags.AV42c_General, writer))
                     client.SendMessage(message, SendMode.Unreliable);

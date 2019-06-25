@@ -258,6 +258,8 @@ public class VTOLServerPlugin : Plugin
                 float pitch = reader.ReadSingle();
                 float yaw = reader.ReadSingle();
                 float roll = reader.ReadSingle();
+                float breaks = reader.ReadSingle();
+                float throttle = reader.ReadSingle();
 
                 //Sending the information to all other clients
                 positionX += 50;
@@ -280,6 +282,8 @@ public class VTOLServerPlugin : Plugin
                     writer.Write(pitch);
                     writer.Write(yaw);
                     writer.Write(roll);
+                    writer.Write(breaks);
+                    writer.Write(throttle);
 
                     using (Message newMessage = Message.Create((ushort)Tags.AV42c_General, writer))
                     {
