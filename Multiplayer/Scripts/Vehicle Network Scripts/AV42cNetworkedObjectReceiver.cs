@@ -20,7 +20,6 @@ namespace NetworkedObjects.Vehicles
         public bool isAI;
 
         //Classes we use to set the information
-        private FlightInfo flightInfo;
         private WheelsController wheelsController;
         private AeroController aeroController;
         private TiltController tiltController;
@@ -28,7 +27,6 @@ namespace NetworkedObjects.Vehicles
 
         private void Start()
         {
-            flightInfo = GetComponent<FlightInfo>();
             wheelsController = GetComponent<WheelsController>();
             aeroController = GetComponent<AeroController>();
             tiltController = GetComponent<TiltController>();
