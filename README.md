@@ -8,11 +8,11 @@ VTOL VR Mod Loader is a basic mod loader to help people get custom scripts/asset
  3. Open the folder and run VTOLVR-ModLoader.exe to launch the mod loader
 
 ## How to use the mod loader
-![The Mod Loader](https://raw.githubusercontent.com/MarshMello0/VTOLVR-ModLoader/master/VTOLVR-ModLoader/Images/Mod%20Loader.PNG)
+![The Mod Loader](https://raw.githubusercontent.com/MarshMello0/VTOLVR-ModLoader/release/VTOLVR-ModLoader/Images/Mod%20Loader.PNG)
 This mod loader is very basic, on the left you have mods which have been found inside your mods folder. On the right, there are the mods which will get loaded when you press the "Inject Mods" button. To move a mod from the unloaded to loaded and the other way round, you just use the arrows to the side.
 
 Once you have moved the mods you want to load, first, make sure the game is running. There is a little shortcut under the unloaded mods which launches the game via Steam. Once the game is in the first scene on the aircraft carrier, then you can inject the mods.
-![The Aircraft Carrier where you can inject the mods](https://raw.githubusercontent.com/MarshMello0/VTOLVR-ModLoader/master/VTOLVR-ModLoader/Images/VTOL%20VR%20Main%20Menu.PNG)
+![The Aircraft Carrier where you can inject the mods](https://raw.githubusercontent.com/MarshMello0/VTOLVR-ModLoader/release/VTOLVR-ModLoader/Images/VTOL%20VR%20Main%20Menu.PNG)
 
 ### WARNING, You can inject mods twice, there is no protection to stop you from doing this. 
 Just move them back to the unloaded side or close the application and reopen it if you want to load more mid-session.
@@ -20,8 +20,8 @@ Just move them back to the unloaded side or close the application and reopen it 
 ## Mods List
 |Mod Name | Description|Version | Download Link | Author |
 |--|--|--|--|--|
-|No Gravity|Adds a basic button to disable/enable gravity|1.0 | [Download](https://github.com/MarshMello0/VTOLVR-ModLoader/blob/master/Example%20Mods/NoGravity/NoGravity.dll?raw=true)| . Marsh.Mello . |
-|Console Mod|Displays the Unity Console in a sperate window|1.0 | [Download](https://github.com/MarshMello0/MarshMellos_VTOLVR_Mods/blob/master/ConsoleMod/ConsoleMod.dll?raw=true)| . Marsh.Mello . |
+|No Gravity|Adds a basic button to disable/enable gravity|1.0 | [Download](https://github.com/MarshMello0/VTOLVR-ModLoader/blob/release/Example%20Mods/NoGravity/NoGravity.dll?raw=true)| . Marsh.Mello . |
+|Console Mod|Displays the Unity Console in a sperate window|1.0 | [Download](https://github.com/MarshMello0/MarshMellos_VTOLVR_Mods/blob/release/ConsoleMod/ConsoleMod.dll?raw=true)| . Marsh.Mello . |
 
 ## How to create mods
 
