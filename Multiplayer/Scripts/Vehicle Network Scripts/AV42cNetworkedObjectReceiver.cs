@@ -96,8 +96,8 @@ namespace NetworkedObjects.Vehicles
 
                     manager.UpdatePlayerListString();
 
-                    transform.position = worldCenter.position - new Vector3(positionX, positionY, positionZ);
-                    transform.rotation = Quaternion.Euler(rotationX, rotationY, rotationZ);
+                    //transform.position = worldCenter.position - new Vector3(positionX, positionY, positionZ);
+                    //transform.rotation = Quaternion.Euler(rotationX, rotationY, rotationZ);
 
                     UpdateAI();
                 }

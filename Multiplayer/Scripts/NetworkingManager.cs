@@ -362,7 +362,7 @@ Player Count: " + playerCount.ToString();
         //Spawning the Vehicle
 
         GameObject vehicleGO = Instantiate(vehicle == MultiplayerMod.Vehicle.AV42C ? av42cPrefab : fa26bPrefab); //Probally cause null errors
-
+        vehicleGO.transform.position += new Vector3(0, 10, 0);
         Console.Log("Enabling God Mode");
         vehicleGO.GetComponent<Health>().minDamage = float.MaxValue; //God Mode for this vehicle
         
