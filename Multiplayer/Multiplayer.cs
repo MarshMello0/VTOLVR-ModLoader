@@ -43,12 +43,19 @@ public class MultiplayerMod : MonoBehaviour
             Destroy(this.gameObject);
             return;
         }
+        
     }
+
     private void Start()
     {
         //Just loading all the pilots in so that we can check that the one they pick exists
         PilotSaveManager.LoadPilotsFromFile();
         SteamAPI.Init();
+        LogInfo();
+    }
+    private void LogInfo()
+    {
+        Console.Log("\n############################## \n\n\n\n\nThis user is running the multiplayer mod\nplease check any issues with\n @. Marsh.Mello .#3194 or @ketkev#3774\n on the VTOL VR Discord first\n\n\n\n\n##############################");
     }
     private void OnGUI()
     {
