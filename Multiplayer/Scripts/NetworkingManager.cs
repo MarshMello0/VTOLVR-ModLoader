@@ -235,6 +235,7 @@ Player Count: " + playerCount.ToString();
                 AV42cNetworkedObjectSender sender = vehicle.AddComponent<AV42cNetworkedObjectSender>();
                 sender.client = client;
                 sender.worldCenter = worldCenter;
+                
                 Console.Log("Found the AV42C");
             }
             else
@@ -244,7 +245,6 @@ Player Count: " + playerCount.ToString();
                 sender.worldCenter = worldCenter;
                 Console.Log("Found the FA26B");
             }
-
         }
         vehicle.GetComponent<Health>().minDamage = float.MaxValue;//God Mode
         PlayerReady();
@@ -365,6 +365,7 @@ Player Count: " + playerCount.ToString();
         vehicleGO.transform.position += new Vector3(0, 10, 0);
         Console.Log("Enabling God Mode");
         vehicleGO.GetComponent<Health>().minDamage = float.MaxValue; //God Mode for this vehicle
+
         
 
         try
@@ -443,7 +444,6 @@ Player Count: " + playerCount.ToString();
         */
 
         vehicleGO.name = "[Multiplayer] Player: " + pilotName;
-        
 
         if (vehicle == MultiplayerMod.Vehicle.AV42C)
         {
@@ -473,6 +473,9 @@ Player Count: " + playerCount.ToString();
 
             vehicleReceiver.id = id;
         }
+        
+
+
         
 
         //Spawning Players Name

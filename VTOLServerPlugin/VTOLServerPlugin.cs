@@ -170,8 +170,8 @@ public class VTOLServerPlugin : Plugin
                         writer.Write(newZ);
                         message.Serialize(writer);
                     }
-                    //Removed .Where(x => x != e.Client)
-                    foreach (IClient c in ClientManager.GetAllClients())
+                    //Removed 
+                    foreach (IClient c in ClientManager.GetAllClients().Where(x => x != e.Client))
                         c.SendMessage(message, e.SendMode);
                 }
             }
@@ -180,7 +180,7 @@ public class VTOLServerPlugin : Plugin
     private void ReceivedSpawnPlayerTag(MessageReceivedEventArgs e, Message message)
     {
         PlayerCount += 1;
-        SendServerInfo(e.Client);
+        SendServerInfo();
 
 
         //Adding my own on client connected so that we only start sending them information when their game is ready
@@ -206,7 +206,7 @@ public class VTOLServerPlugin : Plugin
                     using (Message newPlayerMessage = Message.Create((ushort)Tags.SpawnPlayerTag, writer))
                     {
                         //.Where(x => x != e.Client)
-                        foreach (IClient client in ClientManager.GetAllClients())
+                        foreach (IClient client in ClientManager.GetAllClients().Where(x => x != e.Client))
                         {
                             client.SendMessage(newPlayerMessage, SendMode.Reliable);
                         }
@@ -262,7 +262,7 @@ public class VTOLServerPlugin : Plugin
                 float throttle = reader.ReadSingle();
 
                 //Sending the information to all other clients
-                positionX += 50;
+                //positionX += 50;
                 using (DarkRiftWriter writer = DarkRiftWriter.Create())
                 {
                     writer.Write(id);
@@ -288,7 +288,7 @@ public class VTOLServerPlugin : Plugin
                     using (Message newMessage = Message.Create((ushort)Tags.AV42c_General, writer))
                     {
                         //.Where(x => x != e.Client)
-                        foreach (IClient client in ClientManager.GetAllClients())
+                        foreach (IClient client in ClientManager.GetAllClients().Where(x => x != e.Client))
                         {
                             client.SendMessage(newMessage, SendMode.Unreliable);
                         }
@@ -321,7 +321,7 @@ public class VTOLServerPlugin : Plugin
                 //Sending the information to all other clients
 
 
-                positionX += 50;
+                //positionX += 50;
                 using (DarkRiftWriter writer = DarkRiftWriter.Create())
                 {
                     writer.Write(id);
@@ -340,7 +340,7 @@ public class VTOLServerPlugin : Plugin
                     using (Message newMessage = Message.Create((ushort)Tags.FA26B_General, writer))
                     {
                         //.Where(x => x != e.Client)
-                        foreach (IClient client in ClientManager.GetAllClients())
+                        foreach (IClient client in ClientManager.GetAllClients().Where(x => x != e.Client))
                         {
                             client.SendMessage(newMessage, SendMode.Unreliable);
                         }

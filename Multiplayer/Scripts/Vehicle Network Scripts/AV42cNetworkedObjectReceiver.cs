@@ -18,6 +18,7 @@ namespace NetworkedObjects.Vehicles
         public Player player;
         public ushort id;
         public bool isAI;
+        private Transform temp;
 
         //Classes we use to set the information
         private WheelsController wheelsController;
@@ -31,6 +32,10 @@ namespace NetworkedObjects.Vehicles
             aeroController = GetComponent<AeroController>();
             tiltController = GetComponent<TiltController>();
             engines = GetComponentsInChildren<ModuleEngine>();
+
+            temp = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
+            temp.position = new Vector3(0, 0, 0);
+            temp.transform.localScale = new Vector3(10, 10, 10);
         }
 
         public void SetReceiver()
@@ -94,6 +99,9 @@ namespace NetworkedObjects.Vehicles
 
                     manager.UpdatePlayerListString();
 
+                    temp.position = worldCenter.position - new Vector3(positionX, positionY, positionZ);
+                    temp.rotation = Quaternion.Euler(rotationX, rotationY, rotationZ);
+
                     //transform.position = worldCenter.position - new Vector3(positionX, positionY, positionZ);
                     //transform.rotation = Quaternion.Euler(rotationX, rotationY, rotationZ);
 
@@ -131,5 +139,14 @@ namespace NetworkedObjects.Vehicles
                 engine.SetThrottle(throttle);
             }
         }
+        void OnGUI()
+        {
+            if (GUI.Button(new Rect(100,100,100,100), "Say position"))
+            {
+                Console.Log(temp.position);
+            }
+        }
     }
+
+
 }
