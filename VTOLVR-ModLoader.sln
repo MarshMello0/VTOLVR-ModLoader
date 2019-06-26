@@ -3,9 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28922.388
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VTOLServerPlugin", "VTOLServerPlugin\VTOLServerPlugin.csproj", "{29F45017-D82F-4AF3-BE02-5B897075B3B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VTOLServerPlugin", "VTOLServerPlugin\VTOLServerPlugin.csproj", "{29F45017-D82F-4AF3-BE02-5B897075B3B8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Multiplayer", "Multiplayer\Multiplayer.csproj", "{3F9BF2D9-F3AB-4BD7-B074-99F2370462EC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example Mods", "Example Mods", "{763111D1-471C-49FC-B902-ADA8094A1355}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoGravity", "Example Mods\NoGravity\NoGravity.csproj", "{5471978C-53E1-45FE-AE70-9861A71CCB77}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VTOLVR-ModLoader", "VTOLVR-ModLoader\VTOLVR-ModLoader.csproj", "{4D9D2F10-E1AE-4980-AAAF-37B78DF081E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,9 +27,20 @@ Global
 		{3F9BF2D9-F3AB-4BD7-B074-99F2370462EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F9BF2D9-F3AB-4BD7-B074-99F2370462EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F9BF2D9-F3AB-4BD7-B074-99F2370462EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5471978C-53E1-45FE-AE70-9861A71CCB77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5471978C-53E1-45FE-AE70-9861A71CCB77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5471978C-53E1-45FE-AE70-9861A71CCB77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5471978C-53E1-45FE-AE70-9861A71CCB77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D9D2F10-E1AE-4980-AAAF-37B78DF081E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D9D2F10-E1AE-4980-AAAF-37B78DF081E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D9D2F10-E1AE-4980-AAAF-37B78DF081E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D9D2F10-E1AE-4980-AAAF-37B78DF081E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5471978C-53E1-45FE-AE70-9861A71CCB77} = {763111D1-471C-49FC-B902-ADA8094A1355}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C8C92F2A-8D42-4CD3-8DF9-49B06621ABC6}
