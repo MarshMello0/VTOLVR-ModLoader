@@ -53,6 +53,10 @@
     <Reference Include="UnityEngine.CrashReportingModule">
       <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.CrashReportingModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ModLoader.cs" />
@@ -61,7 +65,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>if EXIST "A:\Program Files\Steam\steamapps\common\VTOL VR\" (
-copy "$(ProjectDir)\bin\Debug\ModLoader.dll" "A:\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_ModLoader\mods\ModLoader.dll"
+copy "$(ProjectDir)\bin\Debug\ModLoader.dll" "A:\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_ModLoader\ModLoader.dll"
 )</PostBuildEvent>
   </PropertyGroup>
 </Project>

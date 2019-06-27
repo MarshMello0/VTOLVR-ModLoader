@@ -30,9 +30,15 @@ namespace ModLoader
             }
             else
             {
+                Debug.Log("ModLoader already injected");
                 Destroy(this.gameObject);
                 return;
             }
+        }
+
+        private void OnGUI()
+        {
+            GUI.Label(new Rect(100, 100, 100, 100), "Version:" + Application.unityVersion);
         }
 
         private void PlayerLogText()
@@ -68,6 +74,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  ##### 
 ";
             Debug.Log(playerLogMessage);
+            Debug.Log("Unity Version: " + Application.unityVersion);
         }
     }
 }
