@@ -132,7 +132,7 @@ namespace VTOLVR_ModLoader
 
             //A delay just to make sure the game has fully launched,
             continueText = "Waiting for Game";
-            await Task.Delay(20000);
+            await Task.Delay(10000);
 
             //Injecting Default Mod
             continueText = "Injecting Mod Loader";

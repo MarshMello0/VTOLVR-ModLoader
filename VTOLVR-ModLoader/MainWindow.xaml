@@ -6,7 +6,7 @@
         xmlns:gif="http://wpfanimatedgif.codeplex.com"
         xmlns:local="clr-namespace:VTOLVR_ModLoader"
         mc:Ignorable="d"
-        Title="VTOL VR Modloader" Height="225" Width="400" ResizeMode="NoResize" Icon="Logo.ico">
+        Title="VTOL VR Modloader" Height="225" Width="400" ResizeMode="NoResize" Icon="Logo.ico" Background="Gray">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="0.1*"/>
