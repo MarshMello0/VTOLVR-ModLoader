@@ -11,34 +11,16 @@ namespace ModLoader
     {
         public static void Init()
         {
+            CrashReportHandler.enableCaptureExceptions = false;
             new GameObject("Mod Loader", typeof(ModLoader));
         }
     }
 
     public class ModLoader : MonoBehaviour
     {
-        public static ModLoader _instance;
-
         private void Awake()
         {
-            //This is to make sure we only have one of these in the game
-            if (!_instance)
-            {
-                _instance = this;
-                DontDestroyOnLoad(this.gameObject);
-                PlayerLogText();
-            }
-            else
-            {
-                Debug.Log("ModLoader already injected");
-                Destroy(this.gameObject);
-                return;
-            }
-        }
-
-        private void OnGUI()
-        {
-            GUI.Label(new Rect(100, 100, 100, 100), "Version:" + Application.unityVersion);
+            PlayerLogText();
         }
 
         private void PlayerLogText()
@@ -74,7 +56,6 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  ##### 
 ";
             Debug.Log(playerLogMessage);
-            Debug.Log("Unity Version: " + Application.unityVersion);
         }
     }
 }
