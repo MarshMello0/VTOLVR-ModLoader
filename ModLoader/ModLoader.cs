@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,11 +19,15 @@ namespace ModLoader
 
     public class ModLoader : MonoBehaviour
     {
+        private string assetsPath = @"\modloader.assets";
+        private string root;
+
+        private AssetBundle assets;
         private void Awake()
         {
+            DontDestroyOnLoad(this.gameObject);
             PlayerLogText();
         }
-
         private void PlayerLogText()
         {
             string playerLogMessage = @" 
@@ -57,5 +62,39 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
 ";
             Debug.Log(playerLogMessage);
         }
+
+        private void Start()
+        {
+            SetPaths();
+            CreateAssetBundle();
+        }
+        private void SetPaths()
+        {
+            root = Directory.GetCurrentDirectory() + @"\VTOLVR_Modloader";
+        }
+        private void CreateAssetBundle()
+        {
+            assets = AssetBundle.LoadFromFile(root + assetsPath);
+            if (assets == null)
+            {
+                Debug.Log("Failed to load AssetBundle!");
+                return;
+            }
+            //Spawning UConsole
+            console = Instantiate(assets.LoadAsset<GameObject>("UConsole-Canvas")).AddComponent<UConsole>();
+
+            console.AddCommand("spawn", "spawn", SpawnConsole);
+        }
+
+        private void SpawnConsole()
+        {
+            //Spawning ModLoader Panel
+            GameObject modloader = Instantiate(assets.LoadAsset<GameObject>("ModLoader"));
+
+            GameObject cam = FindObjectOfType<Camera>().gameObject;
+            modloader.transform.position = cam.transform.position + Vector3.forward * 5f;
+        }
+
+        private UConsole console;
     }
 }
