@@ -7,23 +7,7 @@ using System.Collections;
 [Info("No Gravity", "Adds a basic button to disable/enable gravity","", "1.0")]
 public class NoGravity : VTOLMOD
 {
-    public static NoGravity _instance;
     private bool isDisabled;
-
-    private void Awake()
-    {
-        if (!_instance)
-        {
-            _instance = this;
-            DontDestroyOnLoad(this.gameObject);
-            Debug.Log("No Gravity Mod Loaded");
-        }
-        else
-        {
-            Destroy(this.gameObject);
-            return;
-        }
-    }
     private void OnGUI()
     {
         if (isDisabled)
