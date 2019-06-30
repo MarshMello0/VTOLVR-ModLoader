@@ -1,10 +1,14 @@
 ﻿using System;
 using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.CrashReportHandler;
+using UnityEngine.SceneManagement;
+using UnityEngine.Events;
+using UnityEngine.UI;
 
 namespace ModLoader
 {
@@ -23,6 +27,11 @@ namespace ModLoader
         private string root;
 
         private AssetBundle assets;
+
+        //UI Objects
+        GameObject warningPage, spmp, sp, mp, spModPage, spList, mpPV, mpIPPort;
+        PoseBounds pb;
+        public enum Page { warning, spmp,spMod,spList,mpPV,mpIPPort}
         private void Awake()
         {
             DontDestroyOnLoad(this.gameObject);
@@ -67,6 +76,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
         {
             SetPaths();
             CreateAssetBundle();
+            StartCoroutine(WaitForScene());
         }
         private void SetPaths()
         {
@@ -81,20 +91,177 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                 return;
             }
             //Spawning UConsole
-            console = Instantiate(assets.LoadAsset<GameObject>("UConsole-Canvas")).AddComponent<UConsole>();
-
-            console.AddCommand("spawn", "spawn", SpawnConsole);
+            Instantiate(assets.LoadAsset<GameObject>("UConsole-Canvas")).AddComponent<UConsole>();
         }
-
-        private void SpawnConsole()
+        IEnumerator WaitForScene()
         {
-            //Spawning ModLoader Panel
-            GameObject modloader = Instantiate(assets.LoadAsset<GameObject>("ModLoader"));
+            while (SceneManager.GetActiveScene().name != "SamplerScene")
+            {
+                yield return null;
+            }
+            //We should now be in the game scene
+            SetInGameUI();
+        }
+        private void SetInGameUI()
+        {
+            //This method moves around the panel on the second scene and creates a new one
 
-            GameObject cam = FindObjectOfType<Camera>().gameObject;
-            modloader.transform.position = cam.transform.position + Vector3.forward * 5f;
+            GameObject equipPanel = GameObject.Find("/Platoons/CarrierPlatoon/AlliedCarrier/ControlPanel (1)/EquipPanel");
+            Transform equipPanelT = equipPanel.transform;
+            equipPanelT.parent = null;
+
+            //Moving it up
+            equipPanelT.position = new Vector3(-35.656f, 25.674f, 304.984f);
+            equipPanelT.rotation = Quaternion.Euler(0, -47.13f, 60);
+
+            //Destrying start button and background, then rotating workshop panel
+            GameObject startButton = equipPanelT.GetChild(0).GetChild(1).GetChild(4).gameObject;
+
+            VRInteractable startButtonVR = startButton.GetComponent<VRInteractable>();
+            Debug.Log(string.Format("Radius:{0},useRect:{1},rect:{2},requireMotion:{3},requiredMotion:{4},toggle:{5}," +
+                "taporhold:{6},sqrradius:{7}", startButtonVR.radius, startButtonVR.useRect, startButtonVR.rect, startButtonVR.requireMotion
+                , startButtonVR.requiredMotion, startButtonVR.toggle, startButtonVR.tapOrHold, startButtonVR.sqrRadius));
+
+            GameObject mainBG = equipPanelT.GetChild(0).GetChild(1).GetChild(0).gameObject;
+            Destroy(mainBG);
+            RectTransform workshopT = equipPanelT.GetChild(0).GetChild(0).GetComponent<RectTransform>();
+            workshopT.localRotation = Quaternion.Euler(50, 0, 0);
+            Destroy(startButton);
+
+            //Spawning the Mod Load Menu
+            GameObject canvaus = Instantiate(assets.LoadAsset<GameObject>("ModLoader"));
+            canvaus.transform.position = new Vector3(-36.1251f, 25.9583f, 303.7759f);
+            canvaus.transform.rotation = Quaternion.Euler(-0.303f, -46.172f, -69.8f);
+
+            //Find Objects
+            Transform prefabT = canvaus.transform;
+            Transform canvasT = prefabT.GetChild(0);
+            warningPage = canvasT.GetChild(1).gameObject;
+            spmp = canvasT.GetChild(2).gameObject;
+            sp = canvasT.GetChild(3).gameObject;
+            mp = canvasT.GetChild(4).gameObject;
+            spModPage = sp.transform.GetChild(0).gameObject;
+            spList = sp.transform.GetChild(1).gameObject;
+            mpPV = mp.transform.GetChild(0).gameObject;
+            mpIPPort = mp.transform.GetChild(1).gameObject;
+
+            //Setting PoseBounds
+            RectTransform canvasRect = canvasT.GetComponent<RectTransform>();
+            pb = canvasT.gameObject.AddComponent<PoseBounds>();
+            pb.pose = GloveAnimation.Poses.Point;
+            pb.size = new Vector3(canvasRect.rect.width, canvasRect.rect.height, 155.0f);
+
+
+            //Adding Scripts
+
+            //Warning Page
+            VRInteractable warningPagevrInteractable = warningPage.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            SetDefaultInteractable(warningPagevrInteractable);
+            warningPagevrInteractable.interactableName = "Okay";
+            warningPagevrInteractable.OnInteract.AddListener(delegate { SwitchPage(Page.spmp); });
+            //SP/MP
+            VRInteractable spButton = spmp.transform.GetChild(1).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            VRInteractable mpButton = spmp.transform.GetChild(2).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            SetDefaultInteractable(spButton);
+            SetDefaultInteractable(mpButton);
+            spButton.interactableName = "Start Singleplayer";
+            mpButton.interactableName = "Start Multiplayer";
+            spButton.OnInteract.AddListener(delegate { SwitchPage(Page.spList); });
+            mpButton.OnInteract.AddListener(delegate { SwitchPage(Page.mpPV); });
+            //SP Mod Page
+            VRInteractable spModBack = spModPage.transform.GetChild(3).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            VRInteractable spModLoad = spModPage.transform.GetChild(2).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            SetDefaultInteractable(spModBack);
+            SetDefaultInteractable(spModLoad);
+            spModBack.interactableName = "Back to list";
+            spModLoad.interactableName = "Load Mod";
+            spModBack.OnInteract.AddListener(delegate { SwitchPage(Page.spList); });
+            //SP List
+            VRInteractable spListSwitch = spList.transform.GetChild(2).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            VRInteractable spListNextPage = spList.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            VRInteractable spListPreviousPage = spList.transform.GetChild(1).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            VRInteractable spListStart = spList.transform.GetChild(11).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            SetDefaultInteractable(spListSwitch);
+            SetDefaultInteractable(spListNextPage);
+            SetDefaultInteractable(spListPreviousPage);
+            SetDefaultInteractable(spListStart);
+            spListSwitch.interactableName = "Switch";
+            spListNextPage.interactableName = "Next Page";
+            spListPreviousPage.interactableName = "Previous Page";
+            spListStart.interactableName = "Start Game";
+            spListSwitch.OnInteract.AddListener(delegate { Debug.Log("Switch Button Pressed"); });
+            spListStart.OnInteract.AddListener(delegate { SceneManager.LoadScene(2); });
+
+            SPModManager modManager = spList.AddComponent<SPModManager>();
+            modManager.assets = assets;
+            modManager.modloader = this;
+            modManager.SetButtons(spListNextPage.gameObject, spListPreviousPage.gameObject);
+            modManager.SetModPageItems(spModLoad, spModPage.transform.GetChild(0).GetComponent<Text>(), spModPage.transform.GetChild(1).GetComponent<Text>());
+            spListNextPage.OnInteract.AddListener(delegate { modManager.NextPage(); });
+            spListPreviousPage.OnInteract.AddListener(delegate { modManager.PreviousPage(); });
+            //MP Pilot and Vehicle
+            VRInteractable mpPVContinue = mpPV.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            SetDefaultInteractable(mpPVContinue);
+            mpPVContinue.interactableName = "Continue";
+            mpPVContinue.OnInteract.AddListener(delegate { SwitchPage(Page.mpIPPort); });
+            //MP Server IP and Port
+            VRInteractable mpIPPortJoin = mpIPPort.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            SetDefaultInteractable(mpIPPortJoin);
+            mpIPPortJoin.interactableName = "Join";
+            mpIPPortJoin.OnInteract.AddListener(delegate { Debug.Log("Join Button Pressed"); });
+
+            
         }
 
-        private UConsole console;
+        public VRInteractable SetDefaultInteractable(VRInteractable interactable)
+        {
+            VRInteractable returnValue = interactable;
+            returnValue.radius = 0.06f;
+            returnValue.sqrRadius = 0.0036f;
+            returnValue.OnInteract = new UnityEvent();
+            returnValue.OnInteracting = new UnityEvent();
+            returnValue.OnStopInteract = new UnityEvent();
+            returnValue.poseBounds = pb;
+            returnValue.button = VRInteractable.Buttons.Trigger;
+            return returnValue;
+        }
+
+        public void SwitchPage(Page page)
+        {
+            warningPage.SetActive(false);
+            spmp.SetActive(false);
+            sp.SetActive(false);
+            mp.SetActive(false);
+            spModPage.SetActive(false);
+            spList.SetActive(false);
+            mpPV.SetActive(false);
+            mpIPPort.SetActive(false);
+
+            switch (page)
+            {
+                case Page.warning:
+                    warningPage.SetActive(true);
+                    break;
+                case Page.spmp:
+                    spmp.SetActive(true);
+                    break;
+                case Page.spMod:
+                    sp.SetActive(true);
+                    spModPage.SetActive(true);
+                    break;
+                case Page.spList:
+                    sp.SetActive(true);
+                    spList.SetActive(true);
+                    break;
+                case Page.mpPV:
+                    mp.SetActive(true);
+                    mpPV.SetActive(true);
+                    break;
+                case Page.mpIPPort:
+                    mp.SetActive(true);
+                    mpIPPort.SetActive(true);
+                    break;
+            }
+        }
     }
 }

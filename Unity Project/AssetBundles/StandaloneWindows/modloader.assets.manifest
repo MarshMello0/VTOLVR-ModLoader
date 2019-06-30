@@ -1,9 +1,9 @@
 ManifestFileVersion: 0
-CRC: 4053656930
+CRC: 2134060498
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 48ec76aba9fb313c61a4aff15f896536
+    Hash: 47f96749ac00bfac53cf903626e622b1
   TypeTreeHash:
     serializedVersion: 2
     Hash: 97b6d7ef95a0a986c47db83effbf6fcb
@@ -59,6 +59,9 @@ ClassTypes:
   Script: {instanceID: 0}
 Assets:
 - Assets/UConsole/Prefabs/UConsole-Canvas.prefab
+- Assets/ModLoader/Materials/Blue.mat
+- Assets/ModLoader/Materials/Green.mat
 - Assets/ModLoader/Prefabs/ModLoader.prefab
 - Assets/UConsole/Squares Bold Free.otf
+- Assets/ModLoader/Materials/Gray.mat
 Dependencies: []

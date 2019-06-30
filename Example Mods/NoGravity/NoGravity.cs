@@ -4,58 +4,46 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using System.Collections;
-
-namespace NoGravity
+[Info("No Gravity", "Adds a basic button to disable/enable gravity","", "1.0")]
+public class NoGravity : VTOLMOD
 {
-    public class Load
+    public static NoGravity _instance;
+    private bool isDisabled;
+
+    private void Awake()
     {
-        public static void Init()
+        if (!_instance)
         {
-            new GameObject("No Gravity", typeof(NoGravity));
+            _instance = this;
+            DontDestroyOnLoad(this.gameObject);
+            Debug.Log("No Gravity Mod Loaded");
+        }
+        else
+        {
+            Destroy(this.gameObject);
+            return;
         }
     }
-
-    public class NoGravity : MonoBehaviour
+    private void OnGUI()
     {
-        public static NoGravity _instance;
-        private bool isDisabled;
-
-        private void Awake()
+        if (isDisabled)
         {
-            if (!_instance)
+            if (GUI.Button(new Rect(10, 10, 150, 100), "Enable Gravity"))
             {
-                _instance = this;
-                DontDestroyOnLoad(this.gameObject);
-                Debug.Log("No Gravity Mod Loaded");
-            }
-            else
-            {
-                Destroy(this.gameObject);
-                return;
+                Physics.gravity = new Vector3(0, -9.3f, 0);
+                Debug.Log("Gravity has been enabled");
+                isDisabled = false;
             }
         }
-        private void OnGUI()
+        else
         {
-            if (isDisabled)
+            if (GUI.Button(new Rect(10, 10, 150, 100), "Disable Gravity"))
             {
-                if (GUI.Button(new Rect(10, 10, 150, 100), "Enable Gravity"))
-                {
-                    Physics.gravity = new Vector3(0, -9.3f, 0);
-                    Debug.Log("Gravity has been enabled");
-                    isDisabled = false;
-                }
+                Physics.gravity = new Vector3(0, 0, 0);
+                Debug.Log("Gravity has been disabled");
+                isDisabled = true;
             }
-            else
-            {
-                if (GUI.Button(new Rect(10, 10, 150, 100), "Disable Gravity"))
-                {
-                    Physics.gravity = new Vector3(0, 0, 0);
-                    Debug.Log("Gravity has been disabled");
-                    isDisabled = true;
-                }
-            }
-
         }
+
     }
-
 }
