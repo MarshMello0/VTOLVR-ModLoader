@@ -18,6 +18,7 @@ public class SPModManager : MonoBehaviour
 
     private string mods = @"\mods";
     private string root;
+    private string apiURL = "http://vtolapi.kevinjoosten.nl/availableMods";
 
     private ModSlot[] modSlots = new ModSlot[8];
     private List list;
@@ -95,6 +96,7 @@ public class SPModManager : MonoBehaviour
 
     private void FindOnlineMods()
     {
+        //Featch the information and fill it into the list
 
     }
     public void OnPageChanged(ModLoader.ModLoader.Page newPage)
@@ -206,15 +208,25 @@ public class SPModManager : MonoBehaviour
         modTitleText.text = item.name;
         modDescriptionText.text = item.description;
         loadInteractable.OnInteract.RemoveAllListeners();
-        if (item.isLoaded)
+        if (isLocal)
         {
-            loadModText.text = "Loaded!";
-            loadModMaterial.color = Color.red;
-            return;
+            if (item.isLoaded)
+            {
+                loadModText.text = "Loaded!";
+                loadModMaterial.color = Color.red;
+                return;
+            }
+            loadModText.text = "Load";
+            loadModMaterial.color = Color.green;
+            loadInteractable.OnInteract.AddListener(delegate { LoadMod(item); });
         }
-        loadModText.text = "Load";
-        loadModMaterial.color = Color.green;
-        loadInteractable.OnInteract.AddListener(delegate { LoadMod(item); });
+        else
+        {
+            loadModText.text = "Download";
+            loadModMaterial.color = Color.green;
+            loadInteractable.OnInteract.AddListener(delegate { DownloadMod(item); });
+        }
+
     }
 
     public void LoadMod(ModItem item)
@@ -238,6 +250,10 @@ public class SPModManager : MonoBehaviour
         {
             Debug.LogError("Source is null");
         }
+    }
+    public void DownloadMod(ModItem item)
+    {
+        //This handles the download and placing the file in the correct location
     }
 
     public class ModSlot
@@ -295,24 +311,5 @@ public class ModItem
     public void SetPath(string path)
     {
         this.path = path;
-    }
-}
-public class VTOLMOD : MonoBehaviour
-{
-    [AttributeUsage(AttributeTargets.Class)]
-    public class Info : Attribute
-    {
-        public string name { private set; get; }
-        public string version { private set; get; }
-        public string description { private set; get; }
-        public string downloadURL { private set; get; }
-
-        public Info(string name, string description, string downloadURL, string version)
-        {
-            this.name = name;
-            this.description = description;
-            this.downloadURL = downloadURL;
-            this.version = version;
-        }
     }
 }
