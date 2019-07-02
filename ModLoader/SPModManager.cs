@@ -22,8 +22,8 @@ public class SPModManager : MonoBehaviour
     private ModSlot[] modSlots = new ModSlot[8];
     private List list;
     private VRInteractable nextInteractable, previousInteractable, loadInteractable;
-    private Text modTitleText, modDescriptionText;
-    private Material nextMaterial, previousMaterial, redMaterial, greenMaterial;
+    private Text modTitleText, modDescriptionText, loadModText;
+    private Material nextMaterial, previousMaterial, loadModMaterial, redMaterial, greenMaterial;
 
     private void Awake()
     {
@@ -61,6 +61,10 @@ public class SPModManager : MonoBehaviour
 
         UpdateList(true);
     }
+    private void Start()
+    {
+        modloader.onPageChanged += OnPageChanged;
+    }
 
     private void FindLocalMods()
     {
@@ -93,7 +97,11 @@ public class SPModManager : MonoBehaviour
     {
 
     }
-
+    public void OnPageChanged(ModLoader.ModLoader.Page newPage)
+    {
+        if (newPage == ModLoader.ModLoader.Page.spList)
+            UpdateList(true);
+    }
     private void UpdateList(bool local)
     {
         List<ModItem> items = local ? localMods : onlineMods;
@@ -104,7 +112,8 @@ public class SPModManager : MonoBehaviour
             {
                 ModItem currentItem = list.mods[(list.currentPage * 8) + i];
                 modSlots[i].slot.SetActive(true);
-                modSlots[i].slotText.text = currentItem.name;
+                modSlots[i].slotText.text = currentItem.name + " " + (currentItem.isLoaded ? "[Loaded]":"");
+                Debug.Log("This mod is " + currentItem.isLoaded);
                 modSlots[i].interactable.interactableName = "View " + currentItem.name + "[Try Grip if trigger doesn't work]";
                 modSlots[i].interactable.button = VRInteractable.Buttons.Trigger;
                 modSlots[i].interactable.OnInteract.AddListener(delegate { OpenMod(currentItem, local); });
@@ -156,11 +165,13 @@ public class SPModManager : MonoBehaviour
         previousMaterial = previous.GetComponent<MeshRenderer>().material;
     }
 
-    public void SetModPageItems(VRInteractable loadInteractable, Text title, Text description)
+    public void SetModPageItems(VRInteractable loadInteractable, Text title, Text description, Material loadModMaterial, Text loadModText)
     {
         this.loadInteractable = loadInteractable;
         modTitleText = title;
         modDescriptionText = description;
+        this.loadModMaterial = loadModMaterial;
+        this.loadModText = loadModText;
     }
 
     private void UpdatePageButtons()
@@ -195,6 +206,14 @@ public class SPModManager : MonoBehaviour
         modTitleText.text = item.name;
         modDescriptionText.text = item.description;
         loadInteractable.OnInteract.RemoveAllListeners();
+        if (item.isLoaded)
+        {
+            loadModText.text = "Loaded!";
+            loadModMaterial.color = Color.red;
+            return;
+        }
+        loadModText.text = "Load";
+        loadModMaterial.color = Color.green;
         loadInteractable.OnInteract.AddListener(delegate { LoadMod(item); });
     }
 
@@ -209,7 +228,11 @@ public class SPModManager : MonoBehaviour
         if (source != null && source.Count() == 1)
         {
             new GameObject(item.name, source.First());
-            item.isLoaded = true;
+            localMods.Find(x => x.name == item.name).isLoaded = true;
+
+            loadInteractable.OnInteract.RemoveAllListeners();
+            loadModText.text = "Loaded!";
+            loadModMaterial.color = Color.red;
         }
         else
         {

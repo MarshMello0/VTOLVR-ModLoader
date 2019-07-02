@@ -32,6 +32,10 @@ namespace ModLoader
         GameObject warningPage, spmp, sp, mp, spModPage, spList, mpPV, mpIPPort;
         PoseBounds pb;
         public enum Page { warning, spmp,spMod,spList,mpPV,mpIPPort}
+
+        //Events
+        public delegate void PageChanged(Page newPage);
+        public event PageChanged onPageChanged;
         private void Awake()
         {
             DontDestroyOnLoad(this.gameObject);
@@ -196,7 +200,12 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             modManager.assets = assets;
             modManager.modloader = this;
             modManager.SetButtons(spListNextPage.gameObject, spListPreviousPage.gameObject);
-            modManager.SetModPageItems(spModLoad, spModPage.transform.GetChild(0).GetComponent<Text>(), spModPage.transform.GetChild(1).GetComponent<Text>());
+            modManager.SetModPageItems(
+                spModLoad,
+                spModPage.transform.GetChild(0).GetComponent<Text>(),
+                spModPage.transform.GetChild(1).GetComponent<Text>(),
+                spModPage.transform.GetChild(2).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material,
+                spModPage.transform.GetChild(2).GetChild(1).GetComponent<Text>());
             spListNextPage.OnInteract.AddListener(delegate { modManager.NextPage(); });
             spListPreviousPage.OnInteract.AddListener(delegate { modManager.PreviousPage(); });
             //MP Pilot and Vehicle
@@ -226,6 +235,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             return returnValue;
         }
 
+        
         public void SwitchPage(Page page)
         {
             warningPage.SetActive(false);
@@ -262,6 +272,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                     mpIPPort.SetActive(true);
                     break;
             }
+            onPageChanged(page);
         }
     }
 }
