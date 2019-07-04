@@ -6,6 +6,11 @@ using System.Reflection;
 using System;
 using System.Linq;
 using UnityEngine.UI;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
+using UnityEngine.Networking;
+using System.Text;
+
 
 public class SPModManager : MonoBehaviour
 {
@@ -19,12 +24,14 @@ public class SPModManager : MonoBehaviour
     private string mods = @"\mods";
     private string root;
     private string apiURL = "http://vtolapi.kevinjoosten.nl/availableMods";
+    private bool onLocal = true;
 
     private ModSlot[] modSlots = new ModSlot[8];
     private List list;
     private VRInteractable nextInteractable, previousInteractable, loadInteractable;
     private Text modTitleText, modDescriptionText, loadModText;
     private Material nextMaterial, previousMaterial, loadModMaterial, redMaterial, greenMaterial;
+    private APIMod[] apimods = new APIMod[1];
 
     private void Awake()
     {
@@ -64,7 +71,26 @@ public class SPModManager : MonoBehaviour
     }
     private void Start()
     {
-        modloader.onPageChanged += OnPageChanged;
+        //modloader.onPageChanged += OnPageChanged;
+        APIMod mod1 = new APIMod();
+        mod1.Name = "No Gravity";
+        mod1.Description = @"Adds a basic button to disable\/enable gravity";
+        mod1.Creator = ". Marsh.Mello .";
+        mod1.URL = @"http:\/\/vtolapi.kevinjoosten.nl\/mods\/NoGravity.dll";
+        mod1.Version = "1.0";
+
+        APIMod mod2 = new APIMod();
+        mod2.Name = "Console Mod";
+        mod2.Description = @"Displays the Unity Console in a seperate window";
+        mod2.Creator = ". Marsh.Mello .";
+        mod2.URL = @"http:\/\/vtolapi.kevinjoosten.nl\/mods\/ConsoleMod.dll";
+        mod2.Version = "1.0";
+
+        apimods = new APIMod[] { mod1, mod2};
+        Debug.Log("Mods Lenght = " + mods.Length + " mod 1 name " + mods[0].Name );
+        string jsonoutput = JsonHelper.ToJson<APIMod>(mods);
+        Debug.Log(jsonoutput);
+
     }
 
     private void FindLocalMods()
@@ -94,10 +120,30 @@ public class SPModManager : MonoBehaviour
         
     }
 
-    private void FindOnlineMods()
+    private IEnumerator FindOnlineMods()
     {
         //Featch the information and fill it into the list
+        using (UnityWebRequest request = UnityWebRequest.Get(apiURL))
+        {
+            yield return request.SendWebRequest();
 
+            string returnedJson = "{\"Items\":" + request.downloadHandler.text + "}";
+
+            Debug.Log(returnedJson);
+            //This for some reason keeps returning null as a mod in VTOL but in a new Unity Project its fine
+            apimods = JsonHelper.FromJson<APIMod>(returnedJson);
+
+            if (apimods == null)
+                Debug.LogError("API is Null");
+        
+        onlineMods = new List<ModItem>(apimods.Length);
+            foreach (APIMod mod in apimods)
+            {
+                onlineMods.Add(new ModItem(mod.Name, mod.Description, mod.URL, mod.Version, false));
+                Debug.Log("Added mod " + mod.Name);
+            }
+            UpdateList(false);
+        }
     }
     public void OnPageChanged(ModLoader.ModLoader.Page newPage)
     {
@@ -256,6 +302,15 @@ public class SPModManager : MonoBehaviour
         //This handles the download and placing the file in the correct location
     }
 
+    public void SwitchButton()
+    {
+        onLocal = !onLocal;
+        if (onLocal)
+            FindLocalMods();
+        else
+            StartCoroutine(FindOnlineMods());
+    }
+
     public class ModSlot
     {
         public GameObject slot;
@@ -281,6 +336,8 @@ public class SPModManager : MonoBehaviour
             currentPage = 0;
         }
     }
+
+    
 }
 
 public class ModItem
@@ -312,4 +369,14 @@ public class ModItem
     {
         this.path = path;
     }
+}
+
+[Serializable]
+public class APIMod
+{
+    public string Name;
+    public string Description;
+    public string Creator;
+    public string URL;
+    public string Version;
 }

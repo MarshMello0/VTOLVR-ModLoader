@@ -193,7 +193,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             spListNextPage.interactableName = "Next Page";
             spListPreviousPage.interactableName = "Previous Page";
             spListStart.interactableName = "Start Game";
-            spListSwitch.OnInteract.AddListener(delegate { Debug.Log("Switch Button Pressed"); });
+           
             spListStart.OnInteract.AddListener(delegate { SceneManager.LoadScene(2); });
 
             SPModManager modManager = spList.AddComponent<SPModManager>();
@@ -206,6 +206,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                 spModPage.transform.GetChild(1).GetComponent<Text>(),
                 spModPage.transform.GetChild(2).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material,
                 spModPage.transform.GetChild(2).GetChild(1).GetComponent<Text>());
+            spListSwitch.OnInteract.AddListener(delegate {modManager.SwitchButton(); });
             spListNextPage.OnInteract.AddListener(delegate { modManager.NextPage(); });
             spListPreviousPage.OnInteract.AddListener(delegate { modManager.PreviousPage(); });
             //MP Pilot and Vehicle
