@@ -114,6 +114,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DiscordController.cs" />
+    <Compile Include="DiscordRpc.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="JsonHelper.cs" />
     <Compile Include="ModLoader.cs" />

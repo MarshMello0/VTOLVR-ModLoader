@@ -36,6 +36,11 @@ namespace ModLoader
         //Events
         public delegate void PageChanged(Page newPage);
         public event PageChanged onPageChanged;
+
+        //Discord
+        private DiscordController discord;
+        public string discordDetail;
+        public int loadedModsCount;
         private void Awake()
         {
             DontDestroyOnLoad(this.gameObject);
@@ -81,6 +86,9 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             SetPaths();
             CreateAssetBundle();
             StartCoroutine(WaitForScene());
+            discord = gameObject.AddComponent<DiscordController>();
+            discordDetail = "Launching Game";
+            UpdateDiscord();
         }
         private void SetPaths()
         {
@@ -105,6 +113,8 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             }
             //We should now be in the game scene
             SetInGameUI();
+            discordDetail = "In the loader world";
+            UpdateDiscord();
         }
         private void SetInGameUI()
         {
@@ -198,6 +208,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
 
             SPModManager modManager = spList.AddComponent<SPModManager>();
             modManager.assets = assets;
+            modManager.discord = gameObject.GetComponent<DiscordController>();
             modManager.modloader = this;
             modManager.SetButtons(spListNextPage.gameObject, spListPreviousPage.gameObject);
             modManager.SetModPageItems(
@@ -274,6 +285,10 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                     break;
             }
             onPageChanged(page);
+        }
+       public void UpdateDiscord()
+        {
+            discord.UpdatePresence(loadedModsCount, discordDetail);
         }
     }
 }

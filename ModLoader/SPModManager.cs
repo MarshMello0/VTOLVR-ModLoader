@@ -16,6 +16,7 @@ public class SPModManager : MonoBehaviour
 {
     public AssetBundle assets;
     public ModLoader.ModLoader modloader;
+    public DiscordController discord;
     
     //This script needs to be attached onto "List" gameobject
     private List<ModItem> localMods = new List<ModItem>();
@@ -272,6 +273,8 @@ public class SPModManager : MonoBehaviour
             loadInteractable.OnInteract.RemoveAllListeners();
             loadModText.text = "Loaded!";
             loadModMaterial.color = Color.red;
+            modloader.loadedModsCount++;
+            discord.UpdatePresence(modloader.loadedModsCount, modloader.discordDetail);
         }
         else
         {

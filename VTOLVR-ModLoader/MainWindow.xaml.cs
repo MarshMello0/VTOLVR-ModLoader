@@ -30,7 +30,7 @@ namespace VTOLVR_ModLoader
         private string continueText = "Launching Game";
 
         private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe", "ModLoader.dll", "WpfAnimatedGif.dll" };
-        private string[] neededDllFiles = new string[] {"Discord.dll"};
+        private string[] neededDLLFiles = new string[] { @"\Plugins\discord-rpc.dll" };
         public MainWindow()
         {
             InitializeComponent();
@@ -64,9 +64,9 @@ namespace VTOLVR_ModLoader
             }
 
             //Checking the Managed Folder
-            foreach (string file in neededDllFiles)
+            foreach (string file in neededDLLFiles)
             {
-                if (!File.Exists(Directory.GetParent(Directory.GetCurrentDirectory()).FullName + @"\VTOLVR_Data\Managed\" + file))
+                if (!File.Exists(Directory.GetParent(Directory.GetCurrentDirectory()).FullName + @"\VTOLVR_Data" + file))
                 {
                     MissingManagedFile(file);
                 }
