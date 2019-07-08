@@ -15,8 +15,8 @@ The mod loader now injects its self into the game so you can load mods in VR. To
 ## Mods List
 |Mod Name | Description|Version | Download Link | Author |
 |--|--|--|--|--|
-|No Gravity|Adds a basic button to disable/enable gravity|1.0 | [Download](https://github.com/MarshMello0/VTOLVR-ModLoader/raw/release/Example%20Mods/NoGravity/NoGravity.dll)| . Marsh.Mello . |
-|Console Mod|Displays the Unity Console in a sperate window|1.0 | [Download](https://github.com/MarshMello0/MarshMellos_VTOLVR_Mods/raw/master/ConsoleMod/ConsoleMod.dll)| . Marsh.Mello . |
+|No Gravity|Adds a basic button to disable/enable gravity|1.0 | Not Updated | . Marsh.Mello . |
+|Console Mod|Displays the Unity Console in a sperate window|1.0 | Not Updated | . Marsh.Mello . |
 
 ## How to create mods (Wiki is currently out of date)
 
