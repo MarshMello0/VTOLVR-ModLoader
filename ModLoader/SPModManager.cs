@@ -72,25 +72,6 @@ public class SPModManager : MonoBehaviour
     private void Start()
     {
         //modloader.onPageChanged += OnPageChanged;
-        APIMod mod1 = new APIMod();
-        mod1.Name = "No Gravity";
-        mod1.Description = @"Adds a basic button to disable\/enable gravity";
-        mod1.Creator = ". Marsh.Mello .";
-        mod1.URL = @"http:\/\/vtolapi.kevinjoosten.nl\/mods\/NoGravity.dll";
-        mod1.Version = "1.0";
-
-        APIMod mod2 = new APIMod();
-        mod2.Name = "Console Mod";
-        mod2.Description = @"Displays the Unity Console in a seperate window";
-        mod2.Creator = ". Marsh.Mello .";
-        mod2.URL = @"http:\/\/vtolapi.kevinjoosten.nl\/mods\/ConsoleMod.dll";
-        mod2.Version = "1.0";
-
-        apimods = new APIMod[] { mod1, mod2};
-        Debug.Log("Mods Lenght = " + mods.Length + " mod 1 name " + mods[0].Name );
-        string jsonoutput = JsonHelper.ToJson<APIMod>(mods);
-        Debug.Log(jsonoutput);
-
     }
 
     private void FindLocalMods()
@@ -304,6 +285,8 @@ public class SPModManager : MonoBehaviour
 
     public void SwitchButton()
     {
+        //This is getting disabled till the json issue gets fixed after release of 2.0.0
+        return;
         onLocal = !onLocal;
         if (onLocal)
             FindLocalMods();
