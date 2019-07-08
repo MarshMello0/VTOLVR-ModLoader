@@ -60,7 +60,7 @@ public class UConsole : MonoBehaviour
         output = mainWindow.transform.GetChild(1).GetComponentInChildren<Text>();
         outputTransform = output.rectTransform;
         inputfield = mainWindow.GetComponentInChildren<InputField>();
-        mainWindow.SetActive(false);
+        //mainWindow.SetActive(false);
     }
 
     private void OnEnable()

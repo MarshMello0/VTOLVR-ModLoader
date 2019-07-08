@@ -169,9 +169,9 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             SetDefaultInteractable(spButton);
             SetDefaultInteractable(mpButton);
             spButton.interactableName = "Start Singleplayer";
-            mpButton.interactableName = "Start Multiplayer";
+            mpButton.interactableName = "Not Available";
             spButton.OnInteract.AddListener(delegate { SwitchPage(Page.spList); });
-            mpButton.OnInteract.AddListener(delegate { SwitchPage(Page.mpPV); });
+            mpButton.OnInteract.AddListener(delegate { Debug.Log("Multiplayer Button was pressed"); });
             //SP Mod Page
             VRInteractable spModBack = spModPage.transform.GetChild(3).GetChild(0).gameObject.AddComponent<VRInteractable>();
             VRInteractable spModLoad = spModPage.transform.GetChild(2).GetChild(0).gameObject.AddComponent<VRInteractable>();
