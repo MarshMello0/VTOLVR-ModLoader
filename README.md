@@ -8,14 +8,9 @@ VTOL VR Mod Loader is a basic mod loader to help people get custom scripts/asset
  3. Open the folder and run VTOLVR-ModLoader.exe to launch the mod loader
 
 ## How to use the mod loader
-![The Mod Loader](https://raw.githubusercontent.com/MarshMello0/VTOLVR-ModLoader/release/VTOLVR-ModLoader/Images/Mod%20Loader.PNG)
-This mod loader is very basic, on the left you have mods which have been found inside your mods folder. On the right, there are the mods which will get loaded when you press the "Inject Mods" button. To move a mod from the unloaded to loaded and the other way round, you just use the arrows to the side.
+![The Mod Loader 2.0](https://giant.gfycat.com/AdoredInferiorIrishwolfhound.gif)
 
-Once you have moved the mods you want to load, first, make sure the game is running. There is a little shortcut under the unloaded mods which launches the game via Steam. Once the game is in the first scene on the aircraft carrier, then you can inject the mods.
-![The Aircraft Carrier where you can inject the mods](https://raw.githubusercontent.com/MarshMello0/VTOLVR-ModLoader/release/VTOLVR-ModLoader/Images/VTOL%20VR%20Main%20Menu.PNG)
-
-### WARNING, You can inject mods twice, there is no protection to stop you from doing this. 
-Just move them back to the unloaded side or close the application and reopen it if you want to load more mid-session.
+The mod loader now injects its self into the game so you can load mods in VR. To launch the game modded, all you have to press is launch and wait for the game to open. It will wait a few seconds and inject its self into the game. Then from inside the game, you can load mods in the singleplayer section.
 
 ## Mods List
 |Mod Name | Description|Version | Download Link | Author |
@@ -23,7 +18,7 @@ Just move them back to the unloaded side or close the application and reopen it 
 |No Gravity|Adds a basic button to disable/enable gravity|1.0 | [Download](https://github.com/MarshMello0/VTOLVR-ModLoader/raw/release/Example%20Mods/NoGravity/NoGravity.dll)| . Marsh.Mello . |
 |Console Mod|Displays the Unity Console in a sperate window|1.0 | [Download](https://github.com/MarshMello0/MarshMellos_VTOLVR_Mods/raw/master/ConsoleMod/ConsoleMod.dll)| . Marsh.Mello . |
 
-## How to create mods
+## How to create mods (Wiki is currently out of date)
 
 Mods are created in C# in Visual Studio using the .net framework. Creating these mods are just like creating your own script in Unity, so if you have experience in writing C# scripts in Unity you can check out my more detailed post in the [Wiki](https://github.com/MarshMello0/VTOLVR-ModLoader/wiki).
 
