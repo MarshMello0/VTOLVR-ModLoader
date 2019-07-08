@@ -39,7 +39,7 @@ namespace ModLoader
 
         //Discord
         private DiscordController discord;
-        public string discordDetail;
+        public string discordDetail, discordState;
         public int loadedModsCount;
         private void Awake()
         {
@@ -89,7 +89,53 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             discord = gameObject.AddComponent<DiscordController>();
             discordDetail = "Launching Game";
             UpdateDiscord();
+            SceneManager.sceneLoaded += SceneLoaded;
         }
+
+        private void SceneLoaded(Scene arg0, LoadSceneMode arg1)
+        {
+            string sceneName = arg0.name;
+            switch (sceneName)
+            {
+                case "LaunchSplashScene":
+                    discordDetail = "Launching Game";
+                    break;
+                case "LoadingScene":
+                    discordDetail = "Loading into mission";
+                    break;
+                case "ReadyRoom":
+                    if (loadedModsCount == 0)
+                    {
+                        discordDetail = "In Main Menu";
+                    }
+                    else
+                    {
+                        discordDetail = "In Main Menu with " + loadedModsCount + (loadedModsCount == 0 ? " mod" : " mods");
+                    }
+                    
+                    break;
+                case "Akutan":
+                    discordDetail = "Flying the " + PilotSaveManager.currentVehicle.vehicleName;
+                    discordState = "Akutan: " + PilotSaveManager.currentCampaign.campaignName + " " + PilotSaveManager.currentScenario.scenarioName;
+                    break;
+                case "CustomMapBase":
+                    discordDetail = "Flying the " + PilotSaveManager.currentVehicle.vehicleName;
+                    discordState = "CustomMap: " + PilotSaveManager.currentCampaign.campaignName + " " + PilotSaveManager.currentScenario.scenarioName;
+                    break;
+                case "VehicleConfiguration":
+                    discordDetail = "Configuring " + PilotSaveManager.currentVehicle.vehicleName;
+                    break;
+                case "SamplerScene":
+                    discordDetail = "Selecting Mods";
+                    break;
+                default:
+                    discordDetail = "In ";
+                    discordState = sceneName;
+                    break;
+            }
+            UpdateDiscord();
+        }
+
         private void SetPaths()
         {
             root = Directory.GetCurrentDirectory() + @"\VTOLVR_Modloader";
@@ -113,7 +159,6 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             }
             //We should now be in the game scene
             SetInGameUI();
-            discordDetail = "In the loader world";
             UpdateDiscord();
         }
         private void SetInGameUI()
@@ -288,7 +333,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
         }
        public void UpdateDiscord()
         {
-            discord.UpdatePresence(loadedModsCount, discordDetail);
+            discord.UpdatePresence(loadedModsCount, discordDetail, discordState);
         }
     }
 }

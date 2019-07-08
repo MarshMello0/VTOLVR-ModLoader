@@ -25,17 +25,42 @@ public class DiscordController : MonoBehaviour
     DiscordRpc.EventHandlers handlers;
     private bool connected;
 
-    public void UpdatePresence(int loadModsCount, string detail)
+    public void UpdatePresence(int loadModsCount, string detail, string state)
     {
-        presence.largeImageKey = "vtol-logo";
+        
         if (loadModsCount == 0)
-            presence.largeImageText = "Using no mods :(";
+            presence.largeImageText = "Running no mods :(";
         else
             presence.largeImageText = "Running " + loadModsCount.ToString() + (loadModsCount == 1 ? " mod" : " mods");
+
+        try
+        {
+            string vehicleName = PilotSaveManager.currentVehicle.vehicleName;
+            switch (vehicleName)
+            {
+                case "AV-42C":
+                    presence.largeImageKey = "av42c";
+                    break;
+                case "F/A-26B":
+                    presence.largeImageKey = "fa26b";
+                    break;
+                case "F-45A":
+                    presence.largeImageKey = "fa45a";
+                    break;
+                default:
+                    presence.largeImageKey = "vtol-logo";
+                    break;
+            }
+        }
+        catch (System.Exception)
+        {
+            presence.largeImageKey = "vtol-logo";
+        }
 
         presence.smallImageKey = "logo";
         presence.smallImageText = "VTOL VR Mod Loader";
         presence.details = detail;
+        presence.state = state;
         //presence.joinSecret = "MTI4NzM0OjFpMmhuZToxMjMxMjM";
 
         DiscordRpc.UpdatePresence(presence);

@@ -274,7 +274,7 @@ public class SPModManager : MonoBehaviour
             loadModText.text = "Loaded!";
             loadModMaterial.color = Color.red;
             modloader.loadedModsCount++;
-            discord.UpdatePresence(modloader.loadedModsCount, modloader.discordDetail);
+            discord.UpdatePresence(modloader.loadedModsCount, modloader.discordDetail, modloader.discordState);
         }
         else
         {
