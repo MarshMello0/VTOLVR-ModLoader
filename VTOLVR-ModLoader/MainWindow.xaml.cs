@@ -30,7 +30,7 @@ namespace VTOLVR_ModLoader
         private string continueText = "Launching Game";
 
         private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe", "ModLoader.dll", "WpfAnimatedGif.dll" };
-
+        private string[] neededDllFiles = new string[] {"Discord.dll"};
         public MainWindow()
         {
             InitializeComponent();
@@ -39,6 +39,15 @@ namespace VTOLVR_ModLoader
         }
         private void CheckFolder()
         {
+            //Checking the folder which this is in
+            string[] pathSplit = root.Split('\\');
+            if (pathSplit[pathSplit.Length - 1] != "VTOLVR_ModLoader")
+            {
+                MessageBox.Show("It seems I am not in the folder \"VTOLVR_ModLoader\", place make sure I am in there other wise the in game menu won't load","Wrong Folder");
+                Quit();
+            }
+
+            //Checking if the files we need to run are there
             foreach (string file in needFiles)
             {
                 if (!File.Exists(root + @"\" + file))
@@ -47,14 +56,30 @@ namespace VTOLVR_ModLoader
                     return;
                 }
             }
+
+            //Checking if the mods folder is there
             if (!Directory.Exists(root + modsFolder))
             {
                 Directory.CreateDirectory(root + modsFolder);
+            }
+
+            //Checking the Managed Folder
+            foreach (string file in neededDllFiles)
+            {
+                if (!File.Exists(Directory.GetParent(Directory.GetCurrentDirectory()).FullName + @"\VTOLVR_Data\Managed\" + file))
+                {
+                    MissingManagedFile(file);
+                }
             }
         }
         private void WrongFolder(string file)
         {
             MessageBox.Show("I can't seem to find " + file + " in my folder. Make sure you place me in the same folder as this file.", "Missing File");
+            Quit();
+        }
+        private void MissingManagedFile(string file)
+        {
+            MessageBox.Show("I can't seem to find " + file + " in VTOL VR > VTOLVR_Data > Managed, please make sure this file is here otherwise the mod loader won't work", "Missing File");
             Quit();
         }
 
