@@ -329,7 +329,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                     mpIPPort.SetActive(true);
                     break;
             }
-            onPageChanged(page);
+            //onPageChanged(page);
         }
        public void UpdateDiscord()
         {

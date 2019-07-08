@@ -232,10 +232,11 @@ public class SPModManager : MonoBehaviour
     public void OpenMod(ModItem item, bool isLocal)
     {
         Debug.Log("Opening Mod " + item.name);
-        modloader.SwitchPage(ModLoader.ModLoader.Page.spMod);
+        
         modTitleText.text = item.name;
         modDescriptionText.text = item.description;
         loadInteractable.OnInteract.RemoveAllListeners();
+        modloader.SwitchPage(ModLoader.ModLoader.Page.spMod);
         if (isLocal)
         {
             if (item.isLoaded)
@@ -250,9 +251,9 @@ public class SPModManager : MonoBehaviour
         }
         else
         {
-            loadModText.text = "Download";
-            loadModMaterial.color = Color.green;
-            loadInteractable.OnInteract.AddListener(delegate { DownloadMod(item); });
+            //loadModText.text = "Download";
+            //loadModMaterial.color = Color.green;
+            //loadInteractable.OnInteract.AddListener(delegate { DownloadMod(item); });
         }
 
     }
