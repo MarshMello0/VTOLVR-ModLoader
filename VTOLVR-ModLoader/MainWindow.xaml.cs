@@ -15,30 +15,39 @@ using System.IO;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using WpfAnimatedGif;
 
 namespace VTOLVR_ModLoader
 {
     public partial class MainWindow : Window
     {
+        private enum gifStates { Paused, Play, Frame }
+
         private static string modsFolder = @"\mods";
-        private static string injector = @"\smi.exe";
+        private static string injector = @"\injector.exe";
         private string root;
+        private bool continueDots = true;
+        private string continueText = "Launching Game";
 
-        private List<ModItem> unloadedMods;
-        private List<ModItem> loadedMods = new List<ModItem>();
-        private string[] needFiles = new string[] { "SharpMonoInjector.dll", "smi.exe" }; 
-
+        private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe", "ModLoader.dll", "WpfAnimatedGif.dll" };
+        private string[] neededDLLFiles = new string[] { @"\Plugins\discord-rpc.dll" };
         public MainWindow()
         {
             InitializeComponent();
             root = Directory.GetCurrentDirectory();
             CheckFolder();
-
-            FindMods();
         }
-
         private void CheckFolder()
         {
+            //Checking the folder which this is in
+            string[] pathSplit = root.Split('\\');
+            if (pathSplit[pathSplit.Length - 1] != "VTOLVR_ModLoader")
+            {
+                MessageBox.Show("It seems I am not in the folder \"VTOLVR_ModLoader\", place make sure I am in there other wise the in game menu won't load","Wrong Folder");
+                Quit();
+            }
+
+            //Checking if the files we need to run are there
             foreach (string file in needFiles)
             {
                 if (!File.Exists(root + @"\" + file))
@@ -47,115 +56,124 @@ namespace VTOLVR_ModLoader
                     return;
                 }
             }
+
+            //Checking if the mods folder is there
             if (!Directory.Exists(root + modsFolder))
             {
                 Directory.CreateDirectory(root + modsFolder);
             }
-        }
 
+            //Checking the Managed Folder
+            foreach (string file in neededDLLFiles)
+            {
+                if (!File.Exists(Directory.GetParent(Directory.GetCurrentDirectory()).FullName + @"\VTOLVR_Data" + file))
+                {
+                    MissingManagedFile(file);
+                }
+            }
+        }
         private void WrongFolder(string file)
         {
             MessageBox.Show("I can't seem to find " + file + " in my folder. Make sure you place me in the same folder as this file.", "Missing File");
-            Process.GetCurrentProcess().Kill();
+            Quit();
         }
-
-        private void FindMods()
+        private void MissingManagedFile(string file)
         {
-            DirectoryInfo folder = new DirectoryInfo(root + modsFolder);
-            FileInfo[] files = folder.GetFiles("*.dll");
-            unloadedMods = new List<ModItem>(files.Length);
-
-            foreach (FileInfo file in files)
-            {
-                unloadedMods.Add(new ModItem(file.Name));
-            }
-            UpdateLists();
-        }
-
-        private void AddMod(string name)
-        {
-            try
-            {
-                Console.WriteLine("Addding Mod: " + name);
-                ModItem mod = unloadedMods.Find(x => x.Title == name);
-                loadedMods.Add(mod);
-                unloadedMods.Remove(mod);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString(), "Error when added mod");
-            }
-            UpdateLists();
-        }
-
-        private void RemoveMod(string name)
-        {
-            try
-            {
-                Console.WriteLine("Removing Mod: " + name);
-                ModItem mod = loadedMods.Find(x => x.Title == name);
-                unloadedMods.Add(mod);
-                loadedMods.Remove(mod);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString(), "Error when removing mod");
-            }
-            UpdateLists();
-        }
-
-        private void UpdateLists()
-        {
-            UnloadedBox.ItemsSource = unloadedMods;
-            LoadedBox.ItemsSource = loadedMods;
-            UnloadedBox.Items.Refresh();
-            LoadedBox.Items.Refresh();
+            MessageBox.Show("I can't seem to find " + file + " in VTOL VR > VTOLVR_Data > Managed, please make sure this file is here otherwise the mod loader won't work", "Missing File");
+            Quit();
         }
 
 
         private void OpenGame(object sender, RoutedEventArgs e)
         {
-            Process.Start("steam://run/667970");
-        }
+            //Changing UI
+            launchButton.Visibility = Visibility.Hidden;
+            loadingText.Visibility = Visibility.Visible;
+            LoadingDots();
+            GifState(gifStates.Play);
 
-        private void InjectButton(object sender, RoutedEventArgs e)
+            //Launching the game
+            Process.Start("steam://run/667970");
+
+            //Searching For Process
+            WaitForProcess();
+
+        }
+        private async void LoadingDots()
         {
-            foreach (ModItem mod in loadedMods)
+            //This will constanly loop, but we will just change the text before it when we need to change it
+            int delay = 500;
+            loadingText.Content = continueText + ".";
+            await Task.Delay(delay);
+            loadingText.Content = continueText + "..";
+            await Task.Delay(delay);
+            loadingText.Content = continueText + "...";
+            await Task.Delay(delay);
+            if (continueDots)
+                LoadingDots();
+        }
+        private void GifState(gifStates state, int frame = 0)
+        {
+            //Changing the gif's state
+            var controller = ImageBehavior.GetAnimationController(LogoGif);
+            switch (state)
             {
-                try
-                {
-                    string start = string.Format("inject -p {0} -a {1} -n {2} -c {3} -m {4}", "vtolvr", @"mods\" + mod.Title, mod.Title.ToString().Split('.')[0], "Load", "Init");
-                    Process.Start(root + injector, start);
-                }
-                catch (Exception error)
-                {
-                    MessageBox.Show(error.ToString(), "Error when starting process");
-                }
-                UpdateLists();
+                case gifStates.Paused:
+                    controller.Pause();
+                    break;
+                case gifStates.Play:
+                    controller.Play();
+                    break;
+                case gifStates.Frame:
+                    controller.GotoFrame(frame);
+                    break;
             }
         }
-
-        private void LoadMod(object sender, RoutedEventArgs e)
+        private async void WaitForProcess()
         {
-            string mod = ((Button)sender).DataContext.ToString();
-            AddMod(mod);
+            int maxTries = 5;
+            for (int i = 1; i <= maxTries; i++)
+            {
+                //Doing 5 tries to search for the process
+                continueText = "Searching for Process";
+                await Task.Delay(5000);
 
+                if (Process.GetProcessesByName("vtolvr").Length == 1)
+                {
+                    break;
+                }
+
+                if (i == maxTries)
+                {
+                    //If we couldn't find it, go back to how it was at the start
+                    GifState(gifStates.Paused);
+                    continueText = "Launching Game";
+                    launchButton.Visibility = Visibility.Visible;
+                    loadingText.Visibility = Visibility.Hidden;
+                    MessageBox.Show("Couldn't Find VTOL VR Process");
+                    return;
+                }
+            }
+
+            //A delay just to make sure the game has fully launched,
+            continueText = "Waiting for Game";
+            await Task.Delay(10000);
+
+            //Injecting Default Mod
+            continueText = "Injecting Mod Loader";
+            InjectDefaultMod();
+            //Closing Exe
+            Quit();
         }
-
-        private void UnloadMod(object sender, RoutedEventArgs e)
+        private void InjectDefaultMod()
         {
-            string mod = ((Button)sender).DataContext.ToString();
-            RemoveMod(mod);
+            //Injecting the default mod
+            string defaultStart = string.Format("inject -p {0} -a {1} -n {2} -c {3} -m {4}", "vtolvr", "ModLoader.dll", "ModLoader", "Load", "Init");
+            Process.Start(root + injector, defaultStart);
         }
-    }
-
-    public class ModItem
-    {
-        public string Title { get; set; }
-
-        public ModItem (string Title)
+        private void Quit()
         {
-            this.Title = Title;
+            Process.GetCurrentProcess().Kill();
         }
     }
 }
