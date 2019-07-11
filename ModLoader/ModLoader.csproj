@@ -37,8 +37,17 @@
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
+    <Reference Include="DarkRift">
+      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\DarkRift.dll</HintPath>
+    </Reference>
+    <Reference Include="DarkRift.Client">
+      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\DarkRift.Client.dll</HintPath>
+    </Reference>
     <Reference Include="netstandard">
       <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\netstandard.dll</HintPath>
+    </Reference>
+    <Reference Include="SteamVR">
+      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\SteamVR.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -71,6 +80,9 @@
     <Reference Include="UnityEngine.JSONSerializeModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextCoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -112,6 +124,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.VRModule">
+      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.VRModule.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DiscordController.cs" />
@@ -119,6 +134,24 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="JsonHelper.cs" />
     <Compile Include="ModLoader.cs" />
+    <Compile Include="Multiplayer\Multiplayer.cs" />
+    <Compile Include="Multiplayer\Scripts\Console.cs" />
+    <Compile Include="Multiplayer\Scripts\NetworkingManager.cs" />
+    <Compile Include="Multiplayer\Scripts\Player Network Scripts\PlayerHandLeftNetworkedObjectReceiver.cs" />
+    <Compile Include="Multiplayer\Scripts\Player Network Scripts\PlayerHandLeftNetworkedObjectSender.cs" />
+    <Compile Include="Multiplayer\Scripts\Player Network Scripts\PlayerHandRightNetworkedObjectReceiver.cs" />
+    <Compile Include="Multiplayer\Scripts\Player Network Scripts\PlayerHandRightNetworkedObjectSender.cs" />
+    <Compile Include="Multiplayer\Scripts\Player Network Scripts\PlayerHeadNetworkedObjectReceiver.cs" />
+    <Compile Include="Multiplayer\Scripts\Player Network Scripts\PlayerHeadNetworkedObjectSender.cs" />
+    <Compile Include="Multiplayer\Scripts\Player.cs" />
+    <Compile Include="Multiplayer\Scripts\Receiver.cs" />
+    <Compile Include="Multiplayer\Scripts\Sender.cs" />
+    <Compile Include="Multiplayer\Scripts\Tags.cs" />
+    <Compile Include="Multiplayer\Scripts\UnityClient.cs" />
+    <Compile Include="Multiplayer\Scripts\Vehicle Network Scripts\AV42cNetworkedObjectReceiver.cs" />
+    <Compile Include="Multiplayer\Scripts\Vehicle Network Scripts\AV42cNetworkedObjectSender.cs" />
+    <Compile Include="Multiplayer\Scripts\Vehicle Network Scripts\FA26BNetworkedObjectReceiver.cs" />
+    <Compile Include="Multiplayer\Scripts\Vehicle Network Scripts\FA26BNetworkedObjectSender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SPModManager.cs" />
     <Compile Include="UConsole.cs" />

@@ -9,6 +9,7 @@ using UnityEngine.CrashReportHandler;
 using UnityEngine.SceneManagement;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using Steamworks;
 
 namespace ModLoader
 {
@@ -33,14 +34,13 @@ namespace ModLoader
         PoseBounds pb;
         public enum Page { warning, spmp,spMod,spList,mpPV,mpIPPort}
 
-        //Events
-        public delegate void PageChanged(Page newPage);
-        public event PageChanged onPageChanged;
-
         //Discord
         private DiscordController discord;
         public string discordDetail, discordState;
         public int loadedModsCount;
+
+        //Multiplayer
+        private MultiplayerMod multiplayer;
         private void Awake()
         {
             DontDestroyOnLoad(this.gameObject);
@@ -157,12 +157,20 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             {
                 yield return null;
             }
+
+            SteamAPI.Init();
+
+
             //We should now be in the game scene
             SetInGameUI();
             UpdateDiscord();
+
+            
         }
         private void SetInGameUI()
         {
+            //Adding Multiplayer Script
+            multiplayer = gameObject.AddComponent<MultiplayerMod>();
             //This method moves around the panel on the second scene and creates a new one
 
             GameObject equipPanel = GameObject.Find("/Platoons/CarrierPlatoon/AlliedCarrier/ControlPanel (1)/EquipPanel");
@@ -177,9 +185,6 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             GameObject startButton = equipPanelT.GetChild(0).GetChild(1).GetChild(4).gameObject;
 
             VRInteractable startButtonVR = startButton.GetComponent<VRInteractable>();
-            Debug.Log(string.Format("Radius:{0},useRect:{1},rect:{2},requireMotion:{3},requiredMotion:{4},toggle:{5}," +
-                "taporhold:{6},sqrradius:{7}", startButtonVR.radius, startButtonVR.useRect, startButtonVR.rect, startButtonVR.requireMotion
-                , startButtonVR.requiredMotion, startButtonVR.toggle, startButtonVR.tapOrHold, startButtonVR.sqrRadius));
 
             GameObject mainBG = equipPanelT.GetChild(0).GetChild(1).GetChild(0).gameObject;
             Destroy(mainBG);
@@ -224,9 +229,9 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             SetDefaultInteractable(spButton);
             SetDefaultInteractable(mpButton);
             spButton.interactableName = "Start Singleplayer";
-            mpButton.interactableName = "Not Available";
+            mpButton.interactableName = "Start Multiplayer";
             spButton.OnInteract.AddListener(delegate { SwitchPage(Page.spList); });
-            mpButton.OnInteract.AddListener(delegate { Debug.Log("Multiplayer Button was pressed"); });
+            mpButton.OnInteract.AddListener(delegate { SwitchPage(Page.mpPV); });
             //SP Mod Page
             VRInteractable spModBack = spModPage.transform.GetChild(3).GetChild(0).gameObject.AddComponent<VRInteractable>();
             VRInteractable spModLoad = spModPage.transform.GetChild(2).GetChild(0).gameObject.AddComponent<VRInteractable>();
@@ -266,17 +271,80 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             spListNextPage.OnInteract.AddListener(delegate { modManager.NextPage(); });
             spListPreviousPage.OnInteract.AddListener(delegate { modManager.PreviousPage(); });
             //MP Pilot and Vehicle
+            VRInteractable mpPVAV42 = mpPV.transform.GetChild(2).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            VRInteractable mpPVFA26 = mpPV.transform.GetChild(3).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            VRInteractable mpPVF45 = mpPV.transform.GetChild(4).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            VRInteractable pilot0 = mpPV.transform.GetChild(6).GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            VRInteractable pilot1 = mpPV.transform.GetChild(7).GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            VRInteractable pilot2 = mpPV.transform.GetChild(8).GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
             VRInteractable mpPVContinue = mpPV.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            SetDefaultInteractable(mpPVAV42);
+            SetDefaultInteractable(mpPVFA26);
+            SetDefaultInteractable(mpPVF45);
+            SetDefaultInteractable(pilot0);
+            SetDefaultInteractable(pilot1);
+            SetDefaultInteractable(pilot2);
             SetDefaultInteractable(mpPVContinue);
+            mpPVAV42.interactableName = "Select Vehicle";
+            mpPVFA26.interactableName = "Select Vehicle";
+            mpPVF45.interactableName = "Select Vehicle";
+            pilot0.interactableName = "Select Pilot";
+            pilot1.interactableName = "Select Pilot";
+            pilot2.interactableName = "Select Pilot";
             mpPVContinue.interactableName = "Continue";
+            mpPVAV42.OnInteract.AddListener(delegate { multiplayer.SwitchVehicle(MultiplayerMod.Vehicle.AV42C); });
+            mpPVFA26.OnInteract.AddListener(delegate { multiplayer.SwitchVehicle(MultiplayerMod.Vehicle.FA26B); });
+            mpPVF45.OnInteract.AddListener(delegate { multiplayer.SwitchVehicle(MultiplayerMod.Vehicle.F45A); });
             mpPVContinue.OnInteract.AddListener(delegate { SwitchPage(Page.mpIPPort); });
+
+            Console.Log("Pilot Stuff");
+            //Just loading all the pilots in so that we can check that the one they pick exists
+            PilotSaveManager.LoadPilotsFromFile();
+            Console.Log("Loaded " + PilotSaveManager.pilots.Count + " pilots");
+
+            List<PilotSave> pilots = new List<PilotSave>();
+            foreach (PilotSave pilotSave in PilotSaveManager.pilots.Values)
+            {
+                pilots.Add(pilotSave);
+            }
+            Debug.Log("Setting Pilot");
+            //Setting the pilot to the first value (would cause an error if they haven't got any pilots)
+            multiplayer.pilotName = pilots[0].pilotName;
+
+            Console.Log("Disabling Buttons");
+            //Dealing with Pilots
+            pilot0.transform.parent.parent.gameObject.SetActive(false);
+            pilot1.transform.parent.parent.gameObject.SetActive(false);
+            pilot2.transform.parent.parent.gameObject.SetActive(false);
+
+            Console.Log("Pilots count is " + pilots.Count);
+            if (pilots.Count >= 1)
+            {
+                Console.Log("1");
+                pilot0.transform.parent.parent.gameObject.SetActive(true);
+                mpPV.transform.GetChild(6).GetChild(1).GetComponent<Text>().text = pilots[0].pilotName;
+                pilot0.OnInteract.AddListener(delegate { multiplayer.pilotName = pilots[0].pilotName; ; });
+            }
+            if (pilots.Count >= 2)
+            {
+                Console.Log("2");
+                pilot1.transform.parent.parent.gameObject.SetActive(true);
+                mpPV.transform.GetChild(7).GetChild(1).GetComponent<Text>().text = pilots[1].pilotName;
+                pilot1.OnInteract.AddListener(delegate { multiplayer.pilotName = pilots[1].pilotName; });
+            }
+            if (pilots.Count >= 3)
+            {
+                Console.Log("3");
+                pilot2.transform.parent.parent.gameObject.SetActive(true);
+                mpPV.transform.GetChild(8).GetChild(1).GetComponent<Text>().text = pilots[2].pilotName;
+                pilot2.OnInteract.AddListener(delegate { multiplayer.pilotName = pilots[2].pilotName; });
+            }
+
             //MP Server IP and Port
             VRInteractable mpIPPortJoin = mpIPPort.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
             SetDefaultInteractable(mpIPPortJoin);
             mpIPPortJoin.interactableName = "Join";
-            mpIPPortJoin.OnInteract.AddListener(delegate { Debug.Log("Join Button Pressed"); });
-
-            
+            mpIPPortJoin.OnInteract.AddListener(delegate { multiplayer.Connect(); });
         }
 
         public VRInteractable SetDefaultInteractable(VRInteractable interactable)
@@ -317,10 +385,12 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                     spModPage.SetActive(true);
                     break;
                 case Page.spList:
+                    multiplayer.enabled = false;
                     sp.SetActive(true);
                     spList.SetActive(true);
                     break;
                 case Page.mpPV:
+                    discordDetail = "Playing Online";
                     mp.SetActive(true);
                     mpPV.SetActive(true);
                     break;
@@ -329,7 +399,6 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                     mpIPPort.SetActive(true);
                     break;
             }
-            //onPageChanged(page);
         }
        public void UpdateDiscord()
         {
