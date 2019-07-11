@@ -206,7 +206,7 @@ public class VTOLServerPlugin : Plugin
                     using (Message newPlayerMessage = Message.Create((ushort)Tags.SpawnPlayerTag, writer))
                     {
                         //.Where(x => x != e.Client)
-                        foreach (IClient client in ClientManager.GetAllClients().Where(x => x != e.Client))
+                        foreach (IClient client in ClientManager.GetAllClients())
                         {
                             client.SendMessage(newPlayerMessage, SendMode.Reliable);
                         }
@@ -262,7 +262,7 @@ public class VTOLServerPlugin : Plugin
                 float throttle = reader.ReadSingle();
 
                 //Sending the information to all other clients
-                //positionX += 50;
+                positionX += 50;
                 using (DarkRiftWriter writer = DarkRiftWriter.Create())
                 {
                     writer.Write(id);
@@ -288,7 +288,7 @@ public class VTOLServerPlugin : Plugin
                     using (Message newMessage = Message.Create((ushort)Tags.AV42c_General, writer))
                     {
                         //.Where(x => x != e.Client)
-                        foreach (IClient client in ClientManager.GetAllClients().Where(x => x != e.Client))
+                        foreach (IClient client in ClientManager.GetAllClients())
                         {
                             client.SendMessage(newMessage, SendMode.Unreliable);
                         }

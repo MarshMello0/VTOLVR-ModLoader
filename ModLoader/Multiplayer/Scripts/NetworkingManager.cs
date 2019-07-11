@@ -118,7 +118,7 @@ Player Count: " + playerCount.ToString();
         mod.state = MultiplayerMod.ConnectionState.Connecting;
         try
         {
-            client.Connect(IPAddress.Parse("86.181.254.209"), 4296, DarkRift.IPVersion.IPv4); //This causes an error if it doesn't connect
+            client.Connect(IPAddress.Parse("159.180.107.80"), 4296, DarkRift.IPVersion.IPv4); //This causes an error if it doesn't connect
             //If it errros it won't get to the connected method
             Connected();
         }
@@ -161,6 +161,7 @@ Player Count: " + playerCount.ToString();
         //The scene should be loaded by then
         if (syncBody)
         {
+            Console.Log("Syncing Body");
             if (XRDevice.model.Contains("Oculus"))
             {
                 Console.Log("This is a Oculus User");
@@ -192,8 +193,10 @@ Player Count: " + playerCount.ToString();
                 }
             }
         }
+        Console.Log("Creating Zero Reference");
         CreateZeroReference();
         //Finding Vehicle
+        Console.Log("Searching for players vehicle");
         FindPlayersObjects();
     }
     private void CreateZeroReference()
@@ -245,8 +248,9 @@ Player Count: " + playerCount.ToString();
                 sender.worldCenter = worldCenter;
                 Console.Log("Found the FA26B");
             }
+            vehicle.GetComponent<Health>().minDamage = float.MaxValue;//God Mode
         }
-        vehicle.GetComponent<Health>().minDamage = float.MaxValue;//God Mode
+        
         PlayerReady();
     }
     private void PlayerReady()
