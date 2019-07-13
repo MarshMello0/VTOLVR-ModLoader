@@ -31,7 +31,7 @@ namespace NetworkedObjects.Vehicles
         private float flaps; //0 = 0, 0.5 = 1, 1 = 1
         private float thrusterAngle = 90;
         private float pitch, roll, yaw;
-        private float breaks, throttle;
+        private float breaks, throttle, wheels;
 
         private float minDistance = 0.1f;
         private float minRotation = 0.1f;
@@ -104,8 +104,8 @@ namespace NetworkedObjects.Vehicles
             yaw = aeroController.input.y;
             roll = aeroController.input.z;
             breaks = aeroController.brake;
-            
 
+            wheels = aeroController.input.y;
             if (sendInfo)
                 SendVariables();
         }
@@ -129,6 +129,7 @@ namespace NetworkedObjects.Vehicles
                 writer.Write(roll);
                 writer.Write(breaks);
                 writer.Write(throttle);
+                writer.Write(wheels);
 
                 using (Message message = Message.Create((ushort)Tags.AV42c_General, writer))
                     client.SendMessage(message, SendMode.Unreliable);

@@ -6,7 +6,8 @@ using UnityEngine;
 using DarkRift;
 using DarkRift.Client;
 using DarkRift.Client.Unity;
-
+using System.Collections;
+using UnityEngine.SceneManagement;
 
 namespace NetworkedObjects.Vehicles
 {
@@ -24,18 +25,22 @@ namespace NetworkedObjects.Vehicles
         private WheelsController wheelsController;
         private AeroController aeroController;
         private TiltController tiltController;
-        private ModuleEngine[] engines;
-
+        private AIPilot aiPilot;
+        private AutoPilot autoPilot;
+        private WheelsController wheelController;
         private void Start()
         {
             wheelsController = GetComponent<WheelsController>();
             aeroController = GetComponent<AeroController>();
             tiltController = GetComponent<TiltController>();
-            engines = GetComponentsInChildren<ModuleEngine>();
 
             temp = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
             temp.position = new Vector3(0, 0, 0);
             temp.transform.localScale = new Vector3(10, 10, 10);
+
+            aiPilot = GetComponent<AIPilot>();
+            autoPilot = GetComponent<AutoPilot>();
+            wheelController = GetComponent<WheelsController>();
         }
 
         public void SetReceiver()
@@ -84,6 +89,7 @@ namespace NetworkedObjects.Vehicles
                     float roll = reader.ReadSingle();
                     float breaks = reader.ReadSingle();
                     float throttle = reader.ReadSingle();
+                    float wheels = reader.ReadSingle();
 
                     player.SetPosition(positionX, positionY, positionZ);
                     player.SetRotation(rotationX, rotationY, rotationZ);
@@ -96,6 +102,7 @@ namespace NetworkedObjects.Vehicles
                     player.roll = roll;
                     player.breaks = breaks;
                     player.throttle = throttle;
+                    player.wheels = wheels;
 
                     manager.UpdatePlayerListString();
 
@@ -120,6 +127,10 @@ namespace NetworkedObjects.Vehicles
             float flaps = player.flaps;
             float thrusterAngle = player.thrusterAngle;
             float throttle = player.throttle;
+            float wheels = player.wheels;
+
+            aiPilot.commandState = AIPilot.CommandStates.Override;
+            
             if (wheelsController.gearAnimator.GetCurrentState() == (landingGear ? GearAnimator.GearStates.Extended : GearAnimator.GearStates.Retracted))
             {
                 wheelsController.SetGear(landingGear);
@@ -131,19 +142,31 @@ namespace NetworkedObjects.Vehicles
                 tiltController.SetTiltImmediate(thrusterAngle);
             if (aeroController.input != input)
                 aeroController.input = input;
-            if (aeroController.brake != breaks)
-                aeroController.SetBrakes(breaks);
 
+
+            autoPilot.OverrideSetThrottle(throttle);
+            wheelController.SetBrakes(breaks);
+            wheelController.SetBrakeLock(-1);
+            wheelController.SetWheelSteer(wheels);
+
+            /*
             foreach (ModuleEngine engine in engines)
             {
                 engine.SetThrottle(throttle);
             }
+
+                        if (aeroController.brake != breaks)
+                aeroController.SetBrakes(breaks);
+            */
+
         }
         void OnGUI()
         {
-            if (GUI.Button(new Rect(100,100,100,100), "Say position"))
+            if (GUI.Button(new Rect(100,100,100,100), "Cam"))
             {
-                Console.Log(temp.position);
+
+                GameObject cam = new GameObject("Cam", typeof(Camera));
+                cam.transform.position = new Vector3(0,1000,0);
             }
         }
     }

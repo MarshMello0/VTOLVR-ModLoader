@@ -86,7 +86,7 @@ Player Count: " + playerCount.ToString();
             playerListString += "\n" + player.pilotName + " [" + player.id + "] : " + player.vehicle.ToString() +
                 "\nPosition:" + player.GetPosition() + " Rotation:" + player.GetRotation().eulerAngles +
                 "\nSpeed:" + player.speed + " Land Gear:" + player.landingGear + " Flaps:" + player.flaps + 
-                "\nPitch, Yaw, Roll" + player.GetPitchYawRoll() + " Breaks:" + player.breaks + " Throttle:" + player.throttle;
+                "\nPitch, Yaw, Roll" + player.GetPitchYawRoll() + " Breaks:" + player.breaks + " Throttle:" + player.throttle + " Wheels:" + player.wheels;
             if (player.vehicle == MultiplayerMod.Vehicle.AV42C)
             {
                 playerListString += "\nThrusters Angle:" + player.thrusterAngle;
