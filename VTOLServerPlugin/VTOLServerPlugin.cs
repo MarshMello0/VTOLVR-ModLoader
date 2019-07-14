@@ -37,6 +37,25 @@ public class VTOLServerPlugin : Plugin
         new Command("new","","",CreatePlayer)
     };
 
+    /// <summary>
+    /// Sends a message to everyone but the person who send in the message
+    /// </summary>
+    /// <param name="tag">The tag for the message</param>
+    /// <param name="writer">The writer which has the message</param>
+    /// <param name="e">The Messaeg Received Args of who sent the message</param>
+    /// <param name="reliable">If it is a reliable message or not</param>
+    private void MessageToEveryoneElse(ushort tag, DarkRiftWriter writer, MessageReceivedEventArgs e, bool reliable)
+    {
+        using (Message newMessage = Message.Create(tag, writer))
+        {
+            //.Where(x => x != e.Client)
+            foreach (IClient client in ClientManager.GetAllClients())
+            {
+                client.SendMessage(newMessage, (reliable ? SendMode.Reliable : SendMode.Unreliable));
+            }
+        }
+    }
+
     private void CreatePlayer(object sender, CommandEventArgs e)
     {
         //Creating a fake player for testing
@@ -189,6 +208,10 @@ public class VTOLServerPlugin : Plugin
                 ReceivedAV42CGeneral(e, message);
             else if (message.Tag == (ushort)Tags.FA26B_General)
                 ReceivedFA26BGeneral(e, message);
+            else if (message.Tag == (ushort)Tags.VehicleDeath)
+                VehicleDeath(e, message);
+            else if (message.Tag == (ushort)Tags.PlayerDeath)
+                PlayerDeath(e, message);
             //This is sending the information back to all the other clients, all movement is the same, two vector3s
             else if (message.Tag == (ushort)Tags.PlayerHandLeft_Movement || message.Tag == (ushort)Tags.PlayerHandRight_Movement
                 || message.Tag == (ushort)Tags.PlayerHead_Movement || message.Tag == (ushort)Tags.PlayerHandLeft_Rotation || message.Tag == (ushort)Tags.PlayerHandRight_Rotation
@@ -244,14 +267,7 @@ public class VTOLServerPlugin : Plugin
                     writer.Write(name);
                     writer.Write(vehicle);
 
-                    using (Message newPlayerMessage = Message.Create((ushort)Tags.SpawnPlayerTag, writer))
-                    {
-                        //.Where(x => x != e.Client)
-                        foreach (IClient client in ClientManager.GetAllClients())
-                        {
-                            client.SendMessage(newPlayerMessage, SendMode.Reliable);
-                        }
-                    }
+                    MessageToEveryoneElse((ushort)Tags.SpawnPlayerTag, writer, e, true);
                 }
 
                 //This sends backto the player who joined, everyones ID
@@ -328,14 +344,7 @@ public class VTOLServerPlugin : Plugin
                     writer.Write(throttle);
                     writer.Write(wheels);
 
-                    using (Message newMessage = Message.Create((ushort)Tags.AV42c_General, writer))
-                    {
-                        //.Where(x => x != e.Client)
-                        foreach (IClient client in ClientManager.GetAllClients())
-                        {
-                            client.SendMessage(newMessage, SendMode.Unreliable);
-                        }
-                    }
+                    MessageToEveryoneElse((ushort)Tags.AV42c_General, writer, e, false);
 
                 }
 
@@ -392,16 +401,55 @@ public class VTOLServerPlugin : Plugin
                     writer.Write(throttle);
                     writer.Write(wheels);
 
-                    using (Message newMessage = Message.Create((ushort)Tags.FA26B_General, writer))
-                    {
-                        //.Where(x => x != e.Client)
-                        foreach (IClient client in ClientManager.GetAllClients())
-                        {
-                            client.SendMessage(newMessage, SendMode.Unreliable);
-                        }
-                    }
-
+                    MessageToEveryoneElse((ushort)Tags.FA26B_General, writer, e, false);
                 }
+            }
+        }
+    }
+
+    private void VehicleDeath(MessageReceivedEventArgs e, Message message)
+    {
+        using (DarkRiftReader reader = message.GetReader())
+        {
+            while (reader.Position < reader.Length)
+            {
+                ushort id = e.Client.ID;
+                string deathMessage = reader.ReadString();
+
+                WriteEvent("[" + id + "] " + deathMessage, LogType.Info);
+
+                //Telling everyone that this person crashed
+                using (DarkRiftWriter writer = DarkRiftWriter.Create())
+                {
+                    writer.Write(id);
+                    writer.Write(deathMessage);
+
+                    MessageToEveryoneElse((ushort)Tags.VehicleDeath, writer, e, true);
+                }
+
+            }
+        }
+    }
+    private void PlayerDeath(MessageReceivedEventArgs e, Message message)
+    {
+        using (DarkRiftReader reader = message.GetReader())
+        {
+            while (reader.Position < reader.Length)
+            {
+                ushort id = e.Client.ID;
+                string deathMessage = reader.ReadString();
+
+                WriteEvent("[" + id + "] " + deathMessage, LogType.Info);
+
+                //Telling everyone that this person crashed
+                using (DarkRiftWriter writer = DarkRiftWriter.Create())
+                {
+                    writer.Write(id);
+                    writer.Write(deathMessage);
+
+                    MessageToEveryoneElse((ushort)Tags.PlayerDeath, writer, e, true);
+                }
+
             }
         }
     }

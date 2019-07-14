@@ -32,6 +32,10 @@ public class NetworkingManager : MonoBehaviour
     //Settings - These are settings which should be changed only when doing an update to the mod, so everyone has the same
     private bool syncBody = false;
 
+    //Things used for other features
+    private Health vehicleHeath; //Used to check if the vehicle crashed and died
+    private BlackoutEffect blackoutEffect; //Used to check if the player died by G Forces
+
     private void Update()
     {
         if (false)
@@ -81,6 +85,8 @@ Player Count: " + playerCount.ToString();
         //Finding Vehicle
         Console.Log("Searching for players vehicle");
         yield return StartCoroutine(FindPlayersObjects());
+        Console.Log("Searching for players scripts");
+        yield return StartCoroutine(StorePlayersScripts());
         Console.Log("Done the Start Procedure, telling server we are ready");
         PlayerReady();
     }
@@ -190,9 +196,22 @@ Player Count: " + playerCount.ToString();
                 sender.worldCenter = worldCenter;
                 Console.Log("Found the FA26B");
             }
-            vehicle.GetComponent<Health>().minDamage = float.MaxValue;//God Mode
+            //vehicle.GetComponent<Health>().minDamage = float.MaxValue;//God Mode
         }
 
+        yield break;
+    }
+    private IEnumerator StorePlayersScripts()
+    {
+        //This is finding and storing scripts which will be used later
+        GameObject vehicle = GameObject.Find(mod.vehicle == MultiplayerMod.Vehicle.AV42C ? "VTOL4(Clone)" : "FA-26B(Clone)");
+        if (vehicle)
+        {
+            vehicleHeath = vehicle.GetComponent<Health>();
+            vehicleHeath.OnDeath.AddListener(VehicleLocalDeath);
+            blackoutEffect = vehicle.GetComponentInChildren<BlackoutEffect>();
+            blackoutEffect.OnAccelDeath.AddListener(PlayerLocalDeath);
+        }
         yield break;
     }
     private void PlayerReady()
@@ -222,6 +241,12 @@ Player Count: " + playerCount.ToString();
                 ushort tag = (ushort)message.Tag;
                 switch (tag)
                 {
+                    case (ushort)Tags.PlayerDeath:
+                        PlayerNetworkDeath(reader);
+                        break;
+                    case (ushort)Tags.VehicleDeath:
+                        VehicleNetworkDeath(reader);
+                        break;
                     case (ushort)Tags.SpawnPlayerTag:
                         ReceivedNewPlayer(reader);
                         break;
@@ -370,5 +395,58 @@ Player Count: " + playerCount.ToString();
 
         Console.Log(string.Format("Spawned {0} [{1}] with vehicle {2}", pilotName, id, vehicle.ToString()));
         FlightLogger.Log(pilotName + " has joined the game using " + vehicle.ToString());
+    }
+
+    private void VehicleLocalDeath()
+    {
+        //This runs when the vehicle took too much damage and dies
+
+        //Telling the server that we died
+        using (DarkRiftWriter writer = DarkRiftWriter.Create())
+        {
+            string arg = vehicleHeath.killedByActor ? vehicleHeath.killedByActor.actorName : "Environment";
+            writer.Write(string.Format("{0} was killed by {1}. {2}",mod.pilotName,arg, vehicleHeath.killMessage));
+            using (Message message = Message.Create((ushort)Tags.VehicleDeath,writer))
+            {
+                client.SendMessage(message, SendMode.Reliable);
+            }
+        }
+    }
+    private void VehicleNetworkDeath(DarkRiftReader reader)
+    {
+        //This runs when someone on the network crashed
+        while (reader.Position < reader.Length)
+        {
+            ushort id = reader.ReadUInt16();
+            string deathMessage = reader.ReadString();
+
+            FlightLogger.Log(deathMessage);
+        }
+    }
+
+    private void PlayerLocalDeath()
+    {
+        //This runs when the player dies by G Forces
+        using (DarkRiftWriter writer = DarkRiftWriter.Create())
+        {
+            writer.Write(string.Format("{0} was killed by G Force", mod.pilotName));
+
+            using (Message message = Message.Create((ushort)Tags.PlayerDeath, writer))
+            {
+                client.SendMessage(message, SendMode.Reliable);
+            }
+        }
+    }
+
+    private void PlayerNetworkDeath(DarkRiftReader reader)
+    {
+        //This runs when someone on the network player died
+        while (reader.Position < reader.Length)
+        {
+            ushort id = reader.ReadUInt16();
+            string deathMessage = reader.ReadString();
+
+            FlightLogger.Log(deathMessage);
+        }
     }
 }

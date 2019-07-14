@@ -7,5 +7,5 @@
     ServerInfo,
     DestroyPlayer,
     AV42c_General,FA26B_General,
-    LobbyInfo
+    LobbyInfo, VehicleDeath, PlayerDeath
 }

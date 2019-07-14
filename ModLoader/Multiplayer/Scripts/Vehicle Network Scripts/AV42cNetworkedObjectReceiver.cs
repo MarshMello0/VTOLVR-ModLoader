@@ -26,6 +26,7 @@ namespace NetworkedObjects.Vehicles
         private AIPilot aiPilot;
         private AutoPilot autoPilot;
         private WheelsController wheelController;
+        private Health health;
         private void Start()
         {
             gameObject.AddComponent<FloatingOriginTransform>();
@@ -35,6 +36,7 @@ namespace NetworkedObjects.Vehicles
             aiPilot = GetComponent<AIPilot>();
             autoPilot = GetComponent<AutoPilot>();
             wheelController = GetComponent<WheelsController>();
+            health = GetComponent<Health>();
         }
 
         public void SetReceiver()
@@ -52,6 +54,9 @@ namespace NetworkedObjects.Vehicles
                 {
                     case (ushort)Tags.AV42c_General:
                         AV42CGeneralReceived(message.GetReader());
+                        break;
+                    case (ushort)Tags.VehicleDeath:
+                        VehicleNetworkDeath(message.GetReader());
                         break;
                 }
             }
@@ -136,6 +141,24 @@ namespace NetworkedObjects.Vehicles
             wheelController.SetBrakes(breaks);
             wheelController.SetBrakeLock(-1);
             wheelController.SetWheelSteer(wheels);
+        }
+
+        private void VehicleNetworkDeath(DarkRiftReader reader)
+        {
+            //This runs when someone on the network crashed
+            while (reader.Position < reader.Length)
+            {
+                ushort id = reader.ReadUInt16();
+                
+                if (id == this.id)
+                {
+                    string deathMessage = reader.ReadString();
+                    health.Kill();
+                }
+                else
+                    return;
+            }
+            
         }
     }
 }
