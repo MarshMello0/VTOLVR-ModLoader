@@ -365,88 +365,12 @@ Player Count: " + playerCount.ToString();
 
         //Spawning the Vehicle
 
-        GameObject vehicleGO = Instantiate(vehicle == MultiplayerMod.Vehicle.AV42C ? av42cPrefab : fa26bPrefab); //Probally cause null errors
+        GameObject vehicleGO = Instantiate(vehicle == MultiplayerMod.Vehicle.AV42C ? av42cPrefab : fa26bPrefab);
+        vehicleGO.GetComponent<AIPilot>().startLanded = true;
         vehicleGO.transform.position += new Vector3(0, 10, 0);
         Console.Log("Enabling God Mode");
         vehicleGO.GetComponent<Health>().minDamage = float.MaxValue; //God Mode for this vehicle
-
         
-
-        try
-        {
-            /*
-            vehicleGO.GetComponent<AIAircraftSpawn>().enabled = false;
-            vehicleGO.GetComponent<Actor>().enabled = false;
-            vehicleGO.GetComponent<Health>().enabled = false;
-            vehicleGO.GetComponent<SimpleDrag>().enabled = false;
-            vehicleGO.GetComponent<MissileDetector>().enabled = false;
-            vehicleGO.GetComponent<VehicleFireDeath>().enabled = false;
-            vehicleGO.GetComponent<ChaffCountermeasure>().enabled = false;
-            vehicleGO.GetComponent<CountermeasureManager>().enabled = false;
-            vehicleGO.GetComponent<Tailhook>().enabled = false;
-            vehicleGO.GetComponent<AeroController>().enabled = false;
-            vehicleGO.GetComponent<RCSController>().enabled = false;
-            vehicleGO.GetComponent<FuelTank>().enabled = false;
-            vehicleGO.GetComponent<FlareCountermeasure>().enabled = false;
-            vehicleGO.GetComponent<MassUpdater>().enabled = false;
-            vehicleGO.GetComponent<FlightInfo>().enabled = false;
-            vehicleGO.GetComponent<AudioUpdateModeSetter>().enabled = false;
-            vehicleGO.GetComponent<WeaponManager>().enabled = false;
-            vehicleGO.GetComponent<FlightAssist>().enabled = false;
-            vehicleGO.GetComponent<VehiclePart>().enabled = false;
-            vehicleGO.GetComponent<AirBrakeController>().enabled = false;
-            vehicleGO.GetComponent<TiltController>().enabled = false;
-            vehicleGO.GetComponent<AutoPilot>().enabled = false;
-            vehicleGO.GetComponent<AirFormationLeader>().enabled = false;
-            vehicleGO.GetComponent<AIPilot>().enabled = false;
-            vehicleGO.GetComponent<KinematicPlane>().enabled = false;
-            vehicleGO.GetComponent<AIPlaneConfigurator>().enabled = false;
-            vehicleGO.GetComponent<WheelsController>().enabled = false;
-            vehicleGO.GetComponent<VTOLAutoPilot>().enabled = false;
-            vehicleGO.GetComponent<LODBase>().enabled = false;
-            vehicleGO.GetComponent<LODRenderer>().enabled = false;
-            vehicleGO.GetComponent<LODObject>().enabled = false;
-            vehicleGO.GetComponent<AudioUpdateModeSetter>().enabled = false;
-            vehicleGO.GetComponent<WingMaster>().enabled = false;
-            vehicleGO.GetComponent<RadarCrossSection>().enabled = false;
-            */
-            /*
-            Console.Log("Searching for Colldiers on vehicle");
-
-            BoxCollider[] cols = vehicleGO.GetComponentsInChildren(typeof(BoxCollider)) as BoxCollider[];
-
-            foreach (Collider collider in cols)
-            {
-                try
-                {
-                    collider.enabled = false;
-                    Console.Log("Disabled collider on " + collider.name);
-                }
-                catch (Exception e)
-                {
-                    Console.Log("Failed to disable collider " + e.Message);
-                }
-            }
-            Console.Log("Trying to get Rigidbody");
-            vehicleGO.GetComponent<Rigidbody>().isKinematic = true;
-            */
-        }
-        catch (Exception e)
-        {
-            Console.Log("Error: " + e.Message);
-        }
-
-
-
-        // Spawning Cube
-        /*
-        Console.Log("Spawning New Players Body");
-        GameObject vehicleGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        vehicleGO.GetComponent<BoxCollider>().enabled = false;
-        vehicleGO.transform.localScale = new Vector3(10, 10, 10);
-        vehicleGO.AddComponent<FloatingOriginTransform>();
-        */
-
         vehicleGO.name = "[Multiplayer] Player: " + pilotName;
 
         if (vehicle == MultiplayerMod.Vehicle.AV42C)

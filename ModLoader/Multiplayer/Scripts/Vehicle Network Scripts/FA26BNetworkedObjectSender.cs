@@ -19,6 +19,7 @@ namespace NetworkedObjects.Vehicles
         private FlightInfo flightInfo;
         private WheelsController wheelsController;
         private AeroController aeroController;
+        private VRThrottle vRThrottle;
 
         //Information which gets sent over the network 
         //(These variables are also the last sent ones over the network which is compaired in CheckVariabes() )
@@ -27,6 +28,8 @@ namespace NetworkedObjects.Vehicles
         private float speed = 0;
         private bool landingGear = true;
         private float flaps; //0 = 0, 0.5 = 1, 1 = 1
+        private float pitch, roll, yaw;
+        private float breaks, throttle, wheels;
 
         private float minDistance = 0.1f;
         private float minRotation = 0.1f;
@@ -36,6 +39,7 @@ namespace NetworkedObjects.Vehicles
             flightInfo = GetComponent<FlightInfo>();
             wheelsController = GetComponent<WheelsController>();
             aeroController = GetComponent<AeroController>();
+            vRThrottle = gameObject.GetComponentInChildren<VRThrottle>();
         }
 
         private void Update()
@@ -76,8 +80,12 @@ namespace NetworkedObjects.Vehicles
 
             landingGear = LandingGearState();
 
-
             flaps = aeroController.flaps;
+
+            pitch = aeroController.input.x;
+            yaw = aeroController.input.y;
+            roll = aeroController.input.z;
+            breaks = aeroController.brake;
 
             if (sendInfo)
                 SendVariables();
@@ -96,6 +104,12 @@ namespace NetworkedObjects.Vehicles
                 writer.Write(speed);
                 writer.Write(landingGear);
                 writer.Write(flaps);
+                writer.Write(pitch);
+                writer.Write(yaw);
+                writer.Write(roll);
+                writer.Write(breaks);
+                writer.Write(throttle);
+                writer.Write(wheels);
 
                 using (Message message = Message.Create((ushort)Tags.FA26B_General, writer))
                     client.SendMessage(message, SendMode.Unreliable);

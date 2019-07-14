@@ -19,10 +19,8 @@ namespace NetworkedObjects.Vehicles
         public Player player;
         public ushort id;
         public bool isAI;
-        private Transform temp;
 
         //Classes we use to set the information
-        private WheelsController wheelsController;
         private AeroController aeroController;
         private TiltController tiltController;
         private AIPilot aiPilot;
@@ -30,14 +28,10 @@ namespace NetworkedObjects.Vehicles
         private WheelsController wheelController;
         private void Start()
         {
-            wheelsController = GetComponent<WheelsController>();
+            gameObject.AddComponent<FloatingOriginTransform>();
+
             aeroController = GetComponent<AeroController>();
             tiltController = GetComponent<TiltController>();
-
-            temp = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
-            temp.position = new Vector3(0, 0, 0);
-            temp.transform.localScale = new Vector3(10, 10, 10);
-
             aiPilot = GetComponent<AIPilot>();
             autoPilot = GetComponent<AutoPilot>();
             wheelController = GetComponent<WheelsController>();
@@ -106,11 +100,8 @@ namespace NetworkedObjects.Vehicles
 
                     manager.UpdatePlayerListString();
 
-                    temp.position = worldCenter.position - new Vector3(positionX, positionY, positionZ);
-                    temp.rotation = Quaternion.Euler(rotationX, rotationY, rotationZ);
-
-                    //transform.position = worldCenter.position - new Vector3(positionX, positionY, positionZ);
-                    //transform.rotation = Quaternion.Euler(rotationX, rotationY, rotationZ);
+                    transform.position = (worldCenter.position - new Vector3(positionX, positionY, positionZ)) + new Vector3(0,0.5f,0);
+                    transform.rotation = Quaternion.Euler(rotationX, rotationY, rotationZ);
 
                     UpdateAI();
                 }
@@ -130,11 +121,8 @@ namespace NetworkedObjects.Vehicles
             float wheels = player.wheels;
 
             aiPilot.commandState = AIPilot.CommandStates.Override;
-            
-            if (wheelsController.gearAnimator.GetCurrentState() == (landingGear ? GearAnimator.GearStates.Extended : GearAnimator.GearStates.Retracted))
-            {
-                wheelsController.SetGear(landingGear);
-            }
+
+            //wheelsController.SetGear(landingGear);
 
             if (aeroController.flaps != flaps)
                 aeroController.SetFlaps(flaps);
@@ -148,28 +136,6 @@ namespace NetworkedObjects.Vehicles
             wheelController.SetBrakes(breaks);
             wheelController.SetBrakeLock(-1);
             wheelController.SetWheelSteer(wheels);
-
-            /*
-            foreach (ModuleEngine engine in engines)
-            {
-                engine.SetThrottle(throttle);
-            }
-
-                        if (aeroController.brake != breaks)
-                aeroController.SetBrakes(breaks);
-            */
-
-        }
-        void OnGUI()
-        {
-            if (GUI.Button(new Rect(100,100,100,100), "Cam"))
-            {
-
-                GameObject cam = new GameObject("Cam", typeof(Camera));
-                cam.transform.position = new Vector3(0,1000,0);
-            }
         }
     }
-
-
 }

@@ -320,10 +320,15 @@ public class VTOLServerPlugin : Plugin
                 bool landingGear = reader.ReadBoolean();
                 float flaps = reader.ReadSingle();
 
+                float pitch = reader.ReadSingle();
+                float yaw = reader.ReadSingle();
+                float roll = reader.ReadSingle();
+                float breaks = reader.ReadSingle();
+                float throttle = reader.ReadSingle();
+                float wheels = reader.ReadSingle();
+
                 //Sending the information to all other clients
-
-
-                //positionX += 50;
+                positionX += 50;
                 using (DarkRiftWriter writer = DarkRiftWriter.Create())
                 {
                     writer.Write(id);
@@ -339,10 +344,17 @@ public class VTOLServerPlugin : Plugin
                     writer.Write(landingGear);
                     writer.Write(flaps);
 
+                    writer.Write(pitch);
+                    writer.Write(yaw);
+                    writer.Write(roll);
+                    writer.Write(breaks);
+                    writer.Write(throttle);
+                    writer.Write(wheels);
+
                     using (Message newMessage = Message.Create((ushort)Tags.FA26B_General, writer))
                     {
                         //.Where(x => x != e.Client)
-                        foreach (IClient client in ClientManager.GetAllClients().Where(x => x != e.Client))
+                        foreach (IClient client in ClientManager.GetAllClients())
                         {
                             client.SendMessage(newMessage, SendMode.Unreliable);
                         }
