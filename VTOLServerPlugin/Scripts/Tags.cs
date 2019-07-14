@@ -6,5 +6,6 @@
     PlayerHead_Movement, PlayerHead_Rotation,
     ServerInfo,
     DestroyPlayer,
-    AV42c_General, FA26B_General
+    AV42c_General, FA26B_General,
+    LobbyInfo
 }

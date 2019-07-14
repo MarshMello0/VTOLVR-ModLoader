@@ -30,9 +30,9 @@ namespace ModLoader
         private AssetBundle assets;
 
         //UI Objects
-        GameObject warningPage, spmp, sp, mp, spModPage, spList, mpPV, mpIPPort;
+        GameObject warningPage, spmp, sp, mp, spModPage, spList, mpPV, mpIPPort, mpServerInfo;
         PoseBounds pb;
-        public enum Page { warning, spmp,spMod,spList,mpPV,mpIPPort}
+        public enum Page { warning, spmp,spMod,spList,mpPV,mpIPPort, mpServerInfo}
 
         //Discord
         private DiscordController discord;
@@ -171,6 +171,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
         {
             //Adding Multiplayer Script
             multiplayer = gameObject.AddComponent<MultiplayerMod>();
+            multiplayer.modLoader = this;
             //This method moves around the panel on the second scene and creates a new one
 
             GameObject equipPanel = GameObject.Find("/Platoons/CarrierPlatoon/AlliedCarrier/ControlPanel (1)/EquipPanel");
@@ -208,6 +209,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             spList = sp.transform.GetChild(1).gameObject;
             mpPV = mp.transform.GetChild(0).gameObject;
             mpIPPort = mp.transform.GetChild(1).gameObject;
+            mpServerInfo = mp.transform.GetChild(2).gameObject;
 
             //Setting PoseBounds
             RectTransform canvasRect = canvasT.GetComponent<RectTransform>();
@@ -343,8 +345,20 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             //MP Server IP and Port
             VRInteractable mpIPPortJoin = mpIPPort.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
             SetDefaultInteractable(mpIPPortJoin);
-            mpIPPortJoin.interactableName = "Join";
-            mpIPPortJoin.OnInteract.AddListener(delegate { multiplayer.Connect(); });
+            mpIPPortJoin.interactableName = "Join Lobby";
+            mpIPPortJoin.OnInteract.AddListener(delegate { multiplayer.ConnectToServer(); });
+
+            //MP Server Info
+            VRInteractable mpInfoJoin = mpServerInfo.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            VRInteractable mpInfoBack = mpServerInfo.transform.GetChild(1).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            SetDefaultInteractable(mpInfoJoin);
+            SetDefaultInteractable(mpInfoBack);
+            mpInfoJoin.interactableName = "Join Game";
+            mpInfoBack.interactableName = "Back";
+            mpInfoJoin.OnInteract.AddListener(delegate { multiplayer.JoinGame(); });
+            mpInfoBack.OnInteract.AddListener(delegate { multiplayer.client.Disconnect(); });
+
+            multiplayer.serverInfoText = mpServerInfo.transform.GetChild(2).GetComponent<Text>();
         }
 
         public VRInteractable SetDefaultInteractable(VRInteractable interactable)
@@ -371,7 +385,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             spList.SetActive(false);
             mpPV.SetActive(false);
             mpIPPort.SetActive(false);
-
+            mpServerInfo.SetActive(false);
             switch (page)
             {
                 case Page.warning:
@@ -398,7 +412,13 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                     mp.SetActive(true);
                     mpIPPort.SetActive(true);
                     break;
+                case Page.mpServerInfo:
+                    mp.SetActive(true);
+                    mpServerInfo.SetActive(true);
+                    break;
             }
+
+            Console.Log("Switched Page to " + page.ToString());
         }
        public void UpdateDiscord()
         {

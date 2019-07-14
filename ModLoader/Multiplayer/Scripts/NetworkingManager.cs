@@ -16,7 +16,7 @@ public class NetworkingManager : MonoBehaviour
 {
     //This handles all of the multiplayer code in the game scene
 
-    private UnityClient client;
+    public UnityClient client;
     public MultiplayerMod mod;
 
     //These are things used to spawn other clients in and update them
@@ -32,51 +32,15 @@ public class NetworkingManager : MonoBehaviour
     //Settings - These are settings which should be changed only when doing an update to the mod, so everyone has the same
     private bool syncBody = false;
 
-    private void Start()
-    {
-        client = gameObject.AddComponent<UnityClient>();
-        client.MessageReceived += MessageReceived;
-        client.Disconnected += Disconnected;
-
-        ConnectToServer();
-    }
     private void Update()
     {
-        if (mod.state == MultiplayerMod.ConnectionState.Connected)
+        if (false)
         {
             //If the client is connected we want to update this information on the main screen
             debugInfo = @"Multiplayer Info
 Server Name: " + serverName + @"
 Player Count: " + playerCount.ToString();
         }
-    }
-    private void OnGUI()
-    {
-        //Displaying different UI at different states
-        switch (mod.state)
-        {
-            case MultiplayerMod.ConnectionState.Connecting:
-                GUIConnecting();
-                break;
-            case MultiplayerMod.ConnectionState.Connected:
-                GUIConnected();
-                break;
-            case MultiplayerMod.ConnectionState.Failed:
-                GUIFailed();
-                break;
-        }
-    }
-    private void GUIConnecting()
-    {
-        GUI.Label(new Rect(0, 0, Screen.width, Screen.height), "Connecting to Server... \n(The game will freeze if it can't find it, but will come back and responce after it failed)");
-    }
-    private void GUIConnected()
-    {
-        GUI.Label(new Rect(0, 0, Screen.width, Screen.height), "Connected \n" + debugInfo + "\n" + playerListString);
-    }
-    private void GUIFailed()
-    {
-        GUI.Label(new Rect(0, 0, 100, 20), "Failed Connecting, please restart your game");
     }
     public void UpdatePlayerListString()
     {
@@ -94,44 +58,9 @@ Player Count: " + playerCount.ToString();
             
         }
     }
-    private void Disconnected(object sender, DisconnectedEventArgs e)
-    {
-        Console.Log("Disconnecting");
 
-        Receiver[] receivers = FindObjectsOfType<Receiver>();
-        Console.Log("Receivers Count:" + receivers.Length);
-        for (int i = 0; i < receivers.Length; i++)
-        {
-            receivers[i].DestoryReceiver();
-        }
-
-        Sender[] senders = FindObjectsOfType<Sender>();
-        Console.Log("Senders Count:" + senders.Length);
-        for (int i = 0; i < senders.Length; i++)
-        {
-            Destroy(senders[i].gameObject);
-        }
-        Console.Log("Disconnected");
-    }
-    private void ConnectToServer()
+    public void StartProcedure()
     {
-        mod.state = MultiplayerMod.ConnectionState.Connecting;
-        try
-        {
-            client.Connect(IPAddress.Parse("159.180.107.80"), 4296, DarkRift.IPVersion.IPv4); //This causes an error if it doesn't connect
-            //If it errros it won't get to the connected method
-            Connected();
-        }
-        catch (Exception e)
-        {
-            Console.Log("Failed to Connect to server \n" + e.Message);
-            mod.state = MultiplayerMod.ConnectionState.Failed;
-        }
-        
-    }
-    private void Connected()
-    {
-        mod.state = MultiplayerMod.ConnectionState.Connected;
         SetPrefabs();
         StartCoroutine(DelayFindBody());
     }
@@ -270,7 +199,7 @@ Player Count: " + playerCount.ToString();
             }
         }
     }
-    private void MessageReceived(object sender, MessageReceivedEventArgs e)
+    public void MessageReceived(object sender, MessageReceivedEventArgs e)
     {
         using (Message message = e.GetMessage())
         {

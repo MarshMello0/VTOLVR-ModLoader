@@ -5,68 +5,103 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
 using Steamworks;
+using DarkRift;
+using DarkRift.Client;
+using DarkRift.Client.Unity;
+using System.Net;
+using UnityEngine.UI;
 
 public class MultiplayerMod : MonoBehaviour
 {
     //This is the state which the client is currently in
-    public enum ConnectionState { Offline, Loading, Connecting, Connected, Failed }
+    public enum ConnectionState { Offline, Connecting, Lobby, Loading, InGame }
     public ConnectionState state = ConnectionState.Offline;
 
     //This is the information about what the player has chosen
     public enum Vehicle { FA26B, AV42C,F45A }
     public Vehicle vehicle = Vehicle.AV42C;
     public string pilotName = "Pilot Name";
-    private void OnGUI()
+    
+
+    public UnityClient client { private set; get; }
+    public ModLoader.ModLoader modLoader;
+    public Text serverInfoText;
+
+    private string currentMap;
+    private void Start()
     {
-        //Displaying different UI at different states
-        switch (state)
+        client = gameObject.AddComponent<UnityClient>();
+        client.MessageReceived += MessageReceived;
+        client.Disconnected += Disconnected;
+    }
+
+    public void ConnectToServer(string ip = "159.180.107.80", int port = 4296)
+    {
+        state = ConnectionState.Connecting;
+        try
         {
-            case ConnectionState.Offline:
-                GUIOffline();
-                break;
-            case ConnectionState.Loading:
-                GUILoading();
-                break;
+            //This causes an error if it doesn't connect
+            client.Connect(IPAddress.Parse(ip), port, DarkRift.IPVersion.IPv4);
+
+        }
+        catch
+        {
+            //Failed to connect
+            return;
+        }
+
+        modLoader.SwitchPage(ModLoader.ModLoader.Page.mpServerInfo);
+    }
+
+    private void MessageReceived(object sender, MessageReceivedEventArgs e)
+    {
+        //This should only need to handle one message, 
+        //which is displaying the info about the server to the user
+        using (Message message = e.GetMessage())
+        {
+            using (DarkRiftReader reader = message.GetReader())
+            {
+                ushort tag = (ushort)message.Tag;
+                switch (tag)
+                {
+                    case (ushort)Tags.LobbyInfo:
+                        while (reader.Position < reader.Length)
+                        {
+                            string serverName = reader.ReadString();
+                            string mapName = reader.ReadString();
+                            int playerCount = reader.ReadInt32();
+                            int maxPlayerCount = reader.ReadInt32();
+                            string playersNames = reader.ReadString();
+
+                            currentMap = mapName;
+                            serverInfoText.text = "Name: " + serverName + "\nMap: " + mapName
+                                + "\nPlayers: " + playerCount + "/" + maxPlayerCount + "\n"
+                                + playersNames;
+
+                            state = ConnectionState.Lobby;
+                        }
+                        break;
+                }
+
+            }
         }
     }
 
-    public void SwitchVehicle(Vehicle newVehicle)
+    private void Disconnected(object sender, DisconnectedEventArgs e)
     {
-        vehicle = newVehicle;
-        //Changing the buttons colours
-        switch (newVehicle)
-        {
-            case Vehicle.AV42C:
-                Console.Log("Switched player's vehicle to AV-42C");
-                break;
-            case Vehicle.F45A:
-                Console.Log("Switched player's vehicle to F-45A");
-                break;
-            case Vehicle.FA26B:
-                Console.Log("Switched player's vehicle to F/A-26B");
-                break;
-        }
+        //When we press the button to go back, we disconnect then once fully disconnected we can switch page
+        if (modLoader)
+            modLoader.SwitchPage(ModLoader.ModLoader.Page.mpIPPort);
+        currentMap = "NULL";
     }
-    private void GUIOffline()
+
+    public void JoinGame()
     {
-        GUI.Label(new Rect(0, 0, 100, 20), "Offline");
+        StartCoroutine(JoinGameEnumerator());
     }
-    private void GUILoading()
-    {
-        GUI.Label(new Rect(0, 0, 100, 20), "Loading...");
-    }
-    private bool CheckIfPilotExists(string name)
-    {
-        return PilotSaveManager.pilots.ContainsKey(name);
-    }
-    public void Connect()
-    {
-        StartCoroutine(LoadLevel());
-    }
-    private IEnumerator LoadLevel()
+    private IEnumerator JoinGameEnumerator()
     {
         state = ConnectionState.Loading;
-        Console.Log("Connection State == Loading");
         VTMapManager.nextLaunchMode = VTMapManager.MapLaunchModes.Scenario;
         LoadingSceneController.LoadScene(7);
 
@@ -131,6 +166,29 @@ public class MultiplayerMod : MonoBehaviour
         }
 
         //Adding the networking script to the game which will handle all of the other stuff
-        gameObject.AddComponent<NetworkingManager>().mod = this;
+        NetworkingManager nm = gameObject.AddComponent<NetworkingManager>();
+        nm.mod = this;
+        nm.client = client;
+        nm.StartProcedure();
+        client.MessageReceived -= MessageReceived;// Removing multiplayer.cs one as its not needed any more
+        client.MessageReceived += nm.MessageReceived;
     }
+    public void SwitchVehicle(Vehicle newVehicle)
+    {
+        vehicle = newVehicle;
+        //Changing the buttons colours
+        switch (newVehicle)
+        {
+            case Vehicle.AV42C:
+                Console.Log("Switched player's vehicle to AV-42C");
+                break;
+            case Vehicle.F45A:
+                Console.Log("Switched player's vehicle to F-45A");
+                break;
+            case Vehicle.FA26B:
+                Console.Log("Switched player's vehicle to F/A-26B");
+                break;
+        }
+    }
+    
 }

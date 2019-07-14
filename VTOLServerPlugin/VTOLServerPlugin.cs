@@ -17,26 +17,71 @@ public class VTOLServerPlugin : Plugin
 
     //Sever Info
     private string ServerName;
+    private string MapName;
     private int PlayerCount;
+    private int MaxPlayerCount;
 
 
     public VTOLServerPlugin(PluginLoadData pluginLoadData) : base(pluginLoadData)
     {
         ServerName = "VTOL VR Dedicated Server";
+        MapName = "Akutan";
+        MaxPlayerCount = 100;
         ClientManager.ClientDisconnected += ClientDisconnected;
-        ClientManager.ClientConnected += ClientFirstConnect;
-    }
-    private void ClientFirstConnect(object sender, ClientConnectedEventArgs e)
-    {
-        //Just got to add the listern when the first connect
-        e.Client.MessageReceived += ClientMessageReceived;
+        ClientManager.ClientConnected += ClientJoinedLobby;
     }
     public override Command[] Commands => new Command[]
     {
         new Command("set", "Sets variables in the server", "set VariableToChange", SetSettings),
-        new Command("players", "Says how many players there are", "players", Players),
-        new Command("playersinfo", "Displays all the information stored about the players","playersinfo", PlayersInfo)
+        new Command("playersinfo", "Displays all the information stored about the players","playersinfo", PlayersInfo),
+        new Command("new","","",CreatePlayer)
     };
+
+    private void CreatePlayer(object sender, CommandEventArgs e)
+    {
+        //Creating a fake player for testing
+        Player newPlayer = new Player(999, null, "", "Player(" + (PlayerCount + 1) + ")");
+        players.Add(newPlayer);
+        PlayerCount++;
+        WriteEvent("Added Fake Player", LogType.Info);
+    }
+
+    private void ClientJoinedLobby(object sender, ClientConnectedEventArgs e)
+    {
+        //Just got to add the listern when the first connect
+        e.Client.MessageReceived += ClientMessageReceived;
+
+        //Sending the information needed to display in the lobby page
+        using (DarkRiftWriter writer = DarkRiftWriter.Create())
+        {
+            writer.Write(ServerName);
+            writer.Write(MapName);
+            writer.Write(PlayerCount);
+            writer.Write(MaxPlayerCount);
+
+            string playersNames = "";
+            if (players.Count > 0)
+            {
+                foreach (Player player in players)
+                {
+                    playersNames += player.name + ",";
+                }
+
+                //Removing that last ","
+                playersNames = playersNames.Remove(playersNames.Length - 1);
+            }
+            
+
+            writer.Write(playersNames);
+
+            using (Message message = Message.Create((ushort)Tags.LobbyInfo, writer))
+            {
+                e.Client.SendMessage(message, SendMode.Reliable);
+                WriteEvent("Told " + e.Client.ID + " lobby information",LogType.Info);
+            }
+        }
+    }
+
     private void PlayersInfo(object sender, CommandEventArgs e)
     {
         string playersInfo = "There are " + PlayerCount + " players.";
@@ -45,10 +90,6 @@ public class VTOLServerPlugin : Plugin
             playersInfo += "\nName:" + player.name + " Vehicle:" + player.vehicle;
         }
         WriteEvent(playersInfo, LogType.Info);
-    }
-    private void Players(object sender, CommandEventArgs e)
-    {
-        WriteEvent("There are " + PlayerCount + " players", LogType.Info);
     }
     private void SetSettings(object sender, CommandEventArgs e)
     {
