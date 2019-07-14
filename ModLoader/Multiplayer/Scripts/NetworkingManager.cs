@@ -61,10 +61,30 @@ Player Count: " + playerCount.ToString();
 
     public void StartProcedure()
     {
-        SetPrefabs();
-        StartCoroutine(DelayFindBody());
+        StartCoroutine(StartProcedureEnumerator());
     }
-    private void SetPrefabs()
+
+    private IEnumerator StartProcedureEnumerator()
+    {
+        yield return StartCoroutine(SetPrefabs());
+
+        //This has a delay to wait for everything to spawn in the game world first,so then we can find it
+        yield return new WaitForSeconds(4);
+        //The scene should be loaded by then
+
+        if (syncBody)
+            yield return StartCoroutine(DelayFindBody());
+
+        Console.Log("Creating Zero Reference");
+        yield return StartCoroutine(CreateZeroReference());
+
+        //Finding Vehicle
+        Console.Log("Searching for players vehicle");
+        yield return StartCoroutine(FindPlayersObjects());
+        Console.Log("Done the Start Procedure, telling server we are ready");
+        PlayerReady();
+    }
+    private IEnumerator SetPrefabs()
     {
         #region Players Vehicles Prefabs
         /*
@@ -82,58 +102,51 @@ Player Count: " + playerCount.ToString();
             Console.Log("Couldn't find the prefab for the AV-42C");
         if (!fa26bPrefab)
             Console.Log("Couldn't find the prefab for the F/A-26B");
+
+        yield break;
     }
     private IEnumerator DelayFindBody()
     {
-        //This has a delay to wait for everything to spawn in the game world first,so then we can find it
-        yield return new WaitForSeconds(3);
-        //The scene should be loaded by then
-        if (syncBody)
+        Console.Log("Syncing Body");
+        if (XRDevice.model.Contains("Oculus"))
         {
-            Console.Log("Syncing Body");
-            if (XRDevice.model.Contains("Oculus"))
-            {
-                Console.Log("This is a Oculus User");
-                FindRiftTouch();
-            }
-            else
-            {
-                Console.Log("This is a Vive User");
-                FindViveWands();
-            }
+            Console.Log("This is a Oculus User");
+            FindRiftTouch();
+        }
+        else
+        {
+            Console.Log("This is a Vive User");
+            FindViveWands();
+        }
 
-            VRHead camera = FindObjectOfType<VRHead>();
-            if (camera)
+        VRHead camera = FindObjectOfType<VRHead>();
+        if (camera)
+        {
+            Console.Log("Found the VR Camera");
+            camera.gameObject.AddComponent<PlayerHeadNetworkedObjectSender>().client = client;
+        }
+        else
+        {
+            Console.Log("Looking for cameras");
+            Camera[] cameras = FindObjectsOfType<Camera>();
+            foreach (Camera item in cameras)
             {
-                Console.Log("Found the VR Camera");
-                camera.gameObject.AddComponent<PlayerHeadNetworkedObjectSender>().client = client;
-            }
-            else
-            {
-                Console.Log("Looking for cameras");
-                Camera[] cameras = FindObjectsOfType<Camera>();
-                foreach (Camera item in cameras)
+                if (item.enabled && item.gameObject.activeInHierarchy)
                 {
-                    if (item.enabled && item.gameObject.activeInHierarchy)
-                    {
-                        Console.Log("Found a camera, lets use this one");
-                        item.gameObject.AddComponent<PlayerHeadNetworkedObjectSender>().client = client;
-                    }
+                    Console.Log("Found a camera, lets use this one");
+                    item.gameObject.AddComponent<PlayerHeadNetworkedObjectSender>().client = client;
                 }
             }
         }
-        Console.Log("Creating Zero Reference");
-        CreateZeroReference();
-        //Finding Vehicle
-        Console.Log("Searching for players vehicle");
-        FindPlayersObjects();
+        yield break;
     }
-    private void CreateZeroReference()
+    private IEnumerator CreateZeroReference()
     {
         //Used to workout the offset when sending pos over network and receiving
         GameObject cube = new GameObject("[Multiplayer] World Center",typeof(FloatingOriginTransform));
         cube.transform.position = new Vector3(0, 0, 0);
         worldCenter = cube.transform;
+        yield break;
     }
     private void FindViveWands()
     {
@@ -155,7 +168,7 @@ Player Count: " + playerCount.ToString();
         if (controllers.Length >= 2)
             controllers[1].gameObject.AddComponent<PlayerHandRightNetworkedObjectSender>().client = client;
     }
-    private void FindPlayersObjects()
+    private IEnumerator FindPlayersObjects()
     {
         //This is going to be searching for object in the scene that needed to be spawned in by the game
         //and the found to sync across the network
@@ -179,8 +192,8 @@ Player Count: " + playerCount.ToString();
             }
             vehicle.GetComponent<Health>().minDamage = float.MaxValue;//God Mode
         }
-        
-        PlayerReady();
+
+        yield break;
     }
     private void PlayerReady()
     {
@@ -199,6 +212,7 @@ Player Count: " + playerCount.ToString();
             }
         }
     }
+
     public void MessageReceived(object sender, MessageReceivedEventArgs e)
     {
         using (Message message = e.GetMessage())
