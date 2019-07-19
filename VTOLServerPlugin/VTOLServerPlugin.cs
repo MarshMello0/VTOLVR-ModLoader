@@ -9,33 +9,17 @@ using DarkRift.Server;
 public class VTOLServerPlugin : Plugin
 {
     public override bool ThreadSafe => false;
-
-    public override Version Version => new Version(0, 0, 1);
-
-    private List<Player> players = new List<Player>();
-
-
-    //Sever Info
-    private string ServerName;
-    private string MapName;
-    private int PlayerCount;
-    private int MaxPlayerCount;
-
-
+    public override Version Version => new Version(0, 1, 0);
+    private Server server;
     public VTOLServerPlugin(PluginLoadData pluginLoadData) : base(pluginLoadData)
     {
-        ServerName = "VTOL VR Dedicated Server";
-        MapName = "Akutan";
-        MaxPlayerCount = 100;
+        server = new Server();
+        server.Start();
+        WriteEvent("Started " + server.Name, LogType.Info);
+
         ClientManager.ClientDisconnected += ClientDisconnected;
         ClientManager.ClientConnected += ClientJoinedLobby;
     }
-    public override Command[] Commands => new Command[]
-    {
-        new Command("set", "Sets variables in the server", "set VariableToChange", SetSettings),
-        new Command("playersinfo", "Displays all the information stored about the players","playersinfo", PlayersInfo),
-        new Command("new","","",CreatePlayer)
-    };
 
     /// <summary>
     /// Sends a message to everyone but the person who send in the message
@@ -56,60 +40,22 @@ public class VTOLServerPlugin : Plugin
         }
     }
 
+    #region Commands
+
+    public override Command[] Commands => new Command[]
+{
+        new Command("set", "Sets variables in the server", "set VariableToChange", SetSettings),
+        new Command("playersinfo", "Displays all the information stored about the players","playersinfo", PlayersInfo),
+        new Command("new","","",CreatePlayer)
+};
     private void CreatePlayer(object sender, CommandEventArgs e)
     {
         //Creating a fake player for testing
-        Player newPlayer = new Player(999, null, "", "Player(" + (PlayerCount + 1) + ")");
-        players.Add(newPlayer);
-        PlayerCount++;
+        Player newPlayer = new Player(999, null, "", "Player(" + (server.playerCount + 1) + ")", 999, "Non Steam player", server.useSteamName);
+        server.AddPlayer(newPlayer);
         WriteEvent("Added Fake Player", LogType.Info);
     }
 
-    private void ClientJoinedLobby(object sender, ClientConnectedEventArgs e)
-    {
-        //Just got to add the listern when the first connect
-        e.Client.MessageReceived += ClientMessageReceived;
-
-        //Sending the information needed to display in the lobby page
-        using (DarkRiftWriter writer = DarkRiftWriter.Create())
-        {
-            writer.Write(ServerName);
-            writer.Write(MapName);
-            writer.Write(PlayerCount);
-            writer.Write(MaxPlayerCount);
-
-            string playersNames = "";
-            if (players.Count > 0)
-            {
-                foreach (Player player in players)
-                {
-                    playersNames += player.name + ",";
-                }
-
-                //Removing that last ","
-                playersNames = playersNames.Remove(playersNames.Length - 1);
-            }
-            
-
-            writer.Write(playersNames);
-
-            using (Message message = Message.Create((ushort)Tags.LobbyInfo, writer))
-            {
-                e.Client.SendMessage(message, SendMode.Reliable);
-                WriteEvent("Told " + e.Client.ID + " lobby information",LogType.Info);
-            }
-        }
-    }
-
-    private void PlayersInfo(object sender, CommandEventArgs e)
-    {
-        string playersInfo = "There are " + PlayerCount + " players.";
-        foreach (Player player in players)
-        {
-            playersInfo += "\nName:" + player.name + " Vehicle:" + player.vehicle;
-        }
-        WriteEvent(playersInfo, LogType.Info);
-    }
     private void SetSettings(object sender, CommandEventArgs e)
     {
         string[] args = e.RawArguments;
@@ -124,12 +70,26 @@ public class VTOLServerPlugin : Plugin
         switch (command)
         {
             case "servername":
-                ServerName = "";
+                string newName = "";
                 foreach (string word in argsBroken)
                 {
-                    ServerName += word + " ";
+                    newName += word + " ";
                 }
-                WriteEvent("Server Name has Changed to \"" + ServerName + "\"", LogType.Info);
+                server.ChangeServerName(newName);
+                WriteEvent("Server Name has Changed to \"" + server.Name + "\"", LogType.Info);
+                break;
+            case "maxplayercount":
+                int result = server.MaxPlayerCount;
+                if (int.TryParse(argsBroken[0], out result))
+                {
+                    if (result != server.MaxPlayerCount)
+                    {
+                        server.ChangeMaxPlayerCount(result);
+                        WriteEvent("Changed the max player count to " + result, LogType.Info);
+                    }
+                }
+                else
+                    WriteEvent("Failed to change max player count", LogType.Warning);
                 break;
             default:
                 WriteEvent("Couldn't find command " + command, LogType.Warning);
@@ -138,12 +98,105 @@ public class VTOLServerPlugin : Plugin
 
         SendServerInfo();
     }
+
+    private void PlayersInfo(object sender, CommandEventArgs e)
+    {
+        string playersInfo = "There are " + server.playerCount + " players.";
+        foreach (Player player in server.currentPlayers)
+        {
+            playersInfo += "\nName:" + player.currentName + " Vehicle:" + player.vehicle;
+        }
+        WriteEvent(playersInfo, LogType.Info);
+    }
+    #endregion
+
+    #region Lobby
+    private void ClientJoinedLobby(object sender, ClientConnectedEventArgs e)
+    {
+        //Just got to add the listern when the first connect
+        e.Client.MessageReceived += ClientMessageReceived;
+        //After this we wait for a message with the users info, then we do a ban check on that user
+    }
+    /// <summary>
+    /// Ban Check, this runs when the user sends us their information, then we check if they are banned or not.
+    /// </summary>
+    /// <param name="e"></param>
+    /// <param name="message"></param>
+    private void ReceivedUserInfoTag(MessageReceivedEventArgs e, Message message)
+    {
+        using (DarkRiftReader reader = message.GetReader())
+        {
+            while (reader.Position < reader.Length)
+            {
+                ushort id = e.Client.ID;
+                ulong steamid = reader.ReadUInt64();
+                string PilotName = reader.ReadString();
+                string SteamName = reader.ReadString();
+                string banReason = "";
+                if (!server.CheckBan(steamid, out banReason))
+                {
+                    //Sending the information needed to display in the lobby page
+                    using (DarkRiftWriter writer = DarkRiftWriter.Create())
+                    {
+                        writer.Write(server.Name);
+                        writer.Write(server.Map.ToString());
+                        writer.Write(server.playerCount);
+                        writer.Write(server.MaxPlayerCount);
+
+                        string playersNames = "";
+                        if (server.playerCount > 0)
+                        {
+                            foreach (Player player in server.currentPlayers)
+                            {
+                                playersNames += player.currentName + ",";
+                            }
+
+                            //Removing that last ","
+                            playersNames = playersNames.Remove(playersNames.Length - 1);
+                        }
+
+
+                        writer.Write(playersNames);
+
+                        using (Message newmessage = Message.Create((ushort)Tags.LobbyInfo, writer))
+                        {
+                            e.Client.SendMessage(newmessage, SendMode.Reliable);
+                            WriteEvent("Told " + e.Client.ID + " lobby information", LogType.Info);
+                        }
+                    }
+
+                    //Need to add the new player here instead of spawn tag method
+                }
+                else
+                {
+                    //This user is banned from the server
+                    //Sending the information needed to display in the lobby page
+                    using (DarkRiftWriter writer = DarkRiftWriter.Create())
+                    {
+                        writer.Write(banReason);
+                        using (Message newMessage = Message.Create((ushort)Tags.Banned, writer))
+                        {
+                            e.Client.SendMessage(newMessage, SendMode.Reliable);
+                            WriteEvent("Told " + SteamName + "[" + steamid + "]" + " that they where banned", LogType.Info);
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+    #endregion
+
+    #region In-Game
+
+    #endregion
+
     private void SendServerInfo()
     {
         using (DarkRiftWriter writer = DarkRiftWriter.Create())
         {
-            writer.Write(ServerName);
-            writer.Write(PlayerCount);
+            writer.Write(server.Name);
+            writer.Write(server.playerCount);
 
             using (Message message = Message.Create((ushort)Tags.ServerInfo, writer))
             {
@@ -156,34 +209,10 @@ public class VTOLServerPlugin : Plugin
 
         }
     }
-    private void SendServerInfo(IClient client)
-    {
-        using (DarkRiftWriter writer = DarkRiftWriter.Create())
-        {
-            writer.Write(ServerName);
-            writer.Write(PlayerCount);
-
-            using (Message message = Message.Create((ushort)Tags.ServerInfo, writer))
-            {
-                client.SendMessage(message, SendMode.Reliable);
-                WriteEvent("Sent Server Info to " + client.ID + " (TAG = " + (ushort)Tags.ServerInfo + ")", LogType.Info);
-            }
-
-        }
-    }
     private void ClientDisconnected(object sender, ClientDisconnectedEventArgs e)
     {
-        PlayerCount -= 1;
+        server.RemovePlayer(e.Client.ID);
         SendServerInfo();
-
-        for (int i = 0; i < players.Count; i++)
-        {
-            if (players[i].ID == e.Client.ID)
-            {
-                players.RemoveAt(i);
-                break;
-            }
-        }
 
         using (DarkRiftWriter writer = DarkRiftWriter.Create())
         {
@@ -202,7 +231,9 @@ public class VTOLServerPlugin : Plugin
     {
         using (Message message = e.GetMessage() as Message)
         {
-            if (message.Tag == (ushort)Tags.SpawnPlayerTag)
+            if (message.Tag == (ushort)Tags.UserInfo)
+                ReceivedUserInfoTag(e, message);
+            else if (message.Tag == (ushort)Tags.SpawnPlayerTag)
                 ReceivedSpawnPlayerTag(e, message);
             else if (message.Tag == (ushort)Tags.AV42c_General)
                 ReceivedAV42CGeneral(e, message);
@@ -241,12 +272,10 @@ public class VTOLServerPlugin : Plugin
             }
         }
     }
+    
     private void ReceivedSpawnPlayerTag(MessageReceivedEventArgs e, Message message)
     {
-        PlayerCount += 1;
         SendServerInfo();
-
-
         //Adding my own on client connected so that we only start sending them information when their game is ready
         using (DarkRiftReader reader = message.GetReader())
         {
@@ -254,7 +283,7 @@ public class VTOLServerPlugin : Plugin
             {
                 string name = reader.ReadString();
                 string vehicle = reader.ReadString();
-                players.Add(new Player(e.Client.ID, e.Client, vehicle, name));
+                //server.AddPlayer(new Player(e.Client.ID, e.Client, vehicle, name,0));
                 WriteEvent(name + " joined using " + vehicle, LogType.Warning);
 
                 //This sends to everyone but the person who joined, the new persons ID
@@ -274,12 +303,12 @@ public class VTOLServerPlugin : Plugin
                 using (DarkRiftWriter writer = DarkRiftWriter.Create())
                 {
                     //First send how many new players to spawn
-                    writer.Write(players.Count - 1);
+                    writer.Write(server.playerCount - 1);
 
-                    foreach (Player player in players.Where(x => x.client.ID != e.Client.ID))
+                    foreach (Player player in server.currentPlayers.Where(x => x.client.ID != e.Client.ID))
                     {
                         writer.Write(player.ID);
-                        writer.Write(player.name);
+                        writer.Write(player.currentName);
                         writer.Write(player.vehicle);
                     }
 

@@ -27,7 +27,7 @@ namespace ModLoader
         private string assetsPath = @"\modloader.assets";
         private string root;
 
-        private AssetBundle assets;
+        public AssetBundle assets;
 
         //UI Objects
         GameObject warningPage, spmp, sp, mp, spModPage, spList, mpPV, mpIPPort, mpServerInfo;
@@ -149,7 +149,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                 return;
             }
             //Spawning UConsole
-            Instantiate(assets.LoadAsset<GameObject>("UConsole-Canvas")).AddComponent<UConsole>();
+            //Instantiate(assets.LoadAsset<GameObject>("UConsole-Canvas")).AddComponent<UConsole>();
         }
         IEnumerator WaitForScene()
         {

@@ -35,7 +35,7 @@ public class MultiplayerMod : MonoBehaviour
         client.Disconnected += Disconnected;
     }
 
-    public void ConnectToServer(string ip = "159.180.107.80", int port = 4296)
+    public void ConnectToServer(string ip = "86.154.179.6", int port = 4296)
     {
         state = ConnectionState.Connecting;
         try
@@ -50,7 +50,14 @@ public class MultiplayerMod : MonoBehaviour
             return;
         }
 
-        modLoader.SwitchPage(ModLoader.ModLoader.Page.mpServerInfo);
+        //Sending a message of our information
+        using (DarkRiftWriter writer = DarkRiftWriter.Create())
+        {
+            writer.Write(SteamUser.GetSteamID().m_SteamID);
+            writer.Write(SteamFriends.GetPersonaName());
+            using (Message message = Message.Create((ushort)Tags.UserInfo, writer))
+                client.SendMessage(message, SendMode.Reliable);
+        } 
     }
 
     private void MessageReceived(object sender, MessageReceivedEventArgs e)
@@ -72,16 +79,19 @@ public class MultiplayerMod : MonoBehaviour
                             int playerCount = reader.ReadInt32();
                             int maxPlayerCount = reader.ReadInt32();
                             string playersNames = reader.ReadString();
-
+                            
                             currentMap = mapName;
                             serverInfoText.text = "Name: " + serverName + "\nMap: " + mapName
                                 + "\nPlayers: " + playerCount + "/" + maxPlayerCount + "\n"
                                 + playersNames;
 
                             state = ConnectionState.Lobby;
+                            modLoader.SwitchPage(ModLoader.ModLoader.Page.mpServerInfo);
                         }
                         break;
                 }
+
+                //Need to check if the bann message was returned
 
             }
         }

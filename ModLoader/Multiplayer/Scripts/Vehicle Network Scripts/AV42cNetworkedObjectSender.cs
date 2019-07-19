@@ -130,7 +130,6 @@ namespace NetworkedObjects.Vehicles
                 writer.Write(breaks);
                 writer.Write(throttle);
                 writer.Write(wheels);
-
                 using (Message message = Message.Create((ushort)Tags.AV42c_General, writer))
                     client.SendMessage(message, SendMode.Unreliable);
             }

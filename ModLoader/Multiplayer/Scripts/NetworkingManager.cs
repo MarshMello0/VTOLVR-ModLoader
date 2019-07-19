@@ -218,6 +218,28 @@ Player Count: " + playerCount.ToString();
     {
         //This is when the client is ready to tell everyone that we have joined and receive everyone elses information
 
+        //Temp
+        GameObject fuel = FindObjectOfType<RefuelPlane>().gameObject;
+        Texture2D customTexture = mod.modLoader.assets.LoadAsset<Texture2D>("tex_refuelPlane-Custom");
+        if (fuel)
+        {
+            Console.Log("Found the vehicle " + fuel.name);
+            fuel = fuel.transform.Find("refuelPlane2").gameObject;
+            fuel.transform.Find("bodyCylinder").GetComponent<MeshRenderer>().material.mainTexture = customTexture;
+            fuel.transform.Find("wings").GetComponent<MeshRenderer>().material.mainTexture = customTexture;
+            fuel.transform.Find("vertStab").GetComponent<MeshRenderer>().material.mainTexture = customTexture;
+            fuel.transform.Find("tailPlanes").GetComponent<MeshRenderer>().material.mainTexture = customTexture;
+            fuel.transform.Find("outFlapLeft").GetComponent<MeshRenderer>().material.mainTexture = customTexture;
+            fuel.transform.Find("inFlapLeft").GetComponent<MeshRenderer>().material.mainTexture = customTexture;
+            fuel.transform.Find("inFlapRight").GetComponent<MeshRenderer>().material.mainTexture = customTexture;
+            fuel.transform.Find("outFlapRight").GetComponent<MeshRenderer>().material.mainTexture = customTexture;
+            fuel.transform.Find("elevatorLeft").GetComponent<MeshRenderer>().material.mainTexture = customTexture;
+            fuel.transform.Find("elevatorRight").GetComponent<MeshRenderer>().material.mainTexture = customTexture;
+            fuel.transform.Find("rudder").GetComponent<MeshRenderer>().material.mainTexture = customTexture;
+            fuel.transform.Find("aileronLeft").GetComponent<MeshRenderer>().material.mainTexture = customTexture;
+            fuel.transform.Find("aileronRight").GetComponent<MeshRenderer>().material.mainTexture = customTexture;
+        }
+        return;
         //Sending the players information to the server
         using (DarkRiftWriter writer = DarkRiftWriter.Create())
         {
@@ -230,6 +252,9 @@ Player Count: " + playerCount.ToString();
                 Console.Log("Told the server about our player");
             }
         }
+
+        
+
     }
 
     public void MessageReceived(object sender, MessageReceivedEventArgs e)
