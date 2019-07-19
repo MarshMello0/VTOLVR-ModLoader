@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoGravity", "Example Mods\N
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModLoader", "ModLoader\ModLoader.csproj", "{6954C277-7D91-4274-B54B-FDDAD7738790}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VTOLServerPlugin", "VTOLServerPlugin\VTOLServerPlugin.csproj", "{C05711E1-33C6-427B-ACA1-5A85E6045A0F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +31,10 @@ Global
 		{6954C277-7D91-4274-B54B-FDDAD7738790}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6954C277-7D91-4274-B54B-FDDAD7738790}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6954C277-7D91-4274-B54B-FDDAD7738790}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C05711E1-33C6-427B-ACA1-5A85E6045A0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C05711E1-33C6-427B-ACA1-5A85E6045A0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C05711E1-33C6-427B-ACA1-5A85E6045A0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C05711E1-33C6-427B-ACA1-5A85E6045A0F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

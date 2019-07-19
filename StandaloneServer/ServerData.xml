@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<Server xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>VTOL VR Dedicated Server</Name>
+  <Description>Server Description</Description>
+  <Map>Akutan</Map>
+  <MaxPlayerCount>5</MaxPlayerCount>
+  <useSteamName>false</useSteamName>
+</Server>

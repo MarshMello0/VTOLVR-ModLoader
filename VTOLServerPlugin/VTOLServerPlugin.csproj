@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="DarkRift">
+      <HintPath>Lib\DarkRift.dll</HintPath>
+    </Reference>
+    <Reference Include="DarkRift.Server">
+      <HintPath>Lib\DarkRift.Server.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy &quot;$(ProjectDir)bin\Debug\netstandard2.0\VTOLServerPlugin.dll&quot; &quot;A:\Code\VTOLVR-ModLoader\StandaloneServer\Plugins\VTOLServerPlugin.dll&quot;&#xD;&#xA;start  /d &quot;A:\Code\VTOLVR-ModLoader\StandaloneServer&quot; DedicatedServer.exe" />
+  </Target>
+
+</Project>
