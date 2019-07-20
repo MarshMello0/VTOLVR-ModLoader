@@ -22,7 +22,7 @@ namespace ModLoader
         }
     }
 
-    public class ModLoader : MonoBehaviour
+    public class ModLoader : VTOLMOD
     {
         private string assetsPath = @"\modloader.assets";
         private string root;
@@ -43,6 +43,7 @@ namespace ModLoader
         private MultiplayerMod multiplayer;
         private void Awake()
         {
+            SteamAPI.Init();
             DontDestroyOnLoad(this.gameObject);
             PlayerLogText();
         }
@@ -157,10 +158,6 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             {
                 yield return null;
             }
-
-            SteamAPI.Init();
-
-
             //We should now be in the game scene
             SetInGameUI();
             UpdateDiscord();
