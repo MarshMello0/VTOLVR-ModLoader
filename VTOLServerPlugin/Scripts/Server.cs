@@ -29,6 +29,7 @@ public class Server
     public Server(){}
     public void Start()
     {
+        currentPlayers = new List<Player>();
         root = Directory.GetCurrentDirectory();
         if (File.Exists(root + serverDataPath))
             LoadServerData();
