@@ -8,7 +8,7 @@ using DarkRift.Client;
 using DarkRift.Client.Unity;
 
 
-namespace NetworkedObjects.Vehicles
+namespace ModLoader.Multiplayer.NetworkedObjects.Vehicles
 {
     public class FA26BNetworkedObjectReceiver : MonoBehaviour
     {

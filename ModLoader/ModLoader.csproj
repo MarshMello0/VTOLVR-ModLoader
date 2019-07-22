@@ -132,8 +132,8 @@
     <Compile Include="DiscordController.cs" />
     <Compile Include="DiscordRpc.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="JsonHelper.cs" />
     <Compile Include="ModLoader.cs" />
+    <Compile Include="ModLoaderManager.cs" />
     <Compile Include="Multiplayer\Multiplayer.cs" />
     <Compile Include="Multiplayer\Scripts\Console.cs" />
     <Compile Include="Multiplayer\Scripts\NetworkingManager.cs" />

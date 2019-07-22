@@ -9,7 +9,7 @@ using DarkRift.Client.Unity;
 using System.Collections;
 using UnityEngine.SceneManagement;
 
-namespace NetworkedObjects.Vehicles
+namespace ModLoader.Multiplayer.NetworkedObjects.Vehicles
 {
     public class AV42cNetworkedObjectReceiver : MonoBehaviour
     {

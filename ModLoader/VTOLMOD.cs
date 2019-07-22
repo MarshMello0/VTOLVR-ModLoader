@@ -2,12 +2,11 @@
 using System.IO;
 using UnityEngine;
 using Steamworks;
+public enum VTOLVehicles { None, AV42C, FA26B, F45A }
 public class VTOLMOD : MonoBehaviour
 {
-    public enum Vehicles { None,AV42C,FA26B, F45A }
-
     private GameObject playerVehicleGO;
-    private Vehicles playerVehicleEnum = Vehicles.AV42C;
+    private VTOLVehicles playerVehicleEnum = VTOLVehicles.AV42C;
     private Campaign currentCampaign;
     private CampaignScenario currentScenario;
     private string gamePath;
@@ -48,7 +47,7 @@ public class VTOLMOD : MonoBehaviour
     /// Returns which vehicle the player is using in a Enum.
     /// </summary>
     /// <returns></returns>
-    public Vehicles GetPlayersVehicleEnum()
+    public VTOLVehicles GetPlayersVehicleEnum()
     {
         return playerVehicleEnum;
     }
@@ -67,22 +66,6 @@ public class VTOLMOD : MonoBehaviour
     public CampaignScenario GetCurrentScenario()
     {
         return currentScenario;
-    }
-    /// <summary>
-    /// This returns the root folder of the game where the .exe for VTOLVR is
-    /// </summary>
-    /// <returns></returns>
-    public string GetGamePath()
-    {
-        return gamePath;
-    }
-    /// <summary>
-    /// This returns the folder path where this mod stores its data.
-    /// </summary>
-    /// <returns></returns>
-    public string GetModDataPath()
-    {
-        return gamePath + modsPath + modDataFolder;
     }
     /// <summary>
     /// Saves a file to your mods mod data folder, please use this instead of creating your own location.
@@ -151,6 +134,18 @@ public class VTOLMOD : MonoBehaviour
         {
             return false;
         }
+    }
+    public void Log(object message)
+    {
+        Debug.Log("Mod Loader: " + message);
+    }
+    public void LogWarning(object message)
+    {
+        Debug.LogWarning("Mod Loader: " + message);
+    }
+    public void LogError(object message)
+    {
+        Debug.LogError("Mod Loader: " + message);
     }
 
     [AttributeUsage(AttributeTargets.Class)]

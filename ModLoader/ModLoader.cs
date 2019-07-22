@@ -10,160 +10,26 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using Steamworks;
+using ModLoader.Multiplayer;
 
 namespace ModLoader
 {
-    public class Load
-    {
-        public static void Init()
-        {
-            CrashReportHandler.enableCaptureExceptions = false;
-            new GameObject("Mod Loader", typeof(ModLoader));
-        }
-    }
-
     public class ModLoader : VTOLMOD
     {
-        private string assetsPath = @"\modloader.assets";
-        private string root;
-
-        public AssetBundle assets;
-
         //UI Objects
         GameObject warningPage, spmp, sp, mp, spModPage, spList, mpPV, mpIPPort, mpServerInfo;
         PoseBounds pb;
         public enum Page { warning, spmp,spMod,spList,mpPV,mpIPPort, mpServerInfo}
 
-        //Discord
-        private DiscordController discord;
-        public string discordDetail, discordState;
-        public int loadedModsCount;
 
         //Multiplayer
         private MultiplayerMod multiplayer;
-        private void Awake()
-        {
-            SteamAPI.Init();
-            DontDestroyOnLoad(this.gameObject);
-            PlayerLogText();
-        }
-        private void PlayerLogText()
-        {
-            string playerLogMessage = @" 
-                                                                                                         
-                                                                                                         
- #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  ##### 
-                                                                                                         
- #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  ##### 
-                                                                                                         
- #     #                                              #     #                                            
- ##   ##   ####   #####   #####   ######  #####       #     #  ######  #####    ####   #   ####   #    # 
- # # # #  #    #  #    #  #    #  #       #    #      #     #  #       #    #  #       #  #    #  ##   # 
- #  #  #  #    #  #    #  #    #  #####   #    #      #     #  #####   #    #   ####   #  #    #  # #  # 
- #     #  #    #  #    #  #    #  #       #    #       #   #   #       #####        #  #  #    #  #  # # 
- #     #  #    #  #    #  #    #  #       #    #        # #    #       #   #   #    #  #  #    #  #   ## 
- #     #   ####   #####   #####   ######  #####          #     ######  #    #   ####   #   ####   #    # 
-
-Thank you for download VTOL VR Mod loader by . Marsh.Mello .
-
-Please don't report bugs unless you can reproduce them without any mods loaded
-if you are having any issues with mods and would like to report a bug, please contact @. Marsh.Mello .#3194 
-on the offical VTOL VR Discord or post an issue on github. 
-
-VTOL VR Discord Server: https://discord.gg/azNkZHj
-Mod Loader Github: https://github.com/MarshMello0/VTOLVR-ModLoader
-
-Special Thanks to Ketkev and Nebriv with help in testing and modding.
-
- #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  ##### 
-                                                                                                         
- #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  ##### 
-";
-            Debug.Log(playerLogMessage);
-        }
 
         private void Start()
         {
-            SetPaths();
-            CreateAssetBundle();
-            StartCoroutine(WaitForScene());
-            discord = gameObject.AddComponent<DiscordController>();
-            discordDetail = "Launching Game";
-            UpdateDiscord();
-            SceneManager.sceneLoaded += SceneLoaded;
-        }
-
-        private void SceneLoaded(Scene arg0, LoadSceneMode arg1)
-        {
-            string sceneName = arg0.name;
-            switch (sceneName)
-            {
-                case "LaunchSplashScene":
-                    discordDetail = "Launching Game";
-                    break;
-                case "LoadingScene":
-                    discordDetail = "Loading into mission";
-                    break;
-                case "ReadyRoom":
-                    if (loadedModsCount == 0)
-                    {
-                        discordDetail = "In Main Menu";
-                    }
-                    else
-                    {
-                        discordDetail = "In Main Menu with " + loadedModsCount + (loadedModsCount == 0 ? " mod" : " mods");
-                    }
-                    
-                    break;
-                case "Akutan":
-                    discordDetail = "Flying the " + PilotSaveManager.currentVehicle.vehicleName;
-                    discordState = "Akutan: " + PilotSaveManager.currentCampaign.campaignName + " " + PilotSaveManager.currentScenario.scenarioName;
-                    break;
-                case "CustomMapBase":
-                    discordDetail = "Flying the " + PilotSaveManager.currentVehicle.vehicleName;
-                    discordState = "CustomMap: " + PilotSaveManager.currentCampaign.campaignName + " " + PilotSaveManager.currentScenario.scenarioName;
-                    break;
-                case "VehicleConfiguration":
-                    discordDetail = "Configuring " + PilotSaveManager.currentVehicle.vehicleName;
-                    break;
-                case "SamplerScene":
-                    discordDetail = "Selecting Mods";
-                    break;
-                default:
-                    discordDetail = "In ";
-                    discordState = sceneName;
-                    break;
-            }
-            UpdateDiscord();
-        }
-
-        private void SetPaths()
-        {
-            root = Directory.GetCurrentDirectory() + @"\VTOLVR_Modloader";
-        }
-        private void CreateAssetBundle()
-        {
-            assets = AssetBundle.LoadFromFile(root + assetsPath);
-            if (assets == null)
-            {
-                Debug.Log("Failed to load AssetBundle!");
-                return;
-            }
-            //Spawning UConsole
-            //Instantiate(assets.LoadAsset<GameObject>("UConsole-Canvas")).AddComponent<UConsole>();
-        }
-        IEnumerator WaitForScene()
-        {
-            while (SceneManager.GetActiveScene().name != "SamplerScene")
-            {
-                yield return null;
-            }
-            //We should now be in the game scene
             SetInGameUI();
-            UpdateDiscord();
-
-            
         }
+        
         private void SetInGameUI()
         {
             //Adding Multiplayer Script
@@ -191,7 +57,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             Destroy(startButton);
 
             //Spawning the Mod Load Menu
-            GameObject canvaus = Instantiate(assets.LoadAsset<GameObject>("ModLoader"));
+            GameObject canvaus = Instantiate(ModLoaderManager.instance.assets.LoadAsset<GameObject>("ModLoader"));
             canvaus.transform.position = new Vector3(-36.1251f, 25.9583f, 303.7759f);
             canvaus.transform.rotation = Quaternion.Euler(-0.303f, -46.172f, -69.8f);
 
@@ -256,7 +122,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             spListStart.OnInteract.AddListener(delegate { SceneManager.LoadScene(2); });
 
             SPModManager modManager = spList.AddComponent<SPModManager>();
-            modManager.assets = assets;
+            modManager.assets = ModLoaderManager.instance.assets;
             modManager.discord = gameObject.GetComponent<DiscordController>();
             modManager.modloader = this;
             modManager.SetButtons(spListNextPage.gameObject, spListPreviousPage.gameObject);
@@ -401,7 +267,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                     spList.SetActive(true);
                     break;
                 case Page.mpPV:
-                    discordDetail = "Playing Online";
+                    ModLoaderManager.instance.discordDetail = "Playing Online";
                     mp.SetActive(true);
                     mpPV.SetActive(true);
                     break;
@@ -416,10 +282,6 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             }
 
             Console.Log("Switched Page to " + page.ToString());
-        }
-       public void UpdateDiscord()
-        {
-            discord.UpdatePresence(loadedModsCount, discordDetail, discordState);
         }
     }
 }

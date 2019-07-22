@@ -8,7 +8,7 @@ using DarkRift.Client;
 using DarkRift.Client.Unity;
 using System.Collections;
 
-namespace NetworkedObjects.Vehicles
+namespace ModLoader.Multiplayer.NetworkedObjects.Vehicles
 {
     public class AV42cNetworkedObjectSender : MonoBehaviour
     {

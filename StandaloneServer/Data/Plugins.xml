@@ -6,5 +6,5 @@
   <plugin id="3" name="DemoCommand" version="1.0.0" />
   <plugin id="4" name="MessageCommand" version="1.0.0" />
   <plugin id="5" name="MockCommand" version="1.0.0" />
-  <plugin id="6" name="VTOLServerPlugin" version="0.0.1" />
+  <plugin id="6" name="VTOLServerPlugin" version="0.1.0" />
 </plugins>

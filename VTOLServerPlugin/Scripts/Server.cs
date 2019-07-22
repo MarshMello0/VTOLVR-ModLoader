@@ -114,6 +114,7 @@ public class Server
             //BannedPlayers.Add(new Ban(steamID, reason));
             return true;
         }
+        //This person is already banned
         return false;
     }
     public bool Unban(ulong steamID)
@@ -128,6 +129,17 @@ public class Server
             }
         }
         */
+        return false;
+    }
+    public bool CheckBan(ulong steamID)
+    {
+        foreach (Player player in playerData.players)
+        {
+            if (player.IsBanned)
+            {
+                return true;
+            }
+        }
         return false;
     }
     public bool CheckBan(ulong steamID, out string reason)
