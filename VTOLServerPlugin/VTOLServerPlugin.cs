@@ -14,6 +14,7 @@ public class VTOLServerPlugin : Plugin
     public VTOLServerPlugin(PluginLoadData pluginLoadData) : base(pluginLoadData)
     {
         server = new Server();
+        server.plugin = this;
         server.Start();
         WriteEvent("Started " + server.Name, LogType.Info);
 
@@ -40,13 +41,20 @@ public class VTOLServerPlugin : Plugin
         }
     }
 
+    public void Log(string message)
+    {
+        WriteEvent(message, LogType.Info);
+    }
+
     #region Commands
 
     public override Command[] Commands => new Command[]
 {
         new Command("set", "Sets variables in the server", "set VariableToChange", SetSettings),
         new Command("playersinfo", "Displays all the information stored about the players","playersinfo", PlayersInfo),
-        new Command("new","","",CreatePlayer)
+        new Command("new","","",CreatePlayer),
+        new Command("ban","Bans a player from the server using their steam id or player id", "ban steam steamid reason",BanUser),
+        new Command("unban", "Unbans a player from the server using their steam id", "unban steamid", UnBanUser)
 };
     private void CreatePlayer(object sender, CommandEventArgs e)
     {
@@ -102,11 +110,104 @@ public class VTOLServerPlugin : Plugin
     private void PlayersInfo(object sender, CommandEventArgs e)
     {
         string playersInfo = "There are " + server.playerCount + " players.";
-        foreach (Player player in server.currentPlayers)
+        foreach (Player player in server.playerData.players)
         {
-            playersInfo += "\nName:" + player.currentName + " Vehicle:" + player.vehicle;
+            if (player.isConnected)
+            {
+                playersInfo += "\nName:" + player.currentName + " Vehicle:" + player.vehicle;
+            }
+            
         }
         WriteEvent(playersInfo, LogType.Info);
+    }
+
+    private void BanUser(object sender, CommandEventArgs e)
+    {
+        string[] args = e.RawArguments;
+        if (args.Length <= 2)
+            return;
+        args[0] = args[0].ToLower();
+        
+        if (args[0] == "steam" || args[0] == "playerid")
+        {
+            string[] reasonArray = new string[e.RawArguments.Length - 2];
+            Array.Copy(e.RawArguments, 2, reasonArray, 0, e.RawArguments.Length - 2);
+            string reason = "";
+            foreach (string word in reasonArray)
+            {
+                reason += " " + word;
+            }
+            if (args[0] == "steam")
+            {
+                ulong steamid;
+                if (ulong.TryParse(args[1], out steamid))
+                {
+                    switch (server.Ban(steamid, reason))
+                    {
+                        case Server.BanState.Banned:
+                            WriteEvent("SteamID: " + steamid + " has been banned, reason\n" + reason, LogType.Warning);
+                            break;
+                        case Server.BanState.AlreadyBanned:
+                            WriteEvent("This user is already banned", LogType.Error);
+                            break;
+                        default:
+                            WriteEvent("There seemed to be an error", LogType.Error);
+                            break;
+                    }
+                }
+                else
+                    WriteEvent("Failed to convert " + args[1] + " to a number", LogType.Error);
+            }
+            else if (args[0] == "playerid")
+            {
+                ushort playerID;
+                if (ushort.TryParse(args[1], out playerID))
+                {
+                    switch(server.Ban(playersID: playerID, reason))
+                    {
+                        case Server.BanState.Banned:
+                            WriteEvent("Player ID:" + playerID + " has been banned, reason\n" + reason, LogType.Warning);
+                            break;
+                        case Server.BanState.AlreadyBanned:
+                            WriteEvent("This user is already banned", LogType.Error);
+                            break;
+                        case Server.BanState.NotOnline:
+                            WriteEvent("There seems to be no player online with the ID " + playerID, LogType.Error);
+                            break;
+                        default:
+                            WriteEvent("There seemed to be an error", LogType.Error);
+                            break;
+                    }
+                    
+                }
+                else
+                    WriteEvent("Failed to convert " + args[1] + " to a number", LogType.Error);
+            }
+
+            
+        }
+        
+    }
+
+    private void UnBanUser(object sender, CommandEventArgs e)
+    {
+        string[] args = e.RawArguments;
+        ulong steamid;
+        if (ulong.TryParse(args[0], out steamid))
+        {
+            if (server.Unban(steamid))
+            {
+                WriteEvent("User has been unbanned", LogType.Info);
+            }
+            else
+            {
+                WriteEvent("That user either didn't exist or wasn't banned", LogType.Warning);
+            }
+        }
+        else
+        {
+            WriteEvent("Failed to convert " + args[0] + " to a steamid", LogType.Error);
+        }
     }
     #endregion
 
@@ -146,9 +247,10 @@ public class VTOLServerPlugin : Plugin
                         string playersNames = "";
                         if (server.playerCount > 0)
                         {
-                            foreach (Player player in server.currentPlayers)
+                            foreach (Player player in server.playerData.players)
                             {
-                                playersNames += player.currentName + ",";
+                                if (player.isConnected)
+                                    playersNames += player.currentName + ",";
                             }
 
                             //Removing that last ","
@@ -181,6 +283,8 @@ public class VTOLServerPlugin : Plugin
                         }
 
                     }
+
+                    e.Client.Disconnect();//Forcing the client to disconnect as they are banned :D
                 }
             }
         }
@@ -305,7 +409,7 @@ public class VTOLServerPlugin : Plugin
                     //First send how many new players to spawn
                     writer.Write(server.playerCount - 1);
 
-                    foreach (Player player in server.currentPlayers.Where(x => x.client.ID != e.Client.ID))
+                    foreach (Player player in server.playerData.players.Where(x => x.isConnected = true && x.client.ID != e.Client.ID))
                     {
                         writer.Write(player.ID);
                         writer.Write(player.currentName);

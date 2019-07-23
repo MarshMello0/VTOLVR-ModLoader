@@ -22,9 +22,9 @@ namespace ModLoader
     {
         private ModLoaderManager manager;
         //UI Objects
-        GameObject warningPage, spmp, sp, mp, spModPage, spList, mpPV, mpIPPort, mpServerInfo;
+        GameObject warningPage, spmp, sp, mp, spModPage, spList, mpPV, mpIPPort, mpServerInfo, mpBanned;
         PoseBounds pb;
-        public enum Page { warning, spmp,spMod,spList,mpPV,mpIPPort, mpServerInfo}
+        public enum Page { warning, spmp,spMod,spList,mpPV,mpIPPort, mpServerInfo, mpBanned}
 
 
         //Multiplayer
@@ -40,9 +40,8 @@ namespace ModLoader
 
 
         public UnityClient client { private set; get; }
-        public ModLoader modLoader;
         public Text serverInfoText;
-
+        private Text bannedReasonText;
         private string currentMap;
 
         //Singleplayer
@@ -124,6 +123,7 @@ namespace ModLoader
             mpPV = mp.transform.GetChild(0).gameObject;
             mpIPPort = mp.transform.GetChild(1).gameObject;
             mpServerInfo = mp.transform.GetChild(2).gameObject;
+            mpBanned = mp.transform.GetChild(3).gameObject;
 
             //Setting PoseBounds
             RectTransform canvasRect = canvasT.GetComponent<RectTransform>();
@@ -266,9 +266,16 @@ namespace ModLoader
             mpInfoJoin.interactableName = "Join Game";
             mpInfoBack.interactableName = "Back";
             mpInfoJoin.OnInteract.AddListener(delegate { JoinGame(); });
-            mpInfoBack.OnInteract.AddListener(delegate { client.Disconnect(); });
+            mpInfoBack.OnInteract.AddListener(delegate { client.Disconnect(); SwitchPage(Page.mpIPPort); });
 
             serverInfoText = mpServerInfo.transform.GetChild(2).GetComponent<Text>();
+
+            //MP Banned
+            VRInteractable mpBannedOkay = mpBanned.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
+            SetDefaultInteractable(mpBannedOkay);
+            mpBannedOkay.interactableName = "Okay";
+            mpBannedOkay.OnInteract.AddListener(delegate { SwitchPage(Page.mpIPPort); });
+            bannedReasonText = mpBanned.transform.GetChild(1).gameObject.GetComponent<Text>();
         }
 
         public VRInteractable SetDefaultInteractable(VRInteractable interactable)
@@ -294,6 +301,7 @@ namespace ModLoader
             mpPV.SetActive(false);
             mpIPPort.SetActive(false);
             mpServerInfo.SetActive(false);
+            mpBanned.SetActive(false);
             switch (page)
             {
                 case Page.warning:
@@ -323,6 +331,10 @@ namespace ModLoader
                     mp.SetActive(true);
                     mpServerInfo.SetActive(true);
                     break;
+                case Page.mpBanned:
+                    mp.SetActive(true);
+                    mpBanned.SetActive(true);
+                    break;
             }
 
             Console.Log("Switched Page to " + page.ToString());
@@ -336,7 +348,6 @@ namespace ModLoader
         {
             client = ModLoaderManager.instance.GetUnityClient();
             client.MessageReceived += MessageReceived;
-            client.Disconnected += Disconnected;
         }
         public void ConnectToServer(string ip = "86.154.179.6", int port = 4296)
         {
@@ -389,8 +400,17 @@ namespace ModLoader
                                     + playersNames;
 
                                 state = ConnectionState.Lobby;
-                                modLoader.SwitchPage(ModLoader.Page.mpServerInfo);
+                                SwitchPage(ModLoader.Page.mpServerInfo);
                             }
+                            break;
+                        case (ushort)Tags.Banned:
+                            while (reader.Position < reader.Length)
+                            {
+                                string bannedReason = reader.ReadString();
+                                SwitchPage(Page.mpBanned);
+                                bannedReasonText.text = bannedReason;
+                            }
+                            client.Disconnect();
                             break;
                     }
 
@@ -398,14 +418,6 @@ namespace ModLoader
 
                 }
             }
-        }
-
-        private void Disconnected(object sender, DisconnectedEventArgs e)
-        {
-            //When we press the button to go back, we disconnect then once fully disconnected we can switch page
-            if (modLoader)
-                modLoader.SwitchPage(ModLoader.Page.mpIPPort);
-            currentMap = "NULL";
         }
 
         public void JoinGame()

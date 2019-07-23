@@ -6,7 +6,7 @@ using System.Text;
 using System.Xml.Serialization;
 using System.Xml;
 using System.IO;
-
+using System.Linq;
 public class Server
 {
     //Information about server
@@ -19,17 +19,15 @@ public class Server
     /// </summary>
     public bool useSteamName;
     [XmlIgnore] public int playerCount { private set; get; }
-    [XmlIgnore] public List<Player> currentPlayers { private set; get; }
-
     [XmlIgnore] public PlayerData playerData = new PlayerData();
 
     [XmlIgnore] private string root;
     [XmlIgnore] private string serverDataPath = @"\ServerData.xml";
     [XmlIgnore] private string playerDataPath = @"\PlayerData.xml";
-    public Server(){}
+    [XmlIgnore] public VTOLServerPlugin plugin;
+    //public Server(){}
     public void Start()
     {
-        currentPlayers = new List<Player>();
         root = Directory.GetCurrentDirectory();
         if (File.Exists(root + serverDataPath))
             LoadServerData();
@@ -79,13 +77,28 @@ public class Server
         }
     }
     
-    private Player FindPlayerFromID(ushort id)
+    private Player FindPlayerFromID(ushort playerid)
     {
-        for (int i = 0; i < currentPlayers.Count; i++)
+        if (playerData.players == null)
+            return null;
+        for (int i = 0; i < playerData.players.Length; i++)
         {
-            if (currentPlayers[i].ID == id)
+            if (playerData.players[i].isConnected && playerData.players[i].ID == playerid)
             {
-                return currentPlayers[i];
+                return playerData.players[i];
+            }
+        }
+        return null;
+    }
+    private Player FindPlayerFromID(ulong steamID)
+    {
+        if (playerData.players == null)
+            return null;
+        for (int i = 0; i < playerData.players.Length; i++)
+        {
+            if (playerData.players[i].SteamID == steamID)
+            {
+                return playerData.players[i];
             }
         }
         return null;
@@ -94,48 +107,80 @@ public class Server
     public void AddPlayer(Player player)
     {
         playerCount++;
-        currentPlayers.Add(player);
+        player.isConnected = true;
+        if (FindPlayerFromID(player.SteamID) == null)
+        {
+            playerData.players = playerData.players.Concat(new Player[] { player }).ToArray();
+        }   
     }
     public void RemovePlayer(ushort playersID)
     {
         playerCount--;
-        currentPlayers.Remove(FindPlayerFromID(playersID));
-
+        FindPlayerFromID(playerid: playersID).isConnected = false;
     }
-    public void Ban(ushort playersID, string reason)
+    public enum BanState { Banned, NotBanned, NotOnline, AlreadyBanned }
+    public BanState Ban(ushort playersID, string reason)
     {
         Player player = FindPlayerFromID(playersID);
-        Ban(player.SteamID, reason);
+        if (player == null)
+            return BanState.NotOnline; //This will give a false ban positive, but the player isn't connected
+        return Ban(player.SteamID, reason);
     }
-    public bool Ban(ulong steamID, string reason)
+    public BanState Ban(ulong steamID, string reason)
     {
         if (!CheckBan(steamID))
         {
             //BannedPlayers.Add(new Ban(steamID, reason));
-            return true;
+            Player bannedPlayer = FindPlayerFromID(steamID);
+            if (bannedPlayer == null)
+            {
+                bannedPlayer = new Player();
+                if (playerData.players == null)
+                {
+                    playerData.players = new Player[] { bannedPlayer };
+                }
+                else
+                {
+                    playerData.players = playerData.players.Concat(new Player[] { bannedPlayer }).ToArray();
+                }
+            }
+                
+            bannedPlayer.IsBanned = true;
+            bannedPlayer.BanReason = reason;
+            bannedPlayer.SteamID = steamID;
+            
+            SavePlayerData();
+            return BanState.Banned;
         }
         //This person is already banned
-        return false;
+        return BanState.AlreadyBanned;
     }
     public bool Unban(ulong steamID)
     {
-        /*
-        for (int i = 0; i < bannedPlayers.Count; i++)
+        if (playerData.players == null)
+            return false;
+        for (int i = 0; i < playerData.players.Length; i++)
         {
-            if (bannedPlayers[i].SteamID == steamID)
+            if (playerData.players[i].SteamID == steamID)
             {
-                bannedPlayers.Remove(bannedPlayers[i]);
+                if (!playerData.players[i].IsBanned)
+                    return false;//This is just to state to the server owner, that they are already not banned
+                playerData.players[i].IsBanned = false;
+                playerData.players[i].BanReason = null;
+                SavePlayerData();
                 return true;
             }
         }
-        */
+        
         return false;
     }
     public bool CheckBan(ulong steamID)
     {
+        if (playerData.players == null)
+            return false;
         foreach (Player player in playerData.players)
         {
-            if (player.IsBanned)
+            if (player.SteamID == steamID && player.IsBanned)
             {
                 return true;
             }
@@ -145,9 +190,11 @@ public class Server
     public bool CheckBan(ulong steamID, out string reason)
     {
         reason = "";
+        if (playerData.players == null)
+            return false; 
         foreach (Player player in playerData.players)
         {
-            if (player.IsBanned)
+            if (player.SteamID == steamID && player.IsBanned)
             {
                 reason = player.BanReason;
                 return true;
@@ -176,6 +223,8 @@ public class Player : PlayerData
     public bool IsBanned = false;
     public string BanReason = "";
     public bool isAdmin = false;
+    [XmlIgnore]
+    public bool isConnected;
     [XmlIgnore]
     public ushort ID;
     [XmlIgnore]
