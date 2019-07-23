@@ -5,17 +5,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityEngine.CrashReportHandler;
 using UnityEngine.SceneManagement;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using Steamworks;
 using ModLoader.Multiplayer;
+using DarkRift.Client.Unity;
+using DarkRift;
+using System.Net;
+using DarkRift.Client;
+using System.Reflection;
 
 namespace ModLoader
 {
     public class ModLoader : VTOLMOD
     {
+        private ModLoaderManager manager;
         //UI Objects
         GameObject warningPage, spmp, sp, mp, spModPage, spList, mpPV, mpIPPort, mpServerInfo;
         PoseBounds pb;
@@ -23,18 +28,69 @@ namespace ModLoader
 
 
         //Multiplayer
-        private MultiplayerMod multiplayer;
+
+        //This is the state which the client is currently in
+        public enum ConnectionState { Offline, Connecting, Lobby, Loading, InGame }
+        public ConnectionState state = ConnectionState.Offline;
+
+        //This is the information about what the player has chosen
+        public enum Vehicle { FA26B, AV42C, F45A }
+        public Vehicle vehicle = Vehicle.AV42C;
+        public string pilotName = "Pilot Name";
+
+
+        public UnityClient client { private set; get; }
+        public ModLoader modLoader;
+        public Text serverInfoText;
+
+        private string currentMap;
+
+        //Singleplayer
+
+        private Transform spTransform;
+        //This script needs to be attached onto "List" gameobject
+        private List<ModItem> localMods = new List<ModItem>();
+        private List<ModItem> onlineMods = new List<ModItem>();
+
+        private string mods = @"\mods";
+        private string root;
+        private string apiURL = "http://vtolapi.kevinjoosten.nl/availableMods";
+        private bool onLocal = true;
+
+        private ModSlot[] modSlots = new ModSlot[8];
+        private List list;
+        private VRInteractable nextInteractable, previousInteractable, loadInteractable;
+        private Text modTitleText, modDescriptionText, loadModText;
+        private Material nextMaterial, previousMaterial, loadModMaterial, redMaterial, greenMaterial;
+        private APIMod[] apimods = new APIMod[1];
 
         private void Start()
         {
+            
+
+            manager = ModLoaderManager.instance;
             SetInGameUI();
+
+            if (manager.doneFirstLoad)
+            {
+                //This user is returning from a multiplayer game
+                SwitchPage(Page.mpPV);
+            }
+            else
+            {
+                //This is the first time they have loaded
+                manager.doneFirstLoad = true;
+            }
+
+            SingleplayerStart();
+
+            client = ModLoaderManager.instance.GetUnityClient();
+            client.MessageReceived += MessageReceived;
+            client.Disconnected += Disconnected;
         }
         
         private void SetInGameUI()
         {
-            //Adding Multiplayer Script
-            multiplayer = gameObject.AddComponent<MultiplayerMod>();
-            multiplayer.modLoader = this;
             //This method moves around the panel on the second scene and creates a new one
 
             GameObject equipPanel = GameObject.Find("/Platoons/CarrierPlatoon/AlliedCarrier/ControlPanel (1)/EquipPanel");
@@ -57,7 +113,7 @@ namespace ModLoader
             Destroy(startButton);
 
             //Spawning the Mod Load Menu
-            GameObject canvaus = Instantiate(ModLoaderManager.instance.assets.LoadAsset<GameObject>("ModLoader"));
+            GameObject canvaus = Instantiate(manager.assets.LoadAsset<GameObject>("ModLoader"));
             canvaus.transform.position = new Vector3(-36.1251f, 25.9583f, 303.7759f);
             canvaus.transform.rotation = Quaternion.Euler(-0.303f, -46.172f, -69.8f);
 
@@ -121,20 +177,16 @@ namespace ModLoader
            
             spListStart.OnInteract.AddListener(delegate { SceneManager.LoadScene(2); });
 
-            SPModManager modManager = spList.AddComponent<SPModManager>();
-            modManager.assets = ModLoaderManager.instance.assets;
-            modManager.discord = gameObject.GetComponent<DiscordController>();
-            modManager.modloader = this;
-            modManager.SetButtons(spListNextPage.gameObject, spListPreviousPage.gameObject);
-            modManager.SetModPageItems(
+            SetButtons(spListNextPage.gameObject, spListPreviousPage.gameObject);
+            SetModPageItems(
                 spModLoad,
                 spModPage.transform.GetChild(0).GetComponent<Text>(),
                 spModPage.transform.GetChild(1).GetComponent<Text>(),
                 spModPage.transform.GetChild(2).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material,
                 spModPage.transform.GetChild(2).GetChild(1).GetComponent<Text>());
-            spListSwitch.OnInteract.AddListener(delegate {modManager.SwitchButton(); });
-            spListNextPage.OnInteract.AddListener(delegate { modManager.NextPage(); });
-            spListPreviousPage.OnInteract.AddListener(delegate { modManager.PreviousPage(); });
+            spListSwitch.OnInteract.AddListener(delegate {SwitchButton(); });
+            spListNextPage.OnInteract.AddListener(delegate { NextPage(); });
+            spListPreviousPage.OnInteract.AddListener(delegate { PreviousPage(); });
             //MP Pilot and Vehicle
             VRInteractable mpPVAV42 = mpPV.transform.GetChild(2).GetChild(0).gameObject.AddComponent<VRInteractable>();
             VRInteractable mpPVFA26 = mpPV.transform.GetChild(3).GetChild(0).gameObject.AddComponent<VRInteractable>();
@@ -157,9 +209,9 @@ namespace ModLoader
             pilot1.interactableName = "Select Pilot";
             pilot2.interactableName = "Select Pilot";
             mpPVContinue.interactableName = "Continue";
-            mpPVAV42.OnInteract.AddListener(delegate { multiplayer.SwitchVehicle(MultiplayerMod.Vehicle.AV42C); });
-            mpPVFA26.OnInteract.AddListener(delegate { multiplayer.SwitchVehicle(MultiplayerMod.Vehicle.FA26B); });
-            mpPVF45.OnInteract.AddListener(delegate { multiplayer.SwitchVehicle(MultiplayerMod.Vehicle.F45A); });
+            mpPVAV42.OnInteract.AddListener(delegate { SwitchVehicle(Vehicle.AV42C); });
+            mpPVFA26.OnInteract.AddListener(delegate { SwitchVehicle(Vehicle.FA26B); });
+            mpPVF45.OnInteract.AddListener(delegate { SwitchVehicle(Vehicle.F45A); });
             mpPVContinue.OnInteract.AddListener(delegate { SwitchPage(Page.mpIPPort); });
 
             Console.Log("Pilot Stuff");
@@ -174,7 +226,7 @@ namespace ModLoader
             }
             Debug.Log("Setting Pilot");
             //Setting the pilot to the first value (would cause an error if they haven't got any pilots)
-            multiplayer.pilotName = pilots[0].pilotName;
+            pilotName = pilots[0].pilotName;
 
             Console.Log("Disabling Buttons");
             //Dealing with Pilots
@@ -188,28 +240,28 @@ namespace ModLoader
                 Console.Log("1");
                 pilot0.transform.parent.parent.gameObject.SetActive(true);
                 mpPV.transform.GetChild(6).GetChild(1).GetComponent<Text>().text = pilots[0].pilotName;
-                pilot0.OnInteract.AddListener(delegate { multiplayer.pilotName = pilots[0].pilotName; ; });
+                pilot0.OnInteract.AddListener(delegate { pilotName = pilots[0].pilotName; ; });
             }
             if (pilots.Count >= 2)
             {
                 Console.Log("2");
                 pilot1.transform.parent.parent.gameObject.SetActive(true);
                 mpPV.transform.GetChild(7).GetChild(1).GetComponent<Text>().text = pilots[1].pilotName;
-                pilot1.OnInteract.AddListener(delegate { multiplayer.pilotName = pilots[1].pilotName; });
+                pilot1.OnInteract.AddListener(delegate { pilotName = pilots[1].pilotName; });
             }
             if (pilots.Count >= 3)
             {
                 Console.Log("3");
                 pilot2.transform.parent.parent.gameObject.SetActive(true);
                 mpPV.transform.GetChild(8).GetChild(1).GetComponent<Text>().text = pilots[2].pilotName;
-                pilot2.OnInteract.AddListener(delegate { multiplayer.pilotName = pilots[2].pilotName; });
+                pilot2.OnInteract.AddListener(delegate { pilotName = pilots[2].pilotName; });
             }
 
             //MP Server IP and Port
             VRInteractable mpIPPortJoin = mpIPPort.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
             SetDefaultInteractable(mpIPPortJoin);
             mpIPPortJoin.interactableName = "Join Lobby";
-            mpIPPortJoin.OnInteract.AddListener(delegate { multiplayer.ConnectToServer(); });
+            mpIPPortJoin.OnInteract.AddListener(delegate { ConnectToServer(); });
 
             //MP Server Info
             VRInteractable mpInfoJoin = mpServerInfo.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
@@ -218,10 +270,10 @@ namespace ModLoader
             SetDefaultInteractable(mpInfoBack);
             mpInfoJoin.interactableName = "Join Game";
             mpInfoBack.interactableName = "Back";
-            mpInfoJoin.OnInteract.AddListener(delegate { multiplayer.JoinGame(); });
-            mpInfoBack.OnInteract.AddListener(delegate { multiplayer.client.Disconnect(); });
+            mpInfoJoin.OnInteract.AddListener(delegate { JoinGame(); });
+            mpInfoBack.OnInteract.AddListener(delegate { client.Disconnect(); });
 
-            multiplayer.serverInfoText = mpServerInfo.transform.GetChild(2).GetComponent<Text>();
+            serverInfoText = mpServerInfo.transform.GetChild(2).GetComponent<Text>();
         }
 
         public VRInteractable SetDefaultInteractable(VRInteractable interactable)
@@ -236,8 +288,6 @@ namespace ModLoader
             returnValue.button = VRInteractable.Buttons.Trigger;
             return returnValue;
         }
-
-        
         public void SwitchPage(Page page)
         {
             warningPage.SetActive(false);
@@ -262,7 +312,6 @@ namespace ModLoader
                     spModPage.SetActive(true);
                     break;
                 case Page.spList:
-                    multiplayer.enabled = false;
                     sp.SetActive(true);
                     spList.SetActive(true);
                     break;
@@ -282,6 +331,443 @@ namespace ModLoader
             }
 
             Console.Log("Switched Page to " + page.ToString());
+        }
+
+        #region Multiplayer
+        public void ConnectToServer(string ip = "86.154.179.6", int port = 4296)
+        {
+            state = ConnectionState.Connecting;
+            try
+            {
+                //This causes an error if it doesn't connect
+                client.Connect(IPAddress.Parse(ip), port, DarkRift.IPVersion.IPv4);
+
+            }
+            catch
+            {
+                //Failed to connect
+                return;
+            }
+
+            //Sending a message of our information
+            using (DarkRiftWriter writer = DarkRiftWriter.Create())
+            {
+                writer.Write(SteamUser.GetSteamID().m_SteamID);
+                writer.Write(SteamFriends.GetPersonaName());
+                using (Message message = Message.Create((ushort)Tags.UserInfo, writer))
+                    client.SendMessage(message, SendMode.Reliable);
+            }
+        }
+
+        private void MessageReceived(object sender, MessageReceivedEventArgs e)
+        {
+            //This should only need to handle one message, 
+            //which is displaying the info about the server to the user
+            using (Message message = e.GetMessage())
+            {
+                using (DarkRiftReader reader = message.GetReader())
+                {
+                    ushort tag = (ushort)message.Tag;
+                    switch (tag)
+                    {
+                        case (ushort)Tags.LobbyInfo:
+                            while (reader.Position < reader.Length)
+                            {
+                                string serverName = reader.ReadString();
+                                string mapName = reader.ReadString();
+                                int playerCount = reader.ReadInt32();
+                                int maxPlayerCount = reader.ReadInt32();
+                                string playersNames = reader.ReadString();
+
+                                currentMap = mapName;
+                                serverInfoText.text = "Name: " + serverName + "\nMap: " + mapName
+                                    + "\nPlayers: " + playerCount + "/" + maxPlayerCount + "\n"
+                                    + playersNames;
+
+                                state = ConnectionState.Lobby;
+                                modLoader.SwitchPage(ModLoader.Page.mpServerInfo);
+                            }
+                            break;
+                    }
+
+                    //Need to check if the bann message was returned
+
+                }
+            }
+        }
+
+        private void Disconnected(object sender, DisconnectedEventArgs e)
+        {
+            //When we press the button to go back, we disconnect then once fully disconnected we can switch page
+            if (modLoader)
+                modLoader.SwitchPage(ModLoader.Page.mpIPPort);
+            currentMap = "NULL";
+        }
+
+        public void JoinGame()
+        {
+            client.MessageReceived -= MessageReceived;
+
+            manager.StartMultiplayerProcedure(vehicle,pilotName);
+        }
+        public void SwitchVehicle(Vehicle newVehicle)
+        {
+            vehicle = newVehicle;
+            //Changing the buttons colours
+            switch (newVehicle)
+            {
+                case Vehicle.AV42C:
+                    Console.Log("Switched player's vehicle to AV-42C");
+                    break;
+                case Vehicle.F45A:
+                    Console.Log("Switched player's vehicle to F-45A");
+                    break;
+                case Vehicle.FA26B:
+                    Console.Log("Switched player's vehicle to F/A-26B");
+                    break;
+            }
+        }
+        #endregion
+
+        #region Singleplayer
+
+        private void SingleplayerStart()
+        {
+            root = Directory.GetCurrentDirectory() + @"\VTOLVR_ModLoader";
+            if (!Directory.Exists(root + mods))
+                Directory.CreateDirectory(root + mods);
+            spTransform = spList.transform;
+
+            modSlots[0] = new ModSlot(spTransform.GetChild(3).gameObject, spTransform.GetChild(3).GetChild(1).GetComponent<Text>(), spTransform.GetChild(3).GetChild(0).gameObject.AddComponent<VRInteractable>());
+            modSlots[1] = new ModSlot(spTransform.GetChild(4).gameObject, spTransform.GetChild(4).GetChild(1).GetComponent<Text>(), spTransform.GetChild(4).GetChild(0).gameObject.AddComponent<VRInteractable>());
+            modSlots[2] = new ModSlot(spTransform.GetChild(5).gameObject, spTransform.GetChild(5).GetChild(1).GetComponent<Text>(), spTransform.GetChild(5).GetChild(0).gameObject.AddComponent<VRInteractable>());
+            modSlots[3] = new ModSlot(spTransform.GetChild(6).gameObject, spTransform.GetChild(6).GetChild(1).GetComponent<Text>(), spTransform.GetChild(6).GetChild(0).gameObject.AddComponent<VRInteractable>());
+            modSlots[4] = new ModSlot(spTransform.GetChild(7).gameObject, spTransform.GetChild(7).GetChild(1).GetComponent<Text>(), spTransform.GetChild(7).GetChild(0).gameObject.AddComponent<VRInteractable>());
+            modSlots[5] = new ModSlot(spTransform.GetChild(8).gameObject, spTransform.GetChild(8).GetChild(1).GetComponent<Text>(), spTransform.GetChild(8).GetChild(0).gameObject.AddComponent<VRInteractable>());
+            modSlots[6] = new ModSlot(spTransform.GetChild(9).gameObject, spTransform.GetChild(9).GetChild(1).GetComponent<Text>(), spTransform.GetChild(9).GetChild(0).gameObject.AddComponent<VRInteractable>());
+            modSlots[7] = new ModSlot(spTransform.GetChild(10).gameObject, spTransform.GetChild(10).GetChild(1).GetComponent<Text>(), spTransform.GetChild(10).GetChild(0).gameObject.AddComponent<VRInteractable>());
+
+            SetDefaultInteractable(modSlots[0].interactable);
+            SetDefaultInteractable(modSlots[1].interactable);
+            SetDefaultInteractable(modSlots[2].interactable);
+            SetDefaultInteractable(modSlots[3].interactable);
+            SetDefaultInteractable(modSlots[4].interactable);
+            SetDefaultInteractable(modSlots[5].interactable);
+            SetDefaultInteractable(modSlots[6].interactable);
+            SetDefaultInteractable(modSlots[7].interactable);
+
+            FindLocalMods();
+
+            //Adding the materials from the asset bundle
+            //redMaterial = assets.LoadAsset<Material>("Red");
+            //greenMaterial = assets.LoadAsset<Material>("Green");
+            redMaterial = new Material(Shader.Find("Diffuse"));
+            redMaterial.color = Color.red;
+            greenMaterial = new Material(Shader.Find("Diffuse"));
+            greenMaterial.color = Color.green;
+
+            UpdateList(true);
+        }
+        private void FindLocalMods()
+        {
+            DirectoryInfo folder = new DirectoryInfo(root + mods);
+            FileInfo[] files = folder.GetFiles("*.dll");
+            localMods = new List<ModItem>(files.Length);
+
+            foreach (FileInfo file in files)
+            {
+                //Going though each .dll file, checking if there is a class which derives from VTOLMOD
+                Assembly lastAssembly = Assembly.Load(File.ReadAllBytes(file.FullName));
+                IEnumerable<Type> source = from t in lastAssembly.GetTypes() where t.IsSubclassOf(typeof(VTOLMOD)) select t;
+
+                if (source.Count() != 1)
+                {
+                    Debug.Log("The mod " + file.FullName + " doesn't specify a mod class or specifies more than one");
+                }
+                else
+                {
+                    ModItem item = source.First().GetInfo();
+                    item.SetPath(file.FullName);
+                    item.SetAssembly(lastAssembly);
+                    localMods.Add(item);
+                }
+            }
+
+        }
+
+        private IEnumerator FindOnlineMods()
+        {
+            /*
+            //Featch the information and fill it into the list
+            using (UnityWebRequest request = UnityWebRequest.Get(apiURL))
+            {
+                yield return request.SendWebRequest();
+
+                string returnedJson = "{\"Items\":" + request.downloadHandler.text + "}";
+
+                Debug.Log(returnedJson);
+                //This for some reason keeps returning null as a mod in VTOL but in a new Unity Project its fine
+                apimods = JsonHelper.FromJson<APIMod>(returnedJson);
+
+                if (apimods == null)
+                    Debug.LogError("API is Null");
+
+            onlineMods = new List<ModItem>(apimods.Length);
+                foreach (APIMod mod in apimods)
+                {
+                    onlineMods.Add(new ModItem(mod.Name, mod.Description, mod.URL, mod.Version, false));
+                    Debug.Log("Added mod " + mod.Name);
+                }
+                UpdateList(false);
+            }
+            */
+            yield break;
+        }
+        public void OnPageChanged(ModLoader.Page newPage)
+        {
+            if (newPage == ModLoader.Page.spList)
+                UpdateList(true);
+        }
+        private void UpdateList(bool local)
+        {
+            List<ModItem> items = local ? localMods : onlineMods;
+            list = new List(items);
+            for (int i = 0; i < 8; i++)
+            {
+                if (list.mods.Count > i)
+                {
+                    ModItem currentItem = list.mods[(list.currentPage * 8) + i];
+                    modSlots[i].slot.SetActive(true);
+                    modSlots[i].slotText.text = currentItem.name + " " + (currentItem.isLoaded ? "[Loaded]" : "");
+                    Debug.Log("This mod is " + currentItem.isLoaded);
+                    modSlots[i].interactable.interactableName = "View " + currentItem.name;
+                    modSlots[i].interactable.button = VRInteractable.Buttons.Trigger;
+                    modSlots[i].interactable.OnInteract.AddListener(delegate { OpenMod(currentItem, local); });
+                }
+                else
+                {
+                    modSlots[i].slot.SetActive(false);
+                    modSlots[i].slotText.text = "Mod Name";
+                    modSlots[i].interactable.interactableName = "Mod Name";
+                    modSlots[i].interactable.OnInteract.RemoveAllListeners();
+                }
+            }
+            UpdatePageButtons();
+        }
+
+        public void NextPage()
+        {
+            list.currentPage++;
+            for (int i = 0; i < 8; i++)
+            {
+                if (list.mods.Count <= (list.currentPage * 8) + i + 1)
+                {
+                    modSlots[i].slot.SetActive(true);
+                    modSlots[i].slotText.text = list.mods[(list.currentPage * 8) + i].name;
+                }
+            }
+            UpdatePageButtons();
+        }
+
+        public void PreviousPage()
+        {
+            list.currentPage--;
+            for (int i = 0; i < 8; i++)
+            {
+                if (list.mods.Count <= (list.currentPage * 8) + i + 1)
+                {
+                    modSlots[i].slot.SetActive(true);
+                    modSlots[i].slotText.text = list.mods[(list.currentPage * 8) + i].name;
+                }
+            }
+            UpdatePageButtons();
+        }
+
+        public void SetButtons(GameObject next, GameObject previous)
+        {
+            nextInteractable = next.GetComponent<VRInteractable>();
+            previousInteractable = previous.GetComponent<VRInteractable>();
+            nextMaterial = next.GetComponent<MeshRenderer>().material;
+            previousMaterial = previous.GetComponent<MeshRenderer>().material;
+        }
+
+        public void SetModPageItems(VRInteractable loadInteractable, Text title, Text description, Material loadModMaterial, Text loadModText)
+        {
+            this.loadInteractable = loadInteractable;
+            modTitleText = title;
+            modDescriptionText = description;
+            this.loadModMaterial = loadModMaterial;
+            this.loadModText = loadModText;
+        }
+
+        private void UpdatePageButtons()
+        {
+            if (list.currentPage + 1 < list.pageCount)
+            {
+                nextInteractable.enabled = true;
+                nextMaterial = greenMaterial;
+            }
+            else
+            {
+                nextInteractable.enabled = false;
+                nextMaterial = redMaterial;
+            }
+
+            if (list.currentPage > 0)
+            {
+                previousInteractable.enabled = true;
+                previousMaterial = greenMaterial;
+            }
+            else
+            {
+                previousInteractable.enabled = false;
+                previousMaterial = redMaterial;
+            }
+        }
+
+        public void OpenMod(ModItem item, bool isLocal)
+        {
+            Debug.Log("Opening Mod " + item.name);
+
+            modTitleText.text = item.name;
+            modDescriptionText.text = item.description;
+            loadInteractable.OnInteract.RemoveAllListeners();
+            SwitchPage(Page.spMod);
+            if (isLocal)
+            {
+                if (item.isLoaded)
+                {
+                    loadModText.text = "Loaded!";
+                    loadModMaterial.color = Color.red;
+                    return;
+                }
+                loadModText.text = "Load";
+                loadModMaterial.color = Color.green;
+                loadInteractable.OnInteract.AddListener(delegate { LoadMod(item); });
+            }
+            else
+            {
+                //loadModText.text = "Download";
+                //loadModMaterial.color = Color.green;
+                //loadInteractable.OnInteract.AddListener(delegate { DownloadMod(item); });
+            }
+
+        }
+
+        public void LoadMod(ModItem item)
+        {
+            if (item.isLoaded)
+            {
+                Debug.Log(item.name + " is already loaded");
+                return;
+            }
+            IEnumerable<Type> source = from t in item.assembly.GetTypes() where t.IsSubclassOf(typeof(VTOLMOD)) select t;
+            if (source != null && source.Count() == 1)
+            {
+                new GameObject(item.name, source.First());
+                localMods.Find(x => x.name == item.name).isLoaded = true;
+
+                loadInteractable.OnInteract.RemoveAllListeners();
+                loadModText.text = "Loaded!";
+                loadModMaterial.color = Color.red;
+                ModLoaderManager.instance.loadedModsCount++;
+                ModLoaderManager.instance.UpdateDiscord();
+            }
+            else
+            {
+                Debug.LogError("Source is null");
+            }
+        }
+        public void DownloadMod(ModItem item)
+        {
+            //This handles the download and placing the file in the correct location
+        }
+
+        public void SwitchButton()
+        {
+            //This is getting disabled till the json issue gets fixed after release of 2.0.0
+            return;
+            onLocal = !onLocal;
+            if (onLocal)
+                FindLocalMods();
+            else
+                StartCoroutine(FindOnlineMods());
+        }
+        public class ModSlot
+        {
+            public GameObject slot;
+            public Text slotText;
+            public VRInteractable interactable;
+            public ModSlot(GameObject slot, Text slotText, VRInteractable interactable)
+            {
+                this.slot = slot;
+                this.slotText = slotText;
+                this.interactable = interactable;
+            }
+        }
+
+        public class List
+        {
+            public int currentPage;
+            public int pageCount;
+            public List<ModItem> mods;
+            public List(List<ModItem> mods)
+            {
+                this.mods = mods;
+                pageCount = mods.Count;
+                currentPage = 0;
+            }
+        }
+        public class ModItem
+        {
+            public string name { private set; get; }
+            public string version { private set; get; }
+            public string description { private set; get; }
+            public string downloadURL { private set; get; }
+            public Assembly assembly { private set; get; }
+            public string path { private set; get; }
+            public bool isLoaded = false;
+            public bool isLocal = false;
+            public ModItem(string name, string description, string downloadURL, string version, bool isLocal)
+            {
+                this.name = name;
+                this.description = description;
+                this.downloadURL = downloadURL;
+                this.version = version;
+                this.isLocal = isLocal;
+            }
+
+            public void SetAssembly(Assembly assembly)
+            {
+                this.assembly = assembly;
+                Debug.Log("We have set the assembly " + assembly.FullName);
+            }
+
+            public void SetPath(string path)
+            {
+                this.path = path;
+            }
+        }
+
+        [Serializable]
+        public class APIMod
+        {
+            public string Name;
+            public string Description;
+            public string Creator;
+            public string URL;
+            public string Version;
+        }
+        #endregion
+    }
+
+    public static class Extensions
+    {
+        public static ModLoader.ModItem GetInfo(this Type type)
+        {
+            VTOLMOD.Info info = type.GetCustomAttributes(typeof(VTOLMOD.Info), true).FirstOrDefault<object>() as VTOLMOD.Info;
+            ModLoader.ModItem item = new ModLoader.ModItem(info.name, info.description, info.downloadURL, info.version, true);
+            return item;
         }
     }
 }

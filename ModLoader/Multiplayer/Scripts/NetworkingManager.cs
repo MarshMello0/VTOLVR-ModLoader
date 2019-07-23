@@ -19,7 +19,7 @@ namespace ModLoader.Multiplayer
         //This handles all of the multiplayer code in the game scene
 
         public UnityClient client;
-        public MultiplayerMod mod;
+        public ModLoader mod;
 
         //These are things used to spawn other clients in and update them
         private GameObject av42cPrefab, fa26bPrefab;
@@ -38,6 +38,11 @@ namespace ModLoader.Multiplayer
         private Health vehicleHeath; //Used to check if the vehicle crashed and died
         private BlackoutEffect blackoutEffect; //Used to check if the player died by G Forces
 
+        private void Start()
+        {
+            client = ModLoaderManager.instance.GetUnityClient();
+            StartCoroutine(StartProcedureEnumerator());
+        }
         private void Update()
         {
             if (false)
@@ -57,7 +62,7 @@ Player Count: " + playerCount.ToString();
                     "\nPosition:" + player.GetPosition() + " Rotation:" + player.GetRotation().eulerAngles +
                     "\nSpeed:" + player.speed + " Land Gear:" + player.landingGear + " Flaps:" + player.flaps +
                     "\nPitch, Yaw, Roll" + player.GetPitchYawRoll() + " Breaks:" + player.breaks + " Throttle:" + player.throttle + " Wheels:" + player.wheels;
-                if (player.vehicle == MultiplayerMod.Vehicle.AV42C)
+                if (player.vehicle == ModLoader.Vehicle.AV42C)
                 {
                     playerListString += "\nThrusters Angle:" + player.thrusterAngle;
                 }
@@ -65,10 +70,7 @@ Player Count: " + playerCount.ToString();
             }
         }
 
-        public void StartProcedure()
-        {
-            StartCoroutine(StartProcedureEnumerator());
-        }
+
 
         private IEnumerator StartProcedureEnumerator()
         {
@@ -180,10 +182,10 @@ Player Count: " + playerCount.ToString();
         {
             //This is going to be searching for object in the scene that needed to be spawned in by the game
             //and the found to sync across the network
-            GameObject vehicle = GameObject.Find(mod.vehicle == MultiplayerMod.Vehicle.AV42C ? "VTOL4(Clone)" : "FA-26B(Clone)");
+            GameObject vehicle = GameObject.Find(mod.vehicle == ModLoader.Vehicle.AV42C ? "VTOL4(Clone)" : "FA-26B(Clone)");
             if (vehicle)
             {
-                if (mod.vehicle == MultiplayerMod.Vehicle.AV42C)
+                if (mod.vehicle == ModLoader.Vehicle.AV42C)
                 {
                     AV42cNetworkedObjectSender sender = vehicle.AddComponent<AV42cNetworkedObjectSender>();
                     sender.client = client;
@@ -206,7 +208,7 @@ Player Count: " + playerCount.ToString();
         private IEnumerator StorePlayersScripts()
         {
             //This is finding and storing scripts which will be used later
-            GameObject vehicle = GameObject.Find(mod.vehicle == MultiplayerMod.Vehicle.AV42C ? "VTOL4(Clone)" : "FA-26B(Clone)");
+            GameObject vehicle = GameObject.Find(mod.vehicle == ModLoader.Vehicle.AV42C ? "VTOL4(Clone)" : "FA-26B(Clone)");
             if (vehicle)
             {
                 vehicleHeath = vehicle.GetComponent<Health>();
@@ -246,7 +248,7 @@ Player Count: " + playerCount.ToString();
             using (DarkRiftWriter writer = DarkRiftWriter.Create())
             {
                 writer.Write(mod.pilotName);
-                writer.Write(mod.vehicle == MultiplayerMod.Vehicle.AV42C ? "AV-42c" : "F/A-26B");
+                writer.Write(mod.vehicle == ModLoader.Vehicle.AV42C ? "AV-42c" : "F/A-26B");
 
                 using (Message message = Message.Create((ushort)Tags.SpawnPlayerTag, writer))
                 {
@@ -309,16 +311,16 @@ Player Count: " + playerCount.ToString();
                     ushort id = reader.ReadUInt16();
                     string pilotName = reader.ReadString();
                     string vehicle = reader.ReadString();
-                    MultiplayerMod.Vehicle vehicleEnum = MultiplayerMod.Vehicle.FA26B;
+                    ModLoader.Vehicle vehicleEnum = ModLoader.Vehicle.FA26B;
                     if (vehicle == "AV-42c")
-                        vehicleEnum = MultiplayerMod.Vehicle.AV42C;
+                        vehicleEnum = ModLoader.Vehicle.AV42C;
 
                     SpawnPlayer(id, pilotName, vehicleEnum);
                 }
                 UpdatePlayerListString();
             }
         }
-        private void SpawnPlayer(ushort id, string pilotName, MultiplayerMod.Vehicle vehicle)
+        private void SpawnPlayer(ushort id, string pilotName, ModLoader.Vehicle vehicle)
         {
             Player newPlayer = new Player(id, pilotName, vehicle);
             playersInfo.Add(newPlayer);
@@ -360,7 +362,7 @@ Player Count: " + playerCount.ToString();
 
             //Spawning the Vehicle
 
-            GameObject vehicleGO = Instantiate(vehicle == MultiplayerMod.Vehicle.AV42C ? av42cPrefab : fa26bPrefab);
+            GameObject vehicleGO = Instantiate(vehicle == ModLoader.Vehicle.AV42C ? av42cPrefab : fa26bPrefab);
             vehicleGO.GetComponent<AIPilot>().startLanded = true;
             vehicleGO.transform.position += new Vector3(0, 10, 0);
             Console.Log("Enabling God Mode");
@@ -368,7 +370,7 @@ Player Count: " + playerCount.ToString();
 
             vehicleGO.name = "[Multiplayer] Player: " + pilotName;
 
-            if (vehicle == MultiplayerMod.Vehicle.AV42C)
+            if (vehicle == ModLoader.Vehicle.AV42C)
             {
                 Console.Log("This new player is using AV42-c");
                 AV42cNetworkedObjectReceiver vehicleReceiver = vehicleGO.AddComponent<AV42cNetworkedObjectReceiver>();
