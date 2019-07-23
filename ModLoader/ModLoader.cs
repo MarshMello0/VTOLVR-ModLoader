@@ -349,7 +349,7 @@ namespace ModLoader
             client = ModLoaderManager.instance.GetUnityClient();
             client.MessageReceived += MessageReceived;
         }
-        public void ConnectToServer(string ip = "86.154.179.6", int port = 4296)
+        public void ConnectToServer(string ip = "86.182.110.125", int port = 4296)
         {
             state = ConnectionState.Connecting;
             try
@@ -368,6 +368,7 @@ namespace ModLoader
             using (DarkRiftWriter writer = DarkRiftWriter.Create())
             {
                 writer.Write(SteamUser.GetSteamID().m_SteamID);
+                writer.Write(pilotName);
                 writer.Write(SteamFriends.GetPersonaName());
                 using (Message message = Message.Create((ushort)Tags.UserInfo, writer))
                     client.SendMessage(message, SendMode.Reliable);
@@ -408,7 +409,7 @@ namespace ModLoader
                             {
                                 string bannedReason = reader.ReadString();
                                 SwitchPage(Page.mpBanned);
-                                bannedReasonText.text = bannedReason;
+                                bannedReasonText.text = "You are banned from this server :(\n\nReason: \"" + bannedReason + "\"";
                             }
                             client.Disconnect();
                             break;
