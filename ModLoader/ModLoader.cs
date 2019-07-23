@@ -66,8 +66,6 @@ namespace ModLoader
 
         private void Start()
         {
-            
-
             manager = ModLoaderManager.instance;
             SetInGameUI();
 
@@ -75,20 +73,17 @@ namespace ModLoader
             {
                 //This user is returning from a multiplayer game
                 SwitchPage(Page.mpPV);
+                SetupMultiplayer();
             }
             else
             {
                 //This is the first time they have loaded
                 manager.doneFirstLoad = true;
             }
-
-            SingleplayerStart();
-
-            client = ModLoaderManager.instance.GetUnityClient();
-            client.MessageReceived += MessageReceived;
-            client.Disconnected += Disconnected;
         }
-        
+
+        #region Setting UI Mod Loader
+
         private void SetInGameUI()
         {
             //This method moves around the panel on the second scene and creates a new one
@@ -151,8 +146,8 @@ namespace ModLoader
             SetDefaultInteractable(mpButton);
             spButton.interactableName = "Start Singleplayer";
             mpButton.interactableName = "Start Multiplayer";
-            spButton.OnInteract.AddListener(delegate { SwitchPage(Page.spList); });
-            mpButton.OnInteract.AddListener(delegate { SwitchPage(Page.mpPV); });
+            spButton.OnInteract.AddListener(delegate { SwitchPage(Page.spList); SetupSinglePlayer(); });
+            mpButton.OnInteract.AddListener(delegate { SwitchPage(Page.mpPV); SetupMultiplayer(); });
             //SP Mod Page
             VRInteractable spModBack = spModPage.transform.GetChild(3).GetChild(0).gameObject.AddComponent<VRInteractable>();
             VRInteractable spModLoad = spModPage.transform.GetChild(2).GetChild(0).gameObject.AddComponent<VRInteractable>();
@@ -333,7 +328,16 @@ namespace ModLoader
             Console.Log("Switched Page to " + page.ToString());
         }
 
+        #endregion
+
         #region Multiplayer
+
+        private void SetupMultiplayer()
+        {
+            client = ModLoaderManager.instance.GetUnityClient();
+            client.MessageReceived += MessageReceived;
+            client.Disconnected += Disconnected;
+        }
         public void ConnectToServer(string ip = "86.154.179.6", int port = 4296)
         {
             state = ConnectionState.Connecting;
@@ -431,7 +435,7 @@ namespace ModLoader
 
         #region Singleplayer
 
-        private void SingleplayerStart()
+        private void SetupSinglePlayer()
         {
             root = Directory.GetCurrentDirectory() + @"\VTOLVR_ModLoader";
             if (!Directory.Exists(root + mods))
