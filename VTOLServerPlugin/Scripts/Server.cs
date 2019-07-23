@@ -233,7 +233,6 @@ public class Player : PlayerData
     public string vehicle;
     [XmlIgnore]
     public string currentName;
-    [XmlIgnore]
     public string pilotName;
     public Player(ushort ID, IClient client, string vehicle, string PilotName, ulong SteamID, string SteamName, bool useSteamName)
     {
