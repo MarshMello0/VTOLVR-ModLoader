@@ -14,10 +14,16 @@ public class Server
     public string Description = "Server Description";
     public Maps Map = Maps.Akutan;
     public int MaxPlayerCount = 5;
+    public int MaxBudget = 99999;
+    public Weapons WeaponsData = new Weapons();
+    public bool SpawnAircraftCarrier = true;
+    public bool SpawnAirRefuelTanker = true;
     /// <summary>
     /// If ture, this uses the players steam name over the pilots name in game
     /// </summary>
     public bool useSteamName;
+
+
     [XmlIgnore] public int playerCount { private set; get; }
     [XmlIgnore] public PlayerData playerData = new PlayerData();
 
@@ -80,14 +86,20 @@ public class Server
     private Player FindPlayerFromID(ushort playerid)
     {
         if (playerData.players == null)
+        {
+            plugin.Log("Players is null #####");
             return null;
+        }
+            
         for (int i = 0; i < playerData.players.Length; i++)
         {
             if (playerData.players[i].isConnected && playerData.players[i].ID == playerid)
             {
                 return playerData.players[i];
             }
+            plugin.Log(playerData.players[i].ID + "");
         }
+        plugin.Log("Got to end");
         return null;
     }
     private Player FindPlayerFromID(ulong steamID)
@@ -107,16 +119,40 @@ public class Server
     public void AddPlayer(Player player)
     {
         playerCount++;
-        player.isConnected = true;
-        if (FindPlayerFromID(player.SteamID) == null)
+        Player newPlayer = FindPlayerFromID(player.SteamID);
+        if (newPlayer == null)
         {
-            playerData.players = playerData.players.Concat(new Player[] { player }).ToArray();
-        }   
+            player.isConnected = true;
+            if (playerData.players == null)
+            {
+                playerData.players = new Player[1];
+                playerData.players[0] = player;
+            }
+            else
+            {
+                playerData.players = playerData.players.Concat(new Player[] { player }).ToArray();
+            }
+        }
+        else
+        {
+            //Applying new information to our stored information
+            newPlayer.ID = player.ID;
+            newPlayer.isConnected = true;
+            newPlayer.vehicle = player.vehicle;
+            newPlayer.client = player.client;
+            newPlayer.LastIP = player.client.RemoteTcpEndPoint.Address.ToString(); //Could of changed
+            newPlayer.SteamName = player.SteamName; //Could of changed
+            newPlayer.pilotName = player.pilotName; //Could of changed
+        }
+        SavePlayerData();
     }
     public void RemovePlayer(ushort playersID)
     {
-        playerCount--;
-        FindPlayerFromID(playerid: playersID).isConnected = false;
+        plugin.Log("Removing Player");
+        playerCount = playerCount - 1;
+        plugin.Log("Finding Player " + playersID);
+        Player playerLeaving = FindPlayerFromID(playerid: playersID);
+        playerLeaving.isConnected = false;
     }
     public enum BanState { Banned, NotBanned, NotOnline, AlreadyBanned }
     public BanState Ban(ushort playersID, string reason)
@@ -265,5 +301,11 @@ public class PlayerData
     {
 
     }
+}
+public class Weapons
+{
+    [XmlAttribute]
+    public bool AllowWeapons = true;
+    public Weapons() { }
 }
 public enum Maps { Akutan }

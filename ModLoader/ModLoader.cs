@@ -349,7 +349,7 @@ namespace ModLoader
             client = ModLoaderManager.instance.GetUnityClient();
             client.MessageReceived += MessageReceived;
         }
-        public void ConnectToServer(string ip = "86.182.110.125", int port = 4296)
+        public void ConnectToServer(string ip = "159.180.107.127", int port = 4296)
         {
             state = ConnectionState.Connecting;
             try

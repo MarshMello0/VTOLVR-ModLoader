@@ -234,6 +234,9 @@ public class VTOLServerPlugin : Plugin
                 string PilotName = reader.ReadString();
                 string SteamName = reader.ReadString();
                 string banReason = "";
+
+                Player newPlayer = new Player(id, e.Client, "", PilotName, steamid, SteamName, true);
+                
                 if (!server.CheckBan(steamid, out banReason))
                 {
                     //Sending the information needed to display in the lobby page
@@ -254,7 +257,7 @@ public class VTOLServerPlugin : Plugin
                             }
 
                             //Removing that last ","
-                            playersNames = playersNames.Remove(playersNames.Length - 1);
+                            //playersNames = playersNames.Remove(playersNames.Length - 1); //Causing Error
                         }
 
 
@@ -265,6 +268,8 @@ public class VTOLServerPlugin : Plugin
                             e.Client.SendMessage(newmessage, SendMode.Reliable);
                             WriteEvent("Told " + e.Client.ID + " lobby information", LogType.Info);
                         }
+
+                        server.AddPlayer(newPlayer);
                     }
 
                     //Need to add the new player here instead of spawn tag method

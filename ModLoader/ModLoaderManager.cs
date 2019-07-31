@@ -164,11 +164,14 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
         }
         private IEnumerator CreateModLoader()
         {
+            Debug.Log("Creating Mod Loader");
             while (SceneManager.GetActiveScene().name != "SamplerScene")
             {
+                Debug.Log("Waiting for active Scene");
                 yield return null;
             }
-            GameObject modLoader = new GameObject("Mod Loader", typeof(ModLoader));
+            Debug.Log("Creating new gameobject");
+            new GameObject("Mod Loader", typeof(ModLoader));
         }
         public UnityClient GetUnityClient()
         {
@@ -186,7 +189,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
         private IEnumerator StartMultiplayerEnumerator(ModLoader.Vehicle vehicle, string pilotName)
         {
             VTMapManager.nextLaunchMode = VTMapManager.MapLaunchModes.Scenario;
-            LoadingSceneController.LoadScene(7);
+            LoadingSceneController.LoadScene(3);
 
             yield return new WaitForSeconds(5);
             //After here we should be in the loader scene
@@ -230,6 +233,8 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                 {
                     Console.Log("Setting Scenario");
                     PilotSaveManager.currentScenario = cs;
+                    PilotSaveManager.currentScenario.baseBudget = 999999;
+                    PilotSaveManager.currentScenario.totalBudget = 999999;
                     break;
                 }
             }
@@ -245,12 +250,23 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             while (SceneManager.GetActiveScene().buildIndex != 7)
             {
                 //Pausing this method till the loader scene is unloaded
+                if (SceneManager.GetActiveScene().buildIndex == 4)
+                {
+                    LoadingSceneController.instance.PlayerReady();
+                }
                 yield return null;
             }
 
             //Adding the networking script to the game which will handle all of the other stuff
-            NetworkingManager nm = new GameObject("Networking Manager").AddComponent<NetworkingManager>();            
+            NetworkingManager nm = new GameObject("Networking Manager").AddComponent<NetworkingManager>();
+            nm.pilotName = pilotName;
+            multiplayerVehicle = vehicle;
             client.MessageReceived += nm.MessageReceived;
+        }
+
+        void OnGUI()
+        {
+            GUI.Label(new Rect(100, 100, 100, 100), SceneManager.GetActiveScene().buildIndex + " < Scene Number");
         }
 
     }

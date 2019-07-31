@@ -19,7 +19,8 @@ namespace ModLoader.Multiplayer
         //This handles all of the multiplayer code in the game scene
 
         public UnityClient client;
-        public ModLoader mod;
+        private ModLoaderManager manager;
+        public string pilotName;
 
         //These are things used to spawn other clients in and update them
         private GameObject av42cPrefab, fa26bPrefab;
@@ -40,7 +41,8 @@ namespace ModLoader.Multiplayer
 
         private void Start()
         {
-            client = ModLoaderManager.instance.GetUnityClient();
+            manager = ModLoaderManager.instance;
+            client = manager.GetUnityClient();
             StartCoroutine(StartProcedureEnumerator());
         }
         private void Update()
@@ -182,10 +184,10 @@ Player Count: " + playerCount.ToString();
         {
             //This is going to be searching for object in the scene that needed to be spawned in by the game
             //and the found to sync across the network
-            GameObject vehicle = GameObject.Find(mod.vehicle == ModLoader.Vehicle.AV42C ? "VTOL4(Clone)" : "FA-26B(Clone)");
+            GameObject vehicle = GameObject.Find(manager.multiplayerVehicle == ModLoader.Vehicle.AV42C ? "VTOL4(Clone)" : "FA-26B(Clone)");
             if (vehicle)
             {
-                if (mod.vehicle == ModLoader.Vehicle.AV42C)
+                if (manager.multiplayerVehicle == ModLoader.Vehicle.AV42C)
                 {
                     AV42cNetworkedObjectSender sender = vehicle.AddComponent<AV42cNetworkedObjectSender>();
                     sender.client = client;
@@ -208,7 +210,7 @@ Player Count: " + playerCount.ToString();
         private IEnumerator StorePlayersScripts()
         {
             //This is finding and storing scripts which will be used later
-            GameObject vehicle = GameObject.Find(mod.vehicle == ModLoader.Vehicle.AV42C ? "VTOL4(Clone)" : "FA-26B(Clone)");
+            GameObject vehicle = GameObject.Find(manager.multiplayerVehicle == ModLoader.Vehicle.AV42C ? "VTOL4(Clone)" : "FA-26B(Clone)");
             if (vehicle)
             {
                 vehicleHeath = vehicle.GetComponent<Health>();
@@ -243,12 +245,12 @@ Player Count: " + playerCount.ToString();
                 fuel.transform.Find("aileronLeft").GetComponent<MeshRenderer>().material.mainTexture = customTexture;
                 fuel.transform.Find("aileronRight").GetComponent<MeshRenderer>().material.mainTexture = customTexture;
             }
-            return;
+            
             //Sending the players information to the server
             using (DarkRiftWriter writer = DarkRiftWriter.Create())
             {
-                writer.Write(mod.pilotName);
-                writer.Write(mod.vehicle == ModLoader.Vehicle.AV42C ? "AV-42c" : "F/A-26B");
+                writer.Write(pilotName);
+                writer.Write(manager.multiplayerVehicle == ModLoader.Vehicle.AV42C ? "AV-42c" : "F/A-26B");
 
                 using (Message message = Message.Create((ushort)Tags.SpawnPlayerTag, writer))
                 {
@@ -434,7 +436,7 @@ Player Count: " + playerCount.ToString();
             using (DarkRiftWriter writer = DarkRiftWriter.Create())
             {
                 string arg = vehicleHeath.killedByActor ? vehicleHeath.killedByActor.actorName : "Environment";
-                writer.Write(string.Format("{0} was killed by {1}. {2}", mod.pilotName, arg, vehicleHeath.killMessage));
+                writer.Write(string.Format("{0} was killed by {1}. {2}", pilotName, arg, vehicleHeath.killMessage));
                 using (Message message = Message.Create((ushort)Tags.VehicleDeath, writer))
                 {
                     client.SendMessage(message, SendMode.Reliable);
@@ -458,7 +460,7 @@ Player Count: " + playerCount.ToString();
             //This runs when the player dies by G Forces
             using (DarkRiftWriter writer = DarkRiftWriter.Create())
             {
-                writer.Write(string.Format("{0} was killed by G Force", mod.pilotName));
+                writer.Write(string.Format("{0} was killed by G Force", pilotName));
 
                 using (Message message = Message.Create((ushort)Tags.PlayerDeath, writer))
                 {
