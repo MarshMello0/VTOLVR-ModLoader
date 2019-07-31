@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using DarkRift;
 using DarkRift.Server;
 
@@ -233,9 +234,10 @@ public class VTOLServerPlugin : Plugin
                 ulong steamid = reader.ReadUInt64();
                 string PilotName = reader.ReadString();
                 string SteamName = reader.ReadString();
+                string vehicle = reader.ReadString();
                 string banReason = "";
 
-                Player newPlayer = new Player(id, e.Client, "", PilotName, steamid, SteamName, true);
+                Player newPlayer = new Player(id, e.Client, vehicle, PilotName, steamid, SteamName, true);
                 
                 if (!server.CheckBan(steamid, out banReason))
                 {
@@ -246,6 +248,9 @@ public class VTOLServerPlugin : Plugin
                         writer.Write(server.Map.ToString());
                         writer.Write(server.playerCount);
                         writer.Write(server.MaxPlayerCount);
+                        writer.Write(server.MaxBudget);
+                        writer.Write(server.WeaponsData.AllowWeapons);
+                        writer.Write(server.useSteamName);
 
                         string playersNames = "";
                         if (server.playerCount > 0)

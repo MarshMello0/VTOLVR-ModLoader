@@ -349,9 +349,12 @@ namespace ModLoader
             client = ModLoaderManager.instance.GetUnityClient();
             client.MessageReceived += MessageReceived;
         }
-        public void ConnectToServer(string ip = "159.180.107.127", int port = 4296)
+        public void ConnectToServer(string ip = "marsh.vtolvr-mods.com", int port = 4296)
         {
             state = ConnectionState.Connecting;
+
+            ip = Dns.GetHostEntry(ip).AddressList[0].ToString(); //Does a DNS look up
+
             try
             {
                 //This causes an error if it doesn't connect
@@ -370,6 +373,7 @@ namespace ModLoader
                 writer.Write(SteamUser.GetSteamID().m_SteamID);
                 writer.Write(pilotName);
                 writer.Write(SteamFriends.GetPersonaName());
+                writer.Write(vehicle.ToString());
                 using (Message message = Message.Create((ushort)Tags.UserInfo, writer))
                     client.SendMessage(message, SendMode.Reliable);
             }
@@ -393,10 +397,15 @@ namespace ModLoader
                                 string mapName = reader.ReadString();
                                 int playerCount = reader.ReadInt32();
                                 int maxPlayerCount = reader.ReadInt32();
+                                int maxBudget = reader.ReadInt32();
+                                bool allowWeapons = reader.ReadBoolean();
+                                bool useSteamName = reader.ReadBoolean();
                                 string playersNames = reader.ReadString();
 
                                 currentMap = mapName;
                                 serverInfoText.text = "Name: " + serverName + "\nMap: " + mapName
+                                    + "\nMaxBudget: " + maxBudget + " Allow Weapons: " + allowWeapons
+                                    + "\nUse Steam Name: " + useSteamName
                                     + "\nPlayers: " + playerCount + "/" + maxPlayerCount + "\n"
                                     + playersNames;
 
