@@ -410,7 +410,7 @@ namespace ModLoader
                                     + playersNames;
 
                                 state = ConnectionState.Lobby;
-                                SwitchPage(ModLoader.Page.mpServerInfo);
+                                SwitchPage(Page.mpServerInfo);
                             }
                             break;
                         case (ushort)Tags.Banned:

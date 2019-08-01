@@ -195,13 +195,6 @@ Player Count: " + playerCount.ToString();
 
                     Console.Log("Found the AV42C");
                 }
-                else
-                {
-                    FA26BNetworkedObjectSender sender = vehicle.AddComponent<FA26BNetworkedObjectSender>();
-                    sender.client = client;
-                    sender.worldCenter = worldCenter;
-                    Console.Log("Found the FA26B");
-                }
                 //vehicle.GetComponent<Health>().minDamage = float.MaxValue;//God Mode
             }
 
@@ -376,20 +369,6 @@ Player Count: " + playerCount.ToString();
             {
                 Console.Log("This new player is using AV42-c");
                 AV42cNetworkedObjectReceiver vehicleReceiver = vehicleGO.AddComponent<AV42cNetworkedObjectReceiver>();
-
-                vehicleReceiver.client = client;
-                vehicleReceiver.manager = this;
-                vehicleReceiver.player = newPlayer;
-                vehicleReceiver.worldCenter = worldCenter;
-
-                vehicleReceiver.SetReceiver();
-
-                vehicleReceiver.id = id;
-            }
-            else
-            {
-                Console.Log("This new player is using FA26-B");
-                FA26BNetworkedObjectReceiver vehicleReceiver = vehicleGO.AddComponent<FA26BNetworkedObjectReceiver>();
 
                 vehicleReceiver.client = client;
                 vehicleReceiver.manager = this;
