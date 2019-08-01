@@ -27,6 +27,7 @@ namespace ModLoader
         public enum Page { warning, spmp,spMod,spList,mpPV,mpIPPort, mpServerInfo, mpBanned}
 
 
+        #region Multiplayer Variables
         //Multiplayer
 
         //This is the state which the client is currently in
@@ -44,6 +45,9 @@ namespace ModLoader
         private Text bannedReasonText;
         private string currentMap;
 
+        #endregion
+
+        #region Singleplayer Variables
         //Singleplayer
 
         private Transform spTransform;
@@ -63,6 +67,7 @@ namespace ModLoader
         private Material nextMaterial, previousMaterial, loadModMaterial, redMaterial, greenMaterial;
         private APIMod[] apimods = new APIMod[1];
 
+        #endregion
         private void Start()
         {
             manager = ModLoaderManager.instance;
@@ -145,9 +150,11 @@ namespace ModLoader
             SetDefaultInteractable(spButton);
             SetDefaultInteractable(mpButton);
             spButton.interactableName = "Start Singleplayer";
-            mpButton.interactableName = "Start Multiplayer";
+            //mpButton.interactableName = "Start Multiplayer";
+            mpButton.interactableName = "Not Available Yet";
             spButton.OnInteract.AddListener(delegate { SwitchPage(Page.spList); SetupSinglePlayer(); });
-            mpButton.OnInteract.AddListener(delegate { SwitchPage(Page.mpPV); SetupMultiplayer(); });
+            //mpButton.OnInteract.AddListener(delegate { SwitchPage(Page.mpPV); SetupMultiplayer(); });
+            mpButton.OnInteract.AddListener(delegate { Console.Log("Multiplayer Button was pressed :P"); });
             //SP Mod Page
             VRInteractable spModBack = spModPage.transform.GetChild(3).GetChild(0).gameObject.AddComponent<VRInteractable>();
             VRInteractable spModLoad = spModPage.transform.GetChild(2).GetChild(0).gameObject.AddComponent<VRInteractable>();

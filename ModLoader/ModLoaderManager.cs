@@ -263,11 +263,5 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             multiplayerVehicle = vehicle;
             client.MessageReceived += nm.MessageReceived;
         }
-
-        void OnGUI()
-        {
-            GUI.Label(new Rect(100, 100, 100, 100), SceneManager.GetActiveScene().buildIndex + " < Scene Number");
-        }
-
     }
 }

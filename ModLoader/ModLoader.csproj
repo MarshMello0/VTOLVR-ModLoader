@@ -135,12 +135,6 @@
     <Compile Include="ModLoaderManager.cs" />
     <Compile Include="Multiplayer\Scripts\Console.cs" />
     <Compile Include="Multiplayer\Scripts\NetworkingManager.cs" />
-    <Compile Include="Multiplayer\Scripts\Player Network Scripts\PlayerHandLeftNetworkedObjectReceiver.cs" />
-    <Compile Include="Multiplayer\Scripts\Player Network Scripts\PlayerHandLeftNetworkedObjectSender.cs" />
-    <Compile Include="Multiplayer\Scripts\Player Network Scripts\PlayerHandRightNetworkedObjectReceiver.cs" />
-    <Compile Include="Multiplayer\Scripts\Player Network Scripts\PlayerHandRightNetworkedObjectSender.cs" />
-    <Compile Include="Multiplayer\Scripts\Player Network Scripts\PlayerHeadNetworkedObjectReceiver.cs" />
-    <Compile Include="Multiplayer\Scripts\Player Network Scripts\PlayerHeadNetworkedObjectSender.cs" />
     <Compile Include="Multiplayer\Scripts\Player.cs" />
     <Compile Include="Multiplayer\Scripts\Receiver.cs" />
     <Compile Include="Multiplayer\Scripts\Sender.cs" />

@@ -8,7 +8,6 @@ using UnityEngine.SceneManagement;
 using DarkRift;
 using DarkRift.Client;
 using DarkRift.Client.Unity;
-using NetworkedObjects.Players;
 using ModLoader.Multiplayer.NetworkedObjects.Vehicles;
 using TMPro;
 
@@ -23,7 +22,7 @@ namespace ModLoader.Multiplayer
         public string pilotName;
 
         //These are things used to spawn other clients in and update them
-        private GameObject av42cPrefab, fa26bPrefab;
+        private GameObject av42cPrefab;
         private Transform worldCenter;
 
         //Information collected from the server to store on the client
@@ -33,7 +32,6 @@ namespace ModLoader.Multiplayer
         private int playerCount;
 
         //Settings - These are settings which should be changed only when doing an update to the mod, so everyone has the same
-        private bool syncBody = false;
 
         //Things used for other features
         private Health vehicleHeath; //Used to check if the vehicle crashed and died
@@ -82,9 +80,6 @@ Player Count: " + playerCount.ToString();
             yield return new WaitForSeconds(4);
             //The scene should be loaded by then
 
-            if (syncBody)
-                yield return StartCoroutine(DelayFindBody());
-
             Console.Log("Creating Zero Reference");
             yield return StartCoroutine(CreateZeroReference());
 
@@ -98,60 +93,26 @@ Player Count: " + playerCount.ToString();
         }
         private IEnumerator SetPrefabs()
         {
-            #region Players Vehicles Prefabs
-            /*
+            
+            
             //We need these prefabs to spawn the other players in for this client
             av42cPrefab = VTResources.GetPlayerVehicle("AV-42C").vehiclePrefab;
-            fa26bPrefab = VTResources.GetPlayerVehicle("F/A-26B").vehiclePrefab;
-            */
-            #endregion
 
-            UnitCatalogue.UpdateCatalogue();
-            av42cPrefab = UnitCatalogue.GetUnitPrefab("AV-42CAI");
-            fa26bPrefab = UnitCatalogue.GetUnitPrefab("FA-26B AI");
+            //We need to destroy somethings on this prefab first
+            Destroy(av42cPrefab.transform.Find("DashCanvas").gameObject);
+            Destroy(av42cPrefab.transform.Find("Body").Find("EjectorSeat").Find("CameraRigParent").gameObject);
+
+
+            //AI Prefabs
+            //UnitCatalogue.UpdateCatalogue();
+            //av42cPrefab = UnitCatalogue.GetUnitPrefab("AV-42CAI");
 
             if (!av42cPrefab)
                 Console.Log("Couldn't find the prefab for the AV-42C");
-            if (!fa26bPrefab)
-                Console.Log("Couldn't find the prefab for the F/A-26B");
 
             yield break;
         }
-        private IEnumerator DelayFindBody()
-        {
-            Console.Log("Syncing Body");
-            if (XRDevice.model.Contains("Oculus"))
-            {
-                Console.Log("This is a Oculus User");
-                FindRiftTouch();
-            }
-            else
-            {
-                Console.Log("This is a Vive User");
-                FindViveWands();
-            }
 
-            VRHead camera = FindObjectOfType<VRHead>();
-            if (camera)
-            {
-                Console.Log("Found the VR Camera");
-                camera.gameObject.AddComponent<PlayerHeadNetworkedObjectSender>().client = client;
-            }
-            else
-            {
-                Console.Log("Looking for cameras");
-                Camera[] cameras = FindObjectsOfType<Camera>();
-                foreach (Camera item in cameras)
-                {
-                    if (item.enabled && item.gameObject.activeInHierarchy)
-                    {
-                        Console.Log("Found a camera, lets use this one");
-                        item.gameObject.AddComponent<PlayerHeadNetworkedObjectSender>().client = client;
-                    }
-                }
-            }
-            yield break;
-        }
         private IEnumerator CreateZeroReference()
         {
             //Used to workout the offset when sending pos over network and receiving
@@ -159,26 +120,6 @@ Player Count: " + playerCount.ToString();
             cube.transform.position = new Vector3(0, 0, 0);
             worldCenter = cube.transform;
             yield break;
-        }
-        private void FindViveWands()
-        {
-            SteamVR_TrackedController[] controllers = FindObjectsOfType<SteamVR_TrackedController>();
-            Console.Log("There are " + controllers.Length + " vive controllers found");
-
-            if (controllers.Length >= 1)
-                controllers[0].gameObject.AddComponent<PlayerHandLeftNetworkedObjectSender>().client = client;
-            if (controllers.Length >= 2)
-                controllers[1].gameObject.AddComponent<PlayerHandRightNetworkedObjectSender>().client = client;
-        }
-        private void FindRiftTouch()
-        {
-            RiftTouchController[] controllers = FindObjectsOfType<RiftTouchController>();
-            Console.Log("There are " + controllers.Length + " rift controllers found");
-
-            if (controllers.Length >= 1)
-                controllers[0].gameObject.AddComponent<PlayerHandLeftNetworkedObjectSender>().client = client;
-            if (controllers.Length >= 2)
-                controllers[1].gameObject.AddComponent<PlayerHandRightNetworkedObjectSender>().client = client;
         }
         private IEnumerator FindPlayersObjects()
         {
@@ -322,42 +263,9 @@ Player Count: " + playerCount.ToString();
 
             //This will spawn all of the correct assets needed to display a player over the network
 
-            if (syncBody)
-            {
-                //Spawning the players Body
-                GameObject HandLeft = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                GameObject HandRight = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                GameObject Head = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
-                //During testing these colliders, where colliding with the plane and insta killing me
-                HandLeft.GetComponent<Collider>().enabled = false;
-                HandRight.GetComponent<Collider>().enabled = false;
-                Head.GetComponent<Collider>().enabled = false;
-
-                PlayerHandLeftNetworkedObjectReceiver leftReceiver = HandLeft.AddComponent<PlayerHandLeftNetworkedObjectReceiver>();
-                PlayerHandRightNetworkedObjectReceiver rightRecevier = HandRight.AddComponent<PlayerHandRightNetworkedObjectReceiver>();
-                PlayerHeadNetworkedObjectReceiver headReceiver = Head.AddComponent<PlayerHeadNetworkedObjectReceiver>();
-
-                leftReceiver.client = client;
-                rightRecevier.client = client;
-                headReceiver.client = client;
-
-                leftReceiver.SetReceiver();
-                rightRecevier.SetReceiver();
-                headReceiver.SetReceiver();
-
-                leftReceiver.id = id;
-                rightRecevier.id = id;
-                headReceiver.id = id;
-
-                HandLeft.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-                HandRight.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-                Head.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-            }
-
             //Spawning the Vehicle
 
-            GameObject vehicleGO = Instantiate(vehicle == ModLoader.Vehicle.AV42C ? av42cPrefab : fa26bPrefab);
+            GameObject vehicleGO = Instantiate(av42cPrefab);
             vehicleGO.GetComponent<AIPilot>().startLanded = true;
             vehicleGO.transform.position += new Vector3(0, 10, 0);
             Console.Log("Enabling God Mode");
