@@ -16,6 +16,8 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using WpfAnimatedGif;
+using System.Net;
+using System.Xml.Serialization;
 
 namespace VTOLVR_ModLoader
 {
@@ -23,19 +25,25 @@ namespace VTOLVR_ModLoader
     {
         private enum gifStates { Paused, Play, Frame }
 
+        private static float buildNumber = 2.0f; //This will be used for checking for updates
         private static string modsFolder = @"\mods";
         private static string injector = @"\injector.exe";
+        private static string updatefile = @"\updates.xml";
+        private static string url = @"https://vtolvr-mods.com";
         private string root;
         private bool continueDots = true;
         private string continueText = "Launching Game";
 
-        private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe", "ModLoader.dll", "WpfAnimatedGif.dll" };
+        private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe", "ModLoader.dll", "WpfAnimatedGif.dll", "modloader.assets" };
         private string[] neededDLLFiles = new string[] { @"\Plugins\discord-rpc.dll" };
+
+        private Updates updates;
         public MainWindow()
         {
             InitializeComponent();
             root = Directory.GetCurrentDirectory();
             CheckFolder();
+            CheckForUpdates();
         }
         private void CheckFolder()
         {
@@ -79,11 +87,124 @@ namespace VTOLVR_ModLoader
         }
         private void MissingManagedFile(string file)
         {
-            MessageBox.Show("I can't seem to find " + file + " in VTOL VR > VTOLVR_Data > Managed, please make sure this file is here otherwise the mod loader won't work", "Missing File");
+            MessageBox.Show("I can't seem to find " + file + " in VTOL VR > VTOLVR_Data, please make sure this file is here otherwise the mod loader won't work", "Missing File");
             Quit();
         }
+        private void CheckForUpdates()
+        {
+            if (CheckForInternet())
+            {
+                if (!LoadUpdatesFile())
+                    updates = new Updates(2, 2, 2);
+
+                using (var client = new WebClient())
+                {
+                    string result = "";
+                    try
+                    {
+                        result = client.DownloadString(url + "/update");
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show("It seems we can't load " + url + "\nMaybe its down?\n\n" + e.Message, "Server Down");
+                        return;
+                    }
+
+                    try
+                    {
+                        string[] split = result.Split('|');
+
+                        int exeversion = int.Parse(split[0]);
+                        int dllversion = int.Parse(split[1]);
+                        int assetsversion = int.Parse(split[3]);
+
+                        if (exeversion > updates.exeversion)
+                            UpdateExe();
+                        if (assetsversion > updates.assetversion)
+                            UpdateAssets(split[4], assetsversion);
+                        if (dllversion > updates.dllversion)
+                            UpdateDLL(split[2], dllversion);
 
 
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show("There was a strange error\n" + e.Message + "\nAuto updating seems to be broken.", "Super Strange Error");
+                        return;
+                    }
+
+
+
+                    SaveUpdatesFile();
+                }
+            }
+        }
+        private bool CheckForInternet()
+        {
+            try
+            {
+                using (var client = new WebClient())
+                {
+                    using (client.OpenRead("http://clients3.google.com/generate_204"))
+                    {
+                        return true;
+                    }
+                }
+                
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        private bool LoadUpdatesFile()
+        {
+            if (File.Exists(root + updatefile))
+            {
+                using (FileStream stream = new FileStream(root + updatefile, FileMode.Open))
+                {
+                    XmlSerializer xml = new XmlSerializer(typeof(Updates));
+                    Updates deserialized = (Updates)xml.Deserialize(stream);
+                    updates = new Updates(deserialized.exeversion, deserialized.dllversion, deserialized.assetversion);
+                    return true;
+                }
+            }
+            else
+                return false;
+        }
+        private void UpdateDLL(string url, int newVersion)
+        {
+            using (var client = new WebClient())
+            {
+                if (File.Exists(root + @"\ModLoader.dll"))
+                    File.Delete(root + @"\ModLoader.dll");
+                client.DownloadFile(MainWindow.url + url, @"ModLoader.dll");
+            }
+            updates.dllversion = newVersion;
+        }
+        private void UpdateAssets(string url, int newVersion)
+        {
+            using (var client = new WebClient())
+            {
+                if (File.Exists(root + @"\modloader.assets"))
+                    File.Delete(root + @"\modloader.assets");
+                client.DownloadFile(MainWindow.url + url, @"modloader.assets");
+            }
+            updates.assetversion = newVersion;
+        }
+        private void UpdateExe()
+        {
+            MessageBox.Show("There is an update to the launcher\nPlease head over to " + url + " to download the latest version.","Launcher Update!");
+            Quit();
+        }
+        private void SaveUpdatesFile()
+        {
+            using (FileStream stream = new FileStream(root + updatefile, FileMode.Create))
+            {
+                XmlSerializer xml = new XmlSerializer(typeof(Updates));
+                xml.Serialize(stream, updates);
+            }
+        }
         private void OpenGame(object sender, RoutedEventArgs e)
         {
             //Changing UI

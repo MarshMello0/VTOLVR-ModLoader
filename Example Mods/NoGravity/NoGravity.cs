@@ -6,7 +6,6 @@ using UnityEngine;
 using System.Collections;
 [Info("No Gravity",
     "Adds a basic button to disable/enable gravity",
-    "https://github.com/MarshMello0/VTOLVR-ModLoader/raw/dev/Example%20Mods/NoGravity/NoGravity.dll",
     "1.0")]
 public class NoGravity : VTOLMOD
 {

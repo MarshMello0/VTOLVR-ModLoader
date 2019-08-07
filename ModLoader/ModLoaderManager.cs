@@ -91,6 +91,8 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             DontDestroyOnLoad(this.gameObject);
             Debug.Log("This is the first mod loader manager");
 
+            CreateAPI();
+
             discord = gameObject.AddComponent<DiscordController>();
             discordDetail = "Launching Game";
             discordState = "using . Marsh.Mello .'s Mod Loader";
@@ -101,6 +103,10 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             SceneManager.sceneLoaded += SceneLoaded;
             SetPaths();
             CreateAssetBundle();
+        }
+        private void CreateAPI()
+        {
+            gameObject.AddComponent<VTOLAPI>();
         }
         private void SetPaths()
         {

@@ -23,13 +23,13 @@
         </Grid.RowDefinitions>
 
         <Image Grid.Column="1" Grid.Row="1" gif:ImageBehavior.RepeatBehavior="0x" gif:ImageBehavior.AnimatedSource="LogoSpinning.gif" x:Name="LogoGif" gif:ImageBehavior.AutoStart="False" />
-        
+
         <Label Grid.Column="1" Grid.Row="2" FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" HorizontalAlignment="Center" >VTOL VR Mod Loader</Label>
-        
+
         <Button Grid.Column="1" Grid.Row="3" FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" Background="Transparent" Visibility="Visible" BorderThickness="0" Click="OpenGame" x:Name="launchButton">
             Launch Game
         </Button>
-        
+
         <Label Grid.Column="1" Grid.Row="3" FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" Visibility="Hidden" x:Name="loadingText">
             Launching Game
         </Label>

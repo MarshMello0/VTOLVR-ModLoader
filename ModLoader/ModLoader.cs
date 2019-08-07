@@ -18,9 +18,11 @@ using System.Reflection;
 
 namespace ModLoader
 {
+    [Info("ModLoader","","")]
     public class ModLoader : VTOLMOD
     {
         private ModLoaderManager manager;
+        private VTOLAPI api;
         //UI Objects
         GameObject warningPage, spmp, sp, mp, spModPage, spList, mpPV, mpIPPort, mpServerInfo, mpBanned;
         PoseBounds pb;
@@ -71,6 +73,8 @@ namespace ModLoader
         private void Start()
         {
             manager = ModLoaderManager.instance;
+            api = VTOLAPI.instance;
+            Debug.Log("" + api.GetSteamID());
             SetInGameUI();
 
             if (manager.doneFirstLoad)
@@ -756,18 +760,14 @@ namespace ModLoader
             public string name { private set; get; }
             public string version { private set; get; }
             public string description { private set; get; }
-            public string downloadURL { private set; get; }
             public Assembly assembly { private set; get; }
             public string path { private set; get; }
             public bool isLoaded = false;
-            public bool isLocal = false;
-            public ModItem(string name, string description, string downloadURL, string version, bool isLocal)
+            public ModItem(string name, string description, string version)
             {
                 this.name = name;
                 this.description = description;
-                this.downloadURL = downloadURL;
                 this.version = version;
-                this.isLocal = isLocal;
             }
 
             public void SetAssembly(Assembly assembly)
@@ -799,8 +799,15 @@ namespace ModLoader
         public static ModLoader.ModItem GetInfo(this Type type)
         {
             VTOLMOD.Info info = type.GetCustomAttributes(typeof(VTOLMOD.Info), true).FirstOrDefault<object>() as VTOLMOD.Info;
-            ModLoader.ModItem item = new ModLoader.ModItem(info.name, info.description, info.downloadURL, info.version, true);
+            ModLoader.ModItem item = new ModLoader.ModItem(info.name, info.description, info.version);
             return item;
+        }
+
+        public static string GetModName(this Type type)
+        {
+            VTOLMOD.Info info = type.GetCustomAttributes(typeof(VTOLMOD.Info), true).FirstOrDefault<object>() as VTOLMOD.Info;
+            string name = info.name;
+            return name;
         }
     }
 }
