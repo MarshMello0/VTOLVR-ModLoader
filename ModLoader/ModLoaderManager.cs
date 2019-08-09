@@ -69,7 +69,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
         
         public AssetBundle assets;
 
-        private string rootPath;
+        public string rootPath;
         private string assetsPath = @"\modloader.assets";
 
         //Discord
@@ -90,9 +90,10 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             instance = this;
             DontDestroyOnLoad(this.gameObject);
             Debug.Log("This is the first mod loader manager");
-
+            
             CreateAPI();
 
+            
             discord = gameObject.AddComponent<DiscordController>();
             discordDetail = "Launching Game";
             discordState = "using . Marsh.Mello .'s Mod Loader";
@@ -103,6 +104,8 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             SceneManager.sceneLoaded += SceneLoaded;
             SetPaths();
             CreateAssetBundle();
+
+            gameObject.AddComponent<CSharp>();
         }
         private void CreateAPI()
         {
@@ -120,8 +123,6 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                 Debug.Log("Failed to load AssetBundle!");
                 return;
             }
-            //Spawning UConsole
-            //Instantiate(assets.LoadAsset<GameObject>("UConsole-Canvas")).AddComponent<UConsole>();
         }
         private void SceneLoaded(Scene arg0, LoadSceneMode arg1)
         {

@@ -25,7 +25,6 @@ namespace VTOLVR_ModLoader
     {
         private enum gifStates { Paused, Play, Frame }
 
-        private static float buildNumber = 2.0f; //This will be used for checking for updates
         private static string modsFolder = @"\mods";
         private static string injector = @"\injector.exe";
         private static string updatefile = @"\updates.xml";
@@ -102,7 +101,7 @@ namespace VTOLVR_ModLoader
                     string result = "";
                     try
                     {
-                        result = client.DownloadString(url + "/update");
+                        result = client.DownloadString(url + "/update.php");
                     }
                     catch (Exception e)
                     {

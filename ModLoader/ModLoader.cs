@@ -22,6 +22,7 @@ namespace ModLoader
     public class ModLoader : VTOLMOD
     {
         private ModLoaderManager manager;
+        private CSharp csharp;
         private VTOLAPI api;
         //UI Objects
         GameObject warningPage, spmp, sp, mp, spModPage, spList, mpPV, mpIPPort, mpServerInfo, mpBanned;
@@ -73,6 +74,7 @@ namespace ModLoader
         private void Start()
         {
             manager = ModLoaderManager.instance;
+            csharp = CSharp.instance;
             api = VTOLAPI.instance;
             Debug.Log("" + api.GetSteamID());
             SetInGameUI();
@@ -87,6 +89,22 @@ namespace ModLoader
             {
                 //This is the first time they have loaded
                 manager.doneFirstLoad = true;
+                //Spawning UConsole
+                GameObject uConsole = Instantiate(manager.assets.LoadAsset<GameObject>("UConsole-Canvas"));
+                UConsole console = uConsole.AddComponent<UConsole>();
+
+                UCommand cs = new UCommand("cs", "cs <CSharp Code>");
+                UCommand csfile = new UCommand("csfile", "cs <FileName>");
+
+                cs.callbacks.Add(csharp.CS);
+                csfile.callbacks.Add(csharp.CSFile);
+
+                console.AddCommand(cs);
+                console.AddCommand(csfile);
+
+                //Adding Commands
+                if (CSharp.FindCompiler())
+                    Debug.Log("COMPILER -> " + CSharp.compilerPath);
             }
         }
 
@@ -531,35 +549,6 @@ namespace ModLoader
             }
 
         }
-
-        private IEnumerator FindOnlineMods()
-        {
-            /*
-            //Featch the information and fill it into the list
-            using (UnityWebRequest request = UnityWebRequest.Get(apiURL))
-            {
-                yield return request.SendWebRequest();
-
-                string returnedJson = "{\"Items\":" + request.downloadHandler.text + "}";
-
-                Debug.Log(returnedJson);
-                //This for some reason keeps returning null as a mod in VTOL but in a new Unity Project its fine
-                apimods = JsonHelper.FromJson<APIMod>(returnedJson);
-
-                if (apimods == null)
-                    Debug.LogError("API is Null");
-
-            onlineMods = new List<ModItem>(apimods.Length);
-                foreach (APIMod mod in apimods)
-                {
-                    onlineMods.Add(new ModItem(mod.Name, mod.Description, mod.URL, mod.Version, false));
-                    Debug.Log("Added mod " + mod.Name);
-                }
-                UpdateList(false);
-            }
-            */
-            yield break;
-        }
         public void OnPageChanged(ModLoader.Page newPage)
         {
             if (newPage == ModLoader.Page.spList)
@@ -724,11 +713,6 @@ namespace ModLoader
         {
             //This is getting disabled till the json issue gets fixed after release of 2.0.0
             return;
-            onLocal = !onLocal;
-            if (onLocal)
-                FindLocalMods();
-            else
-                StartCoroutine(FindOnlineMods());
         }
         public class ModSlot
         {
