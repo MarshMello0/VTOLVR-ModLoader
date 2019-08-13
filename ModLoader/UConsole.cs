@@ -57,7 +57,12 @@ public class UConsole : MonoBehaviour
     private void LogMessageReceived(string condition, string stackTrace, LogType type)
     {
         if (showUnityLogs)
+        {
             lines.Add((showType ? type.ToString() + ": " : "") + condition);
+            UpdateVisableLines();
+        }
+
+        
     }
     private void CreateDefaultCommands()
     {
@@ -164,6 +169,8 @@ public class UConsole : MonoBehaviour
             lines.Add((showType ? "Log: " : "") + message);
         else
             Debug.Log(message);
+
+        UpdateVisableLines();
     }
     public void LogError(object message)
     {
@@ -171,6 +178,8 @@ public class UConsole : MonoBehaviour
             lines.Add((showType ? "Error: " : "") + message);
         else
             Debug.LogError(message);
+
+        UpdateVisableLines();
     }
     public void AddCommand(UCommand newCommand)
     {
