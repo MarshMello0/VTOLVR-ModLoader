@@ -93,6 +93,8 @@ namespace ModLoader
                 GameObject uConsole = Instantiate(manager.assets.LoadAsset<GameObject>("UConsole-Canvas"));
                 UConsole console = uConsole.AddComponent<UConsole>();
 
+                /* The CS and CSFile command don't work because it won't compile the dll
+
                 UCommand cs = new UCommand("cs", "cs <CSharp Code>");
                 UCommand csfile = new UCommand("csfile", "cs <FileName>");
 
@@ -101,10 +103,7 @@ namespace ModLoader
 
                 console.AddCommand(cs);
                 console.AddCommand(csfile);
-
-                //Adding Commands
-                if (CSharp.FindCompiler())
-                    Debug.Log("COMPILER -> " + CSharp.compilerPath);
+                */
             }
         }
 

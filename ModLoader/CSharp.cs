@@ -153,16 +153,16 @@ namespace ModLoader
         public IEnumerator CSFileIEnumerator(string fileName)
         {
             string references = "";
-            foreach (string dll in Directory.GetFiles(Directory.GetCurrentDirectory() + @"\VTOLVR_Data\Managed"))
-            //foreach (string dll in Directory.GetFiles(@"A:\Program Files\Steam\steamapps\common\Raft\Raft_Data\Managed"))
+            //foreach (string dll in Directory.GetFiles(Directory.GetCurrentDirectory() + @"\VTOLVR_Data\Managed"))
+            foreach (string dll in Directory.GetFiles(@"A:\Code\VTOLVR-ModLoader\Unity Project\Build\Unity Project_Data\Managed"))
             {
                 if (dll.EndsWith(".dll") && !dll.Contains("System."))
                 {
                     references += "/\" " + dll + "\"/,";
                 }
             }
-            //references = references.Remove(references.Length - 1);
-            references += "/\"" + ModLoaderManager.instance.rootPath + @"\ModLoader.dll" + "\"/";
+            references = references.Remove(references.Length - 1);
+            //references += "/\"" + ModLoaderManager.instance.rootPath + @"\ModLoader.dll" + "\"/";
             string tempDllPath = ModLoaderManager.instance.rootPath + tempFolder + @"\" + fileName.Remove(fileName.Length - 3) + ".dll";
             string arguments = string.Format("/r:{0} /out:\"{1}\" /target:library /nostdlib \"{2}\"", references, tempDllPath, ModLoaderManager.instance.rootPath + csfileFolder + @"\" + fileName);
             
