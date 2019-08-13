@@ -538,6 +538,7 @@ namespace ModLoader
         }
         private void UpdateList()
         {
+            list = new List(ModLoaderManager.mods);
             for (int i = 0; i < 8; i++)
             {
                 if (ModLoaderManager.mods.Count > i)
