@@ -54,14 +54,9 @@ namespace ModLoader
         //Singleplayer
 
         private Transform spTransform;
-        //This script needs to be attached onto "List" gameobject
-        private List<ModItem> localMods = new List<ModItem>();
-        private List<ModItem> onlineMods = new List<ModItem>();
 
         private string mods = @"\mods";
         private string root;
-        private string apiURL = "http://vtolapi.kevinjoosten.nl/availableMods";
-        private bool onLocal = true;
 
         private ModSlot[] modSlots = new ModSlot[8];
         private List list;
@@ -104,6 +99,16 @@ namespace ModLoader
                 console.AddCommand(cs);
                 console.AddCommand(csfile);
                 */
+                UCommand load = new UCommand("loadmod", "loadmod <modname>");
+                UCommand reloadMods = new UCommand("reloadmods", "reloadmods");
+                UCommand listMods = new UCommand("listmods", "listmods");
+                load.callbacks.Add(ModLoaderManager.LoadCommand);
+                reloadMods.callbacks.Add(ModLoaderManager.ReloadMods);
+                listMods.callbacks.Add(ModLoaderManager.ListMods);
+
+                console.AddCommand(load);
+                console.AddCommand(reloadMods);
+                console.AddCommand(listMods);
             }
         }
 
@@ -520,46 +525,22 @@ namespace ModLoader
             greenMaterial = new Material(Shader.Find("Diffuse"));
             greenMaterial.color = Color.green;
 
-            UpdateList(true);
+            UpdateList();
         }
         private void FindLocalMods()
         {
-            DirectoryInfo folder = new DirectoryInfo(root + mods);
-            FileInfo[] files = folder.GetFiles("*.dll");
-            localMods = new List<ModItem>(files.Length);
-
-            foreach (FileInfo file in files)
-            {
-                //Going though each .dll file, checking if there is a class which derives from VTOLMOD
-                Assembly lastAssembly = Assembly.Load(File.ReadAllBytes(file.FullName));
-                IEnumerable<Type> source = from t in lastAssembly.GetTypes() where t.IsSubclassOf(typeof(VTOLMOD)) select t;
-
-                if (source.Count() != 1)
-                {
-                    Debug.Log("The mod " + file.FullName + " doesn't specify a mod class or specifies more than one");
-                }
-                else
-                {
-                    ModItem item = source.First().GetInfo();
-                    item.SetPath(file.FullName);
-                    item.SetAssembly(lastAssembly);
-                    localMods.Add(item);
-                }
-            }
-
+            ModLoaderManager.FindMods();
         }
         public void OnPageChanged(ModLoader.Page newPage)
         {
             if (newPage == ModLoader.Page.spList)
-                UpdateList(true);
+                UpdateList();
         }
-        private void UpdateList(bool local)
+        private void UpdateList()
         {
-            List<ModItem> items = local ? localMods : onlineMods;
-            list = new List(items);
             for (int i = 0; i < 8; i++)
             {
-                if (list.mods.Count > i)
+                if (ModLoaderManager.mods.Count > i)
                 {
                     ModItem currentItem = list.mods[(list.currentPage * 8) + i];
                     modSlots[i].slot.SetActive(true);
@@ -567,7 +548,7 @@ namespace ModLoader
                     Debug.Log("This mod is " + currentItem.isLoaded);
                     modSlots[i].interactable.interactableName = "View " + currentItem.name;
                     modSlots[i].interactable.button = VRInteractable.Buttons.Trigger;
-                    modSlots[i].interactable.OnInteract.AddListener(delegate { OpenMod(currentItem, local); });
+                    modSlots[i].interactable.OnInteract.AddListener(delegate { OpenMod(currentItem); });
                 }
                 else
                 {
@@ -650,7 +631,7 @@ namespace ModLoader
             }
         }
 
-        public void OpenMod(ModItem item, bool isLocal)
+        public void OpenMod(ModItem item)
         {
             Debug.Log("Opening Mod " + item.name);
 
@@ -658,24 +639,16 @@ namespace ModLoader
             modDescriptionText.text = item.description;
             loadInteractable.OnInteract.RemoveAllListeners();
             SwitchPage(Page.spMod);
-            if (isLocal)
+
+            if (item.isLoaded)
             {
-                if (item.isLoaded)
-                {
-                    loadModText.text = "Loaded!";
-                    loadModMaterial.color = Color.red;
-                    return;
-                }
-                loadModText.text = "Load";
-                loadModMaterial.color = Color.green;
-                loadInteractable.OnInteract.AddListener(delegate { LoadMod(item); });
+                loadModText.text = "Loaded!";
+                loadModMaterial.color = Color.red;
+                return;
             }
-            else
-            {
-                //loadModText.text = "Download";
-                //loadModMaterial.color = Color.green;
-                //loadInteractable.OnInteract.AddListener(delegate { DownloadMod(item); });
-            }
+            loadModText.text = "Load";
+            loadModMaterial.color = Color.green;
+            loadInteractable.OnInteract.AddListener(delegate { LoadMod(item); });
 
         }
 
@@ -690,7 +663,7 @@ namespace ModLoader
             if (source != null && source.Count() == 1)
             {
                 new GameObject(item.name, source.First());
-                localMods.Find(x => x.name == item.name).isLoaded = true;
+                ModLoaderManager.mods.Find(x => x.name == item.name).isLoaded = true;
 
                 loadInteractable.OnInteract.RemoveAllListeners();
                 loadModText.text = "Loaded!";
@@ -702,10 +675,6 @@ namespace ModLoader
             {
                 Debug.LogError("Source is null");
             }
-        }
-        public void DownloadMod(ModItem item)
-        {
-            //This handles the download and placing the file in the correct location
         }
 
         public void SwitchButton()
@@ -738,32 +707,7 @@ namespace ModLoader
                 currentPage = 0;
             }
         }
-        public class ModItem
-        {
-            public string name { private set; get; }
-            public string version { private set; get; }
-            public string description { private set; get; }
-            public Assembly assembly { private set; get; }
-            public string path { private set; get; }
-            public bool isLoaded = false;
-            public ModItem(string name, string description, string version)
-            {
-                this.name = name;
-                this.description = description;
-                this.version = version;
-            }
-
-            public void SetAssembly(Assembly assembly)
-            {
-                this.assembly = assembly;
-                Debug.Log("We have set the assembly " + assembly.FullName);
-            }
-
-            public void SetPath(string path)
-            {
-                this.path = path;
-            }
-        }
+        
 
         [Serializable]
         public class APIMod
@@ -779,10 +723,10 @@ namespace ModLoader
 
     public static class Extensions
     {
-        public static ModLoader.ModItem GetInfo(this Type type)
+        public static ModItem GetInfo(this Type type)
         {
             VTOLMOD.Info info = type.GetCustomAttributes(typeof(VTOLMOD.Info), true).FirstOrDefault<object>() as VTOLMOD.Info;
-            ModLoader.ModItem item = new ModLoader.ModItem(info.name, info.description, info.version);
+            ModItem item = new ModItem(info.name, info.description, info.version);
             return item;
         }
 

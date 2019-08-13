@@ -12,6 +12,7 @@ using Steamworks;
 using System.Collections;
 using System.IO;
 using ModLoader.Multiplayer;
+using System.Reflection;
 
 namespace ModLoader
 {
@@ -81,6 +82,9 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
         public UnityClient client;
         public bool doneFirstLoad;
         public ModLoader.Vehicle multiplayerVehicle;
+
+        //SinglePlayer
+        public static List<ModItem> mods = new List<ModItem>();
 
         private void Awake()
         {
@@ -269,6 +273,111 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             nm.pilotName = pilotName;
             multiplayerVehicle = vehicle;
             client.MessageReceived += nm.MessageReceived;
+        }
+
+
+        public static List<ModItem> FindMods()
+        {
+            DirectoryInfo folder = new DirectoryInfo(ModLoaderManager.instance.rootPath + @"\mods");
+            FileInfo[] files = folder.GetFiles("*.dll");
+            mods = new List<ModItem>(files.Length);
+
+            foreach (FileInfo file in files)
+            {
+                //Going though each .dll file, checking if there is a class which derives from VTOLMOD
+                Assembly lastAssembly = Assembly.Load(File.ReadAllBytes(file.FullName));
+                IEnumerable<Type> source = from t in lastAssembly.GetTypes() where t.IsSubclassOf(typeof(VTOLMOD)) select t;
+
+                if (source.Count() != 1)
+                {
+                    Debug.Log("The mod " + file.FullName + " doesn't specify a mod class or specifies more than one");
+                }
+                else
+                {
+                    ModItem item = source.First().GetInfo();
+                    item.SetPath(file.FullName);
+                    item.SetAssembly(lastAssembly);
+                    mods.Add(item);
+                }
+            }
+
+            return mods;
+        }
+        public static void ListMods(string[] args)
+        {
+            if (mods.Count == 0)
+                Debug.Log("There are no mods in the mods folder");
+            foreach (ModItem item in mods)
+            {
+                Debug.Log(item.name + (item.isLoaded ? " [Loaded]" : ""));
+            }
+        }
+        public static void ReloadMods(string[] args)
+        {
+            mods.Clear();
+            FindMods();
+        }
+
+        public static void LoadCommand(string[] args)
+        {
+            if (args == null || args.Length == 0)
+            {
+                Debug.Log("You need to include a mod name \nEG: load No Gravity");
+                return;
+            }
+            string modName = string.Join(" ", args);
+            if (mods.Count == 0)
+                FindMods();
+            ModItem modToLoad = mods.Find(x => x.name.ToLower() == modName.ToLower());
+            LoadMod(modToLoad);
+        }
+
+        public static void LoadMod(ModItem item)
+        {
+            if (item.isLoaded)
+            {
+                Debug.Log(item.name + " is already loaded");
+                return;
+            }
+            IEnumerable<Type> source = from t in item.assembly.GetTypes() where t.IsSubclassOf(typeof(VTOLMOD)) select t;
+            if (source != null && source.Count() == 1)
+            {
+                new GameObject(item.name, source.First());
+                mods.Find(x => x.name == item.name).isLoaded = true;
+                instance.loadedModsCount++;
+                instance.UpdateDiscord();
+            }
+            else
+            {
+                Debug.LogError("Source is null");
+            }
+        }
+    }
+
+    public class ModItem
+    {
+        public string name { private set; get; }
+        public string version { private set; get; }
+        public string description { private set; get; }
+        public Assembly assembly { private set; get; }
+        public string path { private set; get; }
+        public bool isLoaded = false;
+        public ModItem(string name, string description, string version)
+        {
+            this.name = name;
+            this.description = description;
+            this.version = version;
+        }
+
+        public void SetAssembly(Assembly assembly)
+        {
+            this.assembly = assembly;
+            Debug.Log("We have set the assembly " + assembly.FullName);
+        }
+
+        public void SetPath(string path)
+        {
+            this.path = path;
         }
     }
 }
