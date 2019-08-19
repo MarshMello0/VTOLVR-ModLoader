@@ -145,10 +145,10 @@ namespace ModLoader
             //Find Objects
             Transform prefabT = canvaus.transform;
             Transform canvasT = prefabT.GetChild(0);
-            warningPage = canvasT.GetChild(1).gameObject;
-            spmp = canvasT.GetChild(2).gameObject;
-            sp = canvasT.GetChild(3).gameObject;
-            mp = canvasT.GetChild(4).gameObject;
+            warningPage = canvasT.GetChild(2).gameObject;
+            spmp = canvasT.GetChild(3).gameObject;
+            sp = canvasT.GetChild(4).gameObject;
+            mp = canvasT.GetChild(5).gameObject;
             spModPage = sp.transform.GetChild(0).gameObject;
             spList = sp.transform.GetChild(1).gameObject;
             mpPV = mp.transform.GetChild(0).gameObject;
@@ -156,6 +156,10 @@ namespace ModLoader
             mpServerInfo = mp.transform.GetChild(2).gameObject;
             mpBanned = mp.transform.GetChild(3).gameObject;
 
+            //Setting outline in background
+            Image outline = canvasT.GetChild(1).GetComponent<Image>();
+            Texture2D tex = Resources.FindObjectsOfTypeAll(typeof(Texture2D)).Where(x => x.name == "crtScreenEffect").ToArray()[0] as Texture2D;
+            outline.sprite = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
             //Setting PoseBounds
             RectTransform canvasRect = canvasT.GetComponent<RectTransform>();
             pb = canvasT.gameObject.AddComponent<PoseBounds>();
