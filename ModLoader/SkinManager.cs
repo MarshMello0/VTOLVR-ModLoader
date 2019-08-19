@@ -47,22 +47,49 @@ namespace ModLoader
         private void SetMaterials()
         {
             skins = new Dictionary<string, Material>();
-            string vehicleName = PilotSaveManager.currentVehicle.vehiclePrefab.name + "(Clone)";
-            GameObject vehicle = GameObject.Find(vehicleName);
-            Debug.Log("Finding Materials on " + vehicle.name);
-            switch (VTOLAPI.instance.GetPlayersVehicleEnum())
+            
+            foreach (Material item in Resources.FindObjectsOfTypeAll(typeof(Material)) as Material[])
             {
-                case VTOLVehicles.AV42C:
-                    skins.Add("mat_vtol4Exterior", vehicle.transform.Find("VT4Body(new)").GetComponent<MeshRenderer>().material);
-                    skins.Add("mat_vtol4Exterior2", vehicle.transform.Find("VT4Body(new)").GetChild(1).GetComponent<MeshRenderer>().material);
-                    skins.Add("mat_vtol4Interior", vehicle.transform.Find("Body").GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);
-                    skins.Add("mat_vtol4TiltEngine", vehicle.transform.Find("Body").Find("WingRight").Find("RightEnginePart").GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetComponent<MeshRenderer>().material);
-                    break;
-                case VTOLVehicles.FA26B:
-                    break;
-                case VTOLVehicles.F45A:
-                    break;
-            }
+                switch (item.name)
+                {
+                    case "mat_vtol4Exterior":
+                        if (!skins.ContainsKey("mat_vtol4Exterior"))
+                            skins.Add("mat_vtol4Exterior", item);
+                        continue;
+                    case "mat_vtol4Exterior2":
+                        if (!skins.ContainsKey("mat_vtol4Exterior2"))
+                            skins.Add("mat_vtol4Exterior2", item);
+                        continue;
+                    case "mat_vtol4Interior":
+                        if (!skins.ContainsKey("mat_vtol4Interior"))
+                            skins.Add("mat_vtol4Interior", item);
+                        continue;
+                    case "mat_vtol4TiltEngine":
+                        if (!skins.ContainsKey("mat_vtol4TiltEngine"))
+                            skins.Add("mat_vtol4TiltEngine", item);
+                        continue;
+                    case "mat_cockpitProps":
+                        if (!skins.ContainsKey("mat_cockpitProps"))
+                            skins.Add("mat_cockpitProps", item);
+                        continue;
+                    case "mat_acesSeat":
+                        if (!skins.ContainsKey("mat_acesSeat"))
+                            skins.Add("mat_acesSeat", item);
+                        continue;
+                    case "mat_bobbleHead":
+                        if (!skins.ContainsKey("mat_bobbleHead"))
+                            skins.Add("mat_bobbleHead", item);
+                        continue;
+                    case "mat_miniMFD":
+                        if (!skins.ContainsKey("mat_miniMFD"))
+                            skins.Add("mat_miniMFD", item);
+                        continue;
+                    case "mat_mfd":
+                        if (!skins.ContainsKey("mat_mfd"))
+                            skins.Add("mat_mfd", item);
+                        continue;
+                }
+            } 
         }
 
         private IEnumerator VehicleConfigurationScene()
@@ -207,13 +234,13 @@ namespace ModLoader
             switch (VTOLAPI.instance.GetPlayersVehicleEnum())
             {
                 case VTOLVehicles.AV42C:
-                    if (File.Exists(selected.folderPath + @"\vtol4Exterior.png"))
+                    if (File.Exists(selected.folderPath + @"\vtol4Exterior.png") && skins.ContainsKey("mat_vtol4Exterior"))
                         StartCoroutine(UpdateTexture(selected.folderPath + @"\vtol4Exterior.png", skins["mat_vtol4Exterior"]));
-                    if (File.Exists(selected.folderPath + @"\vtol4Exterior2.png"))
+                    if (File.Exists(selected.folderPath + @"\vtol4Exterior2.png") && skins.ContainsKey("mat_vtol4Exterior2"))
                         StartCoroutine(UpdateTexture(selected.folderPath + @"\vtol4Exterior2.png", skins["mat_vtol4Exterior2"]));
-                    if (File.Exists(selected.folderPath + @"\vtol4Interior.png"))
+                    if (File.Exists(selected.folderPath + @"\vtol4Interior.png") && skins.ContainsKey("mat_vtol4Interior"))
                         StartCoroutine(UpdateTexture(selected.folderPath + @"\vtol4Interior.png", skins["mat_vtol4Interior"]));
-                    if (File.Exists(selected.folderPath + @"\vtol4TiltEngine.png"))
+                    if (File.Exists(selected.folderPath + @"\vtol4TiltEngine.png") && skins.ContainsKey("mat_vtol4TiltEngine"))
                         StartCoroutine(UpdateTexture(selected.folderPath + @"\vtol4TiltEngine.png", skins["mat_vtol4TiltEngine"]));
                     break;
                 case VTOLVehicles.FA26B:
@@ -221,6 +248,18 @@ namespace ModLoader
                 case VTOLVehicles.F45A:
                     break;
             }
+
+            if (File.Exists(selected.folderPath + @"\cockpitProps.png") && skins.ContainsKey("mat_cockpitProps"))
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\cockpitProps.png", skins["mat_cockpitProps"]));
+            if (File.Exists(selected.folderPath + @"\acesSeat.png") && skins.ContainsKey("mat_acesSeat"))
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\acesSeat.png", skins["mat_acesSeat"]));
+            if (File.Exists(selected.folderPath + @"\bobbleHead.png") && skins.ContainsKey("mat_bobbleHead"))
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\bobbleHead.png", skins["mat_bobbleHead"]));
+            if (File.Exists(selected.folderPath + @"\miniMFD.png") && skins.ContainsKey("mat_miniMFD"))
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\miniMFD.png", skins["mat_miniMFD"]));
+            if (File.Exists(selected.folderPath + @"\mfd.png") && skins.ContainsKey("mat_mfd"))
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\mfd.png", skins["mat_mfd"]));
+
         }
 
         private IEnumerator UpdateTexture(string path, Material material)
@@ -277,8 +316,6 @@ namespace ModLoader
         {
             yield return new WaitForSeconds(3);
             Debug.Log("In game scene, setting skins");
-            SetMaterials();
-            ApplySkin();
         }
         private void OnDestroy()
         {
