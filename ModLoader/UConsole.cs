@@ -110,6 +110,12 @@ public class UConsole : MonoBehaviour
         {
             consoleHolder.SetActive(!isEnabled);
             isEnabled = !isEnabled;
+            if (isEnabled)
+            {
+                UpdateVisableLines();
+                startLine = 0;
+                UpdateVisableLines();
+            }
         }
 
         if (isEnabled)

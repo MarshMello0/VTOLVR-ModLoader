@@ -22,7 +22,7 @@ namespace ModLoader
         {
             PlayerLogText();
             CrashReportHandler.enableCaptureExceptions = false;
-            new GameObject("Mod Loader Manager", typeof(ModLoaderManager));
+            new GameObject("Mod Loader Manager", typeof(ModLoaderManager), typeof(SkinManager));
         }
         private static void PlayerLogText()
         {

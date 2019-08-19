@@ -146,6 +146,7 @@
     <Compile Include="Multiplayer\Scripts\Vehicle Network Scripts\AV42cNetworkedObjectReceiver.cs" />
     <Compile Include="Multiplayer\Scripts\Vehicle Network Scripts\AV42cNetworkedObjectSender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SkinManager.cs" />
     <Compile Include="UConsole.cs" />
     <Compile Include="VTOLAPI.cs" />
     <Compile Include="VTOLMOD.cs" />

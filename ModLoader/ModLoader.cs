@@ -167,14 +167,14 @@ namespace ModLoader
 
             //Warning Page
             VRInteractable warningPagevrInteractable = warningPage.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            SetDefaultInteractable(warningPagevrInteractable);
+            SetDefaultInteractable(warningPagevrInteractable, pb);
             warningPagevrInteractable.interactableName = "Okay";
             warningPagevrInteractable.OnInteract.AddListener(delegate { SwitchPage(Page.spmp); });
             //SP/MP
             VRInteractable spButton = spmp.transform.GetChild(1).GetChild(0).gameObject.AddComponent<VRInteractable>();
             VRInteractable mpButton = spmp.transform.GetChild(2).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            SetDefaultInteractable(spButton);
-            SetDefaultInteractable(mpButton);
+            SetDefaultInteractable(spButton, pb);
+            SetDefaultInteractable(mpButton, pb);
             spButton.interactableName = "Start Singleplayer";
             //mpButton.interactableName = "Start Multiplayer";
             mpButton.interactableName = "Not Available Yet";
@@ -184,8 +184,8 @@ namespace ModLoader
             //SP Mod Page
             VRInteractable spModBack = spModPage.transform.GetChild(3).GetChild(0).gameObject.AddComponent<VRInteractable>();
             VRInteractable spModLoad = spModPage.transform.GetChild(2).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            SetDefaultInteractable(spModBack);
-            SetDefaultInteractable(spModLoad);
+            SetDefaultInteractable(spModBack, pb);
+            SetDefaultInteractable(spModLoad, pb);
             spModBack.interactableName = "Back to list";
             spModLoad.interactableName = "Load Mod";
             spModBack.OnInteract.AddListener(delegate { SwitchPage(Page.spList); });
@@ -194,10 +194,10 @@ namespace ModLoader
             VRInteractable spListNextPage = spList.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
             VRInteractable spListPreviousPage = spList.transform.GetChild(1).GetChild(0).gameObject.AddComponent<VRInteractable>();
             VRInteractable spListStart = spList.transform.GetChild(11).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            SetDefaultInteractable(spListSwitch);
-            SetDefaultInteractable(spListNextPage);
-            SetDefaultInteractable(spListPreviousPage);
-            SetDefaultInteractable(spListStart);
+            SetDefaultInteractable(spListSwitch, pb);
+            SetDefaultInteractable(spListNextPage, pb);
+            SetDefaultInteractable(spListPreviousPage, pb);
+            SetDefaultInteractable(spListStart, pb);
             spListSwitch.interactableName = "Switch";
             spListNextPage.interactableName = "Next Page";
             spListPreviousPage.interactableName = "Previous Page";
@@ -223,13 +223,13 @@ namespace ModLoader
             VRInteractable pilot1 = mpPV.transform.GetChild(7).GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
             VRInteractable pilot2 = mpPV.transform.GetChild(8).GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
             VRInteractable mpPVContinue = mpPV.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            SetDefaultInteractable(mpPVAV42);
-            SetDefaultInteractable(mpPVFA26);
-            SetDefaultInteractable(mpPVF45);
-            SetDefaultInteractable(pilot0);
-            SetDefaultInteractable(pilot1);
-            SetDefaultInteractable(pilot2);
-            SetDefaultInteractable(mpPVContinue);
+            SetDefaultInteractable(mpPVAV42, pb);
+            SetDefaultInteractable(mpPVFA26, pb);
+            SetDefaultInteractable(mpPVF45, pb);
+            SetDefaultInteractable(pilot0, pb);
+            SetDefaultInteractable(pilot1, pb);
+            SetDefaultInteractable(pilot2, pb);
+            SetDefaultInteractable(mpPVContinue, pb);
             mpPVAV42.interactableName = "Select Vehicle";
             mpPVFA26.interactableName = "Select Vehicle";
             mpPVF45.interactableName = "Select Vehicle";
@@ -287,15 +287,15 @@ namespace ModLoader
 
             //MP Server IP and Port
             VRInteractable mpIPPortJoin = mpIPPort.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            SetDefaultInteractable(mpIPPortJoin);
+            SetDefaultInteractable(mpIPPortJoin, pb);
             mpIPPortJoin.interactableName = "Join Lobby";
             mpIPPortJoin.OnInteract.AddListener(delegate { ConnectToServer(); });
 
             //MP Server Info
             VRInteractable mpInfoJoin = mpServerInfo.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
             VRInteractable mpInfoBack = mpServerInfo.transform.GetChild(1).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            SetDefaultInteractable(mpInfoJoin);
-            SetDefaultInteractable(mpInfoBack);
+            SetDefaultInteractable(mpInfoJoin, pb);
+            SetDefaultInteractable(mpInfoBack, pb);
             mpInfoJoin.interactableName = "Join Game";
             mpInfoBack.interactableName = "Back";
             mpInfoJoin.OnInteract.AddListener(delegate { JoinGame(); });
@@ -305,13 +305,13 @@ namespace ModLoader
 
             //MP Banned
             VRInteractable mpBannedOkay = mpBanned.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            SetDefaultInteractable(mpBannedOkay);
+            SetDefaultInteractable(mpBannedOkay, pb);
             mpBannedOkay.interactableName = "Okay";
             mpBannedOkay.OnInteract.AddListener(delegate { SwitchPage(Page.mpIPPort); });
             bannedReasonText = mpBanned.transform.GetChild(1).gameObject.GetComponent<Text>();
         }
 
-        public VRInteractable SetDefaultInteractable(VRInteractable interactable)
+        public static VRInteractable SetDefaultInteractable(VRInteractable interactable, PoseBounds pb)
         {
             VRInteractable returnValue = interactable;
             returnValue.radius = 0.06f;
@@ -506,14 +506,14 @@ namespace ModLoader
             modSlots[6] = new ModSlot(spTransform.GetChild(9).gameObject, spTransform.GetChild(9).GetChild(1).GetComponent<Text>(), spTransform.GetChild(9).GetChild(0).gameObject.AddComponent<VRInteractable>());
             modSlots[7] = new ModSlot(spTransform.GetChild(10).gameObject, spTransform.GetChild(10).GetChild(1).GetComponent<Text>(), spTransform.GetChild(10).GetChild(0).gameObject.AddComponent<VRInteractable>());
 
-            SetDefaultInteractable(modSlots[0].interactable);
-            SetDefaultInteractable(modSlots[1].interactable);
-            SetDefaultInteractable(modSlots[2].interactable);
-            SetDefaultInteractable(modSlots[3].interactable);
-            SetDefaultInteractable(modSlots[4].interactable);
-            SetDefaultInteractable(modSlots[5].interactable);
-            SetDefaultInteractable(modSlots[6].interactable);
-            SetDefaultInteractable(modSlots[7].interactable);
+            SetDefaultInteractable(modSlots[0].interactable, pb);
+            SetDefaultInteractable(modSlots[1].interactable, pb);
+            SetDefaultInteractable(modSlots[2].interactable, pb);
+            SetDefaultInteractable(modSlots[3].interactable, pb);
+            SetDefaultInteractable(modSlots[4].interactable, pb);
+            SetDefaultInteractable(modSlots[5].interactable, pb);
+            SetDefaultInteractable(modSlots[6].interactable, pb);
+            SetDefaultInteractable(modSlots[7].interactable, pb);
 
             FindLocalMods();
 
