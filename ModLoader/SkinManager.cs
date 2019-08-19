@@ -53,43 +53,79 @@ namespace ModLoader
                 switch (item.name)
                 {
                     case "mat_vtol4Exterior":
-                        if (!skins.ContainsKey("mat_vtol4Exterior"))
-                            skins.Add("mat_vtol4Exterior", item);
+                        AddKey("mat_vtol4Exterior", item);
                         continue;
                     case "mat_vtol4Exterior2":
-                        if (!skins.ContainsKey("mat_vtol4Exterior2"))
-                            skins.Add("mat_vtol4Exterior2", item);
+                        AddKey("mat_vtol4Exterior2", item);
                         continue;
                     case "mat_vtol4Interior":
-                        if (!skins.ContainsKey("mat_vtol4Interior"))
-                            skins.Add("mat_vtol4Interior", item);
+                        AddKey("mat_vtol4Interior", item);
                         continue;
                     case "mat_vtol4TiltEngine":
-                        if (!skins.ContainsKey("mat_vtol4TiltEngine"))
-                            skins.Add("mat_vtol4TiltEngine", item);
+                        AddKey("mat_vtol4TiltEngine", item);
                         continue;
                     case "mat_cockpitProps":
-                        if (!skins.ContainsKey("mat_cockpitProps"))
-                            skins.Add("mat_cockpitProps", item);
+                        AddKey("mat_cockpitProps", item);
                         continue;
                     case "mat_acesSeat":
-                        if (!skins.ContainsKey("mat_acesSeat"))
-                            skins.Add("mat_acesSeat", item);
+                        AddKey("mat_acesSeat", item);
                         continue;
                     case "mat_bobbleHead":
-                        if (!skins.ContainsKey("mat_bobbleHead"))
-                            skins.Add("mat_bobbleHead", item);
+                        AddKey("mat_bobbleHead", item);
                         continue;
                     case "mat_miniMFD":
-                        if (!skins.ContainsKey("mat_miniMFD"))
-                            skins.Add("mat_miniMFD", item);
+                        AddKey("mat_miniMFD", item);
                         continue;
                     case "mat_mfd":
-                        if (!skins.ContainsKey("mat_mfd"))
-                            skins.Add("mat_mfd", item);
+                        AddKey("mat_mfd", item);
+                        continue;
+                    case "mat_sevtf_CanopyInt":
+                        AddKey("mat_sevtf_CanopyInt", item);
+                        continue;
+                    case "mat_sevtf_engine":
+                        AddKey("mat_sevtf_engine", item);
+                        continue;
+                    case "mat_sevtf_ext":
+                        AddKey("mat_sevtf_ext", item);
+                        continue;
+                    case "mat_sevtf_ext2":
+                        AddKey("mat_sevtf_ext2", item);
+                        continue;
+                    case "mat_sevtf_int":
+                        AddKey("mat_sevtf_int", item);
+                        continue;
+                    case "mat_sevtf_lowPoly":
+                        AddKey("mat_sevtf_lowPoly", item);
+                        continue;
+                    case "mat_aFighterCanopyExt":
+                        AddKey("mat_aFighterCanopyExt", item);
+                        continue;
+                    case "mat_aFighterCanopyInt":
+                        AddKey("mat_aFighterCanopyInt", item);
+                        continue;
+                    case "mat_afighterExt1":
+                        AddKey("mat_afighterExt1", item);
+                        continue;
+                    case "mat_afighterExt2":
+                        AddKey("mat_afighterExt2", item);
+                        continue;
+                    case "mat_aFighterInterior":
+                        AddKey("mat_aFighterInterior", item);
+                        continue;
+                    case "mat_aFighterInterior2":
+                        AddKey("mat_aFighterInterior2", item);
+                        continue;
+                    case "mat_vgLowpoly":
+                        AddKey("mat_vgLowpoly", item);
                         continue;
                 }
             } 
+        }
+
+        private void AddKey(string key, Material item)
+        {
+            if (!skins.ContainsKey(key))
+                skins.Add(key, item);
         }
 
         private IEnumerator VehicleConfigurationScene()
@@ -244,8 +280,34 @@ namespace ModLoader
                         StartCoroutine(UpdateTexture(selected.folderPath + @"\vtol4TiltEngine.png", skins["mat_vtol4TiltEngine"]));
                     break;
                 case VTOLVehicles.FA26B:
+                    if (File.Exists(selected.folderPath + @"\aFighterCanopyExt.png") && skins.ContainsKey("mat_aFighterCanopyExt"))
+                        StartCoroutine(UpdateTexture(selected.folderPath + @"\aFighterCanopyExt.png", skins["mat_aFighterCanopyExt"]));
+                    if (File.Exists(selected.folderPath + @"\aFighterCanopyInt.png") && skins.ContainsKey("mat_aFighterCanopyInt"))
+                        StartCoroutine(UpdateTexture(selected.folderPath + @"\aFighterCanopyInt.png", skins["mat_aFighterCanopyInt"]));
+                    if (File.Exists(selected.folderPath + @"\afighterExt1.png") && skins.ContainsKey("mat_afighterExt1"))
+                        StartCoroutine(UpdateTexture(selected.folderPath + @"\afighterExt1.png", skins["mat_afighterExt1"]));
+                    if (File.Exists(selected.folderPath + @"\afighterExt2.png") && skins.ContainsKey("mat_afighterExt2"))
+                        StartCoroutine(UpdateTexture(selected.folderPath + @"\afighterExt2.png", skins["mat_afighterExt2"]));
+                    if (File.Exists(selected.folderPath + @"\aFighterInterior.png") && skins.ContainsKey("mat_aFighterInterior"))
+                        StartCoroutine(UpdateTexture(selected.folderPath + @"\aFighterInterior.png", skins["mat_aFighterInterior"]));
+                    if (File.Exists(selected.folderPath + @"\aFighterInterior2.png") && skins.ContainsKey("mat_aFighterInterior2"))
+                        StartCoroutine(UpdateTexture(selected.folderPath + @"\aFighterInterior2.png", skins["mat_aFighterInterior2"]));
+                    if (File.Exists(selected.folderPath + @"\vgLowpoly.png") && skins.ContainsKey("mat_vgLowpoly"))
+                        StartCoroutine(UpdateTexture(selected.folderPath + @"\vgLowpoly.png", skins["mat_vgLowpoly"]));
                     break;
                 case VTOLVehicles.F45A:
+                    if (File.Exists(selected.folderPath + @"\sevtf_CanopyInt.png") && skins.ContainsKey("mat_sevtf_CanopyInt"))
+                        StartCoroutine(UpdateTexture(selected.folderPath + @"\sevtf_CanopyInt.png", skins["mat_sevtf_CanopyInt"]));
+                    if (File.Exists(selected.folderPath + @"\sevtf_engine.png") && skins.ContainsKey("mat_sevtf_engine"))
+                        StartCoroutine(UpdateTexture(selected.folderPath + @"\sevtf_engine.png", skins["mat_sevtf_engine"]));
+                    if (File.Exists(selected.folderPath + @"\sevtf_ext.png") && skins.ContainsKey("mat_sevtf_ext"))
+                        StartCoroutine(UpdateTexture(selected.folderPath + @"\sevtf_ext.png", skins["mat_sevtf_ext"]));
+                    if (File.Exists(selected.folderPath + @"\sevtf_ext2.png") && skins.ContainsKey("mat_sevtf_ext2"))
+                        StartCoroutine(UpdateTexture(selected.folderPath + @"\sevtf_ext2.png", skins["mat_sevtf_ext2"]));
+                    if (File.Exists(selected.folderPath + @"\sevtf_int.png") && skins.ContainsKey("mat_sevtf_int"))
+                        StartCoroutine(UpdateTexture(selected.folderPath + @"\sevtf_int.png", skins["mat_sevtf_int"]));
+                    if (File.Exists(selected.folderPath + @"\sevtf_lowPoly.png") && skins.ContainsKey("mat_sevtf_lowPoly"))
+                        StartCoroutine(UpdateTexture(selected.folderPath + @"\sevtf_lowPoly.png", skins["mat_sevtf_lowPoly"]));
                     break;
             }
 
@@ -259,6 +321,7 @@ namespace ModLoader
                 StartCoroutine(UpdateTexture(selected.folderPath + @"\miniMFD.png", skins["mat_miniMFD"]));
             if (File.Exists(selected.folderPath + @"\mfd.png") && skins.ContainsKey("mat_mfd"))
                 StartCoroutine(UpdateTexture(selected.folderPath + @"\mfd.png", skins["mat_mfd"]));
+
 
         }
 
