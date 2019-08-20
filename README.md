@@ -1,24 +1,20 @@
 # VTOL VR Mod Loader
-VTOL VR Mod Loader is a basic mod loader to help people get custom scripts/assets into the game VTOLVR on steam. 
 
-## How to install VTOL VR Mod Loader
+## [Website](https://vtolvr-mods.com/ "VTOL VR Mod Loader Website")
 
- 1. Download the zip from the [releases tab](https://github.com/MarshMello0/VTOLVR-ModLoader/releases)
- 2. Extract the folders to the root of your game folder
- 3. Open the folder called "VTOLVR_ModLoader" and run VTOLVR-ModLoader.exe to launch the mod loader
+VTOLVR Modding aims to add more user-created content into the game as mods. With the mod loader, players can add custom code into the game to add extra features that they wanted.
+Anyone can create mods with a bit of knowledge of Unity and C# using the Wiki, also the mod loader is open source, so anyone can help out improving the mod loader it's self.
 
-## How to use the mod loader
-![The Mod Loader 2.0](https://giant.gfycat.com/AdoredInferiorIrishwolfhound.gif)
+Please note, modding in VTOL VR isn't officially supported by the developers. Mods will break from time to time, this isn't the developers' fault, please don't blame them or report bugs to the developers while running the mod loader or any mods. If there are any issues with the mod loader, please report them to @. Marsh.Mello .#3194 on the [official VTOLVR Discord](https://discord.gg/u7X72wc "official VTOLVR Discord").
 
-The mod loader now injects its self into the game so you can load mods in VR. To launch the game modded, all you have to press is launch and wait for the game to open. It will wait a few seconds and inject its self into the game. Then from inside the game, you can load mods in the singleplayer section.
 
-## Mods List
-|Mod Name | Description|Version | Download Link | Author |
-|--|--|--|--|--|
-|No Gravity|Adds a basic button to disable/enable gravity|1.0 | Not Updated | . Marsh.Mello . |
-|Console Mod|Displays the Unity Console in a sperate window|1.0 | Not Updated | . Marsh.Mello . |
 
-## How to create mods (Wiki is currently out of date)
+## Contributing to the mod loader
+This is this all the source code for the exe, mod loader.dll, logo files, multiplayer mod, unity project and server files. 
+This project is open-source, so anyone can help out improving. Just create a fork, improve upon the code, and do a pull request. However, if you just want to create a mod you don't need to touch this source code, head over to the [creating a mod page](https://vtolvr-mods.com/creating-a-mod.php "creating a mod page") on the website to learn how.
 
-Mods are created in C# in Visual Studio using the .net framework. Creating these mods are just like creating your own script in Unity, so if you have experience in writing C# scripts in Unity you can check out my more detailed post in the [Wiki](https://github.com/MarshMello0/VTOLVR-ModLoader/wiki).
+The logo was created in Adobe Illustrator and the gif was created in Adobe Photoshop.
+Modloader, Multiplayer, ServerPlugin and ModLoader exe are all in one visual studio project in C#.
+The Standalone Server is what runs the Server Plugin and doesn't need to be changed apart from moving the .dll.
 
+Class Diagram Plan shows a plan of the base logic how the mod loader works, however, it isn't 100% up to date but is a good place to start understanding how everything works. It was created in [SINVAS UML](https://sourceforge.net/projects/sinvas-uml/ "SINVAS UML").
