@@ -14,7 +14,6 @@ namespace ModLoader
     class SkinManager : VTOLMOD
     {
         //This variables are used on different scenes
-        private Dictionary<string, Material> skins;
         private List<Skin> installedSkins = new List<Skin>();
         private int selectedSkin = -1;
 
@@ -43,91 +42,6 @@ namespace ModLoader
                 StartCoroutine(GameScene());
             }
         }
-
-        private void SetMaterials()
-        {
-            skins = new Dictionary<string, Material>();
-            
-            foreach (Material item in Resources.FindObjectsOfTypeAll(typeof(Material)) as Material[])
-            {
-                switch (item.name)
-                {
-                    case "mat_vtol4Exterior":
-                        AddKey("mat_vtol4Exterior", item);
-                        continue;
-                    case "mat_vtol4Exterior2":
-                        AddKey("mat_vtol4Exterior2", item);
-                        continue;
-                    case "mat_vtol4Interior":
-                        AddKey("mat_vtol4Interior", item);
-                        continue;
-                    case "mat_vtol4TiltEngine":
-                        AddKey("mat_vtol4TiltEngine", item);
-                        continue;
-                    case "mat_cockpitProps":
-                        AddKey("mat_cockpitProps", item);
-                        continue;
-                    case "mat_acesSeat":
-                        AddKey("mat_acesSeat", item);
-                        continue;
-                    case "mat_bobbleHead":
-                        AddKey("mat_bobbleHead", item);
-                        continue;
-                    case "mat_miniMFD":
-                        AddKey("mat_miniMFD", item);
-                        continue;
-                    case "mat_mfd":
-                        AddKey("mat_mfd", item);
-                        continue;
-                    case "mat_sevtf_CanopyInt":
-                        AddKey("mat_sevtf_CanopyInt", item);
-                        continue;
-                    case "mat_sevtf_engine":
-                        AddKey("mat_sevtf_engine", item);
-                        continue;
-                    case "mat_sevtf_ext":
-                        AddKey("mat_sevtf_ext", item);
-                        continue;
-                    case "mat_sevtf_ext2":
-                        AddKey("mat_sevtf_ext2", item);
-                        continue;
-                    case "mat_sevtf_int":
-                        AddKey("mat_sevtf_int", item);
-                        continue;
-                    case "mat_sevtf_lowPoly":
-                        AddKey("mat_sevtf_lowPoly", item);
-                        continue;
-                    case "mat_aFighterCanopyExt":
-                        AddKey("mat_aFighterCanopyExt", item);
-                        continue;
-                    case "mat_aFighterCanopyInt":
-                        AddKey("mat_aFighterCanopyInt", item);
-                        continue;
-                    case "mat_afighterExt1":
-                        AddKey("mat_afighterExt1", item);
-                        continue;
-                    case "mat_afighterExt2":
-                        AddKey("mat_afighterExt2", item);
-                        continue;
-                    case "mat_aFighterInterior":
-                        AddKey("mat_aFighterInterior", item);
-                        continue;
-                    case "mat_aFighterInterior2":
-                        AddKey("mat_aFighterInterior2", item);
-                        continue;
-                    case "mat_vgLowpoly":
-                        AddKey("mat_vgLowpoly", item);
-                        continue;
-                }
-            } 
-        }
-
-        private void AddKey(string key, Material item)
-        {
-            if (!skins.ContainsKey(key))
-                skins.Add(key, item);
-        }
-
         private IEnumerator VehicleConfigurationScene()
         {
             while (SceneManager.GetActiveScene().buildIndex != 3)
@@ -143,8 +57,6 @@ namespace ModLoader
               Add my contents depnding on how many skins there are
               Change main vehicles skin when the select one
              */
-
-            SetMaterials();
 
             GameObject MissionLauncher = GameObject.Find("MissionLauncher");
 
@@ -248,38 +160,41 @@ namespace ModLoader
         }
         public void Next()
         {
-            currentSkin++;
+            currentSkin += 1;
             ClampCount();
             UpdateUI();
         }
         public void Previous()
         {
-            currentSkin--;
+            currentSkin -= 1;
             ClampCount();
             UpdateUI();
+            
         }
         public void SelectSkin()
         {
+            Debug.Log("Changed selected skin to " + currentSkin);
             selectedSkin = currentSkin;
         }
-        private void ApplySkin()
+        private void ApplySkin(GameObject vehicle = null)
         {
+            Debug.Log("Applying Skin Number " + selectedSkin);
             if (selectedSkin < 0)
+            {
+                Debug.Log("Selected Skin was below 0");
                 return;
+            }
+
             Skin selected = installedSkins[selectedSkin];
+
+            Debug.Log("\nSkin: " + selected.name + " \nPath: " + selected.folderPath + "\nHasAV42C: " + selected.hasAv42c);
             switch (VTOLAPI.instance.GetPlayersVehicleEnum())
             {
                 case VTOLVehicles.AV42C:
-                    if (File.Exists(selected.folderPath + @"\vtol4Exterior.png") && skins.ContainsKey("mat_vtol4Exterior"))
-                        StartCoroutine(UpdateTexture(selected.folderPath + @"\vtol4Exterior.png", skins["mat_vtol4Exterior"]));
-                    if (File.Exists(selected.folderPath + @"\vtol4Exterior2.png") && skins.ContainsKey("mat_vtol4Exterior2"))
-                        StartCoroutine(UpdateTexture(selected.folderPath + @"\vtol4Exterior2.png", skins["mat_vtol4Exterior2"]));
-                    if (File.Exists(selected.folderPath + @"\vtol4Interior.png") && skins.ContainsKey("mat_vtol4Interior"))
-                        StartCoroutine(UpdateTexture(selected.folderPath + @"\vtol4Interior.png", skins["mat_vtol4Interior"]));
-                    if (File.Exists(selected.folderPath + @"\vtol4TiltEngine.png") && skins.ContainsKey("mat_vtol4TiltEngine"))
-                        StartCoroutine(UpdateTexture(selected.folderPath + @"\vtol4TiltEngine.png", skins["mat_vtol4TiltEngine"]));
+                    ApplyVTOL4((vehicle == null? GameObject.Find("VTOL4(Clone)") : vehicle).transform, selected);
                     break;
                 case VTOLVehicles.FA26B:
+                    /*
                     if (File.Exists(selected.folderPath + @"\aFighterCanopyExt.png") && skins.ContainsKey("mat_aFighterCanopyExt"))
                         StartCoroutine(UpdateTexture(selected.folderPath + @"\aFighterCanopyExt.png", skins["mat_aFighterCanopyExt"]));
                     if (File.Exists(selected.folderPath + @"\aFighterCanopyInt.png") && skins.ContainsKey("mat_aFighterCanopyInt"))
@@ -294,8 +209,11 @@ namespace ModLoader
                         StartCoroutine(UpdateTexture(selected.folderPath + @"\aFighterInterior2.png", skins["mat_aFighterInterior2"]));
                     if (File.Exists(selected.folderPath + @"\vgLowpoly.png") && skins.ContainsKey("mat_vgLowpoly"))
                         StartCoroutine(UpdateTexture(selected.folderPath + @"\vgLowpoly.png", skins["mat_vgLowpoly"]));
+                    Debug.Log("Loaded FA-26B Skins");
+                    */
                     break;
                 case VTOLVehicles.F45A:
+                    /*
                     if (File.Exists(selected.folderPath + @"\sevtf_CanopyInt.png") && skins.ContainsKey("mat_sevtf_CanopyInt"))
                         StartCoroutine(UpdateTexture(selected.folderPath + @"\sevtf_CanopyInt.png", skins["mat_sevtf_CanopyInt"]));
                     if (File.Exists(selected.folderPath + @"\sevtf_engine.png") && skins.ContainsKey("mat_sevtf_engine"))
@@ -308,24 +226,161 @@ namespace ModLoader
                         StartCoroutine(UpdateTexture(selected.folderPath + @"\sevtf_int.png", skins["mat_sevtf_int"]));
                     if (File.Exists(selected.folderPath + @"\sevtf_lowPoly.png") && skins.ContainsKey("mat_sevtf_lowPoly"))
                         StartCoroutine(UpdateTexture(selected.folderPath + @"\sevtf_lowPoly.png", skins["mat_sevtf_lowPoly"]));
+                    Debug.Log("Loaded F-45A Skins");
+                    */
+                    break;
+                case VTOLVehicles.None:
+                    Debug.LogError("API FAILED");
                     break;
             }
+        }
+        private void ApplyVTOL4(Transform vehicle, Skin selected)
+        {
+            /*
+             * Here we are finding all the Game Objects which have the texture on it, 
+             * we are manually going though them all instead of changing the material in memory
+             * because then it will just only apply to that vehicle meaning different vehilces could
+             * have different textures. EG one team blue other team red but all VTOL4's
+             */
+            Debug.Log("Applying Skin...");
+            Transform VT4Body = vehicle.Find("VT4Body(new)");
+            Transform Body = vehicle.Find("Body");
+            Transform LeftGear = vehicle.Find("NewLandingGear").GetChild(1);
+            Transform RightGear = vehicle.Find("NewLandingGear").GetChild(2);
+            if (File.Exists(selected.folderPath + @"\vtol4Exterior.png"))
+            {
+                Debug.Log("Searching for objects with vtol4Exterior material");
+                List<Material> mats = new List<Material>();
+                
+                mats.Add(VT4Body.GetComponent<MeshRenderer>().material);
+                mats.Add(VT4Body.GetChild(0).GetComponent<MeshRenderer>().material);
+                mats.Add(VT4Body.GetChild(3).GetComponent<MeshRenderer>().material);
+                mats.Add(VT4Body.GetChild(4).GetComponent<MeshRenderer>().material);
+                mats.Add(VT4Body.GetChild(5).GetComponent<MeshRenderer>().material);
+                mats.Add(VT4Body.GetChild(6).GetComponent<MeshRenderer>().material);
+                mats.Add(VT4Body.GetChild(7).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);
+                mats.Add(VT4Body.GetChild(7).GetChild(0).GetChild(1).GetComponent<MeshRenderer>().material);
 
-            if (File.Exists(selected.folderPath + @"\cockpitProps.png") && skins.ContainsKey("mat_cockpitProps"))
-                StartCoroutine(UpdateTexture(selected.folderPath + @"\cockpitProps.png", skins["mat_cockpitProps"]));
-            if (File.Exists(selected.folderPath + @"\acesSeat.png") && skins.ContainsKey("mat_acesSeat"))
-                StartCoroutine(UpdateTexture(selected.folderPath + @"\acesSeat.png", skins["mat_acesSeat"]));
-            if (File.Exists(selected.folderPath + @"\bobbleHead.png") && skins.ContainsKey("mat_bobbleHead"))
-                StartCoroutine(UpdateTexture(selected.folderPath + @"\bobbleHead.png", skins["mat_bobbleHead"]));
-            if (File.Exists(selected.folderPath + @"\miniMFD.png") && skins.ContainsKey("mat_miniMFD"))
-                StartCoroutine(UpdateTexture(selected.folderPath + @"\miniMFD.png", skins["mat_miniMFD"]));
-            if (File.Exists(selected.folderPath + @"\mfd.png") && skins.ContainsKey("mat_mfd"))
-                StartCoroutine(UpdateTexture(selected.folderPath + @"\mfd.png", skins["mat_mfd"]));
+                Transform VTOLAnimated = vehicle.Find("VTOLAnimated(doNotChange)");
+                mats.Add(VTOLAnimated.GetChild(0).GetComponent<MeshRenderer>().material);
+                mats.Add(VTOLAnimated.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);
+                mats.Add(VTOLAnimated.GetChild(1).GetComponent<MeshRenderer>().material);
+                mats.Add(VTOLAnimated.GetChild(1).GetChild(0).GetComponent<MeshRenderer>().material);
+                mats.Add(VTOLAnimated.GetChild(2).GetComponent<MeshRenderer>().material);
+                mats.Add(VTOLAnimated.GetChild(3).GetComponent<MeshRenderer>().material);
+                mats.Add(VTOLAnimated.GetChild(4).GetComponent<MeshRenderer>().material);
+                mats.Add(VTOLAnimated.GetChild(5).GetComponent<MeshRenderer>().material);
+                mats.Add(VTOLAnimated.GetChild(6).GetComponent<MeshRenderer>().material);
 
+                mats.Add(Body.GetChild(11).GetChild(0).GetComponent<MeshRenderer>().material); //fuelDoorLeft
+                mats.Add(Body.GetChild(11).GetChild(1).GetComponent<MeshRenderer>().material); //fuelDoorRight
 
+                mats.Add(Body.GetChild(12).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material); //landingHook
+
+                mats.Add(Body.GetChild(13).GetChild(0).GetComponent<MeshRenderer>().material); //canopyFrame.002
+
+                mats.Add(Body.GetChild(20).GetComponent<MeshRenderer>().material); //airBrake
+                mats.Add(Body.GetChild(20).GetChild(0).GetComponent<MeshRenderer>().material); //airbrakePiston
+                mats.Add(Body.GetChild(21).GetComponent<MeshRenderer>().material); //airbrakeCylinder
+
+                mats.Add(LeftGear.GetChild(1).GetChild(1).GetChild(2).GetComponent<MeshRenderer>().material);//gearLowerDoorLeft
+                mats.Add(RightGear.GetChild(1).GetChild(0).GetChild(2).GetComponent<MeshRenderer>().material);//gearLowerDoorRight
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\vtol4Exterior.png",mats));
+            }
+            if (File.Exists(selected.folderPath + @"\vtol4Exterior2.png"))
+            {
+                Debug.Log("Searching for objects with vtol4Exterior2 material");
+                List<Material> mats = new List<Material>();
+                mats.Add(VT4Body.GetChild(1).GetComponent<MeshRenderer>().material);
+                mats.Add(VT4Body.GetChild(2).GetComponent<MeshRenderer>().material);
+                mats.Add(Body.GetChild(9).GetComponent<MeshRenderer>().material); //WingLeft
+                mats.Add(Body.GetChild(9).GetChild(3).GetComponent<MeshRenderer>().material); //aileronLeft
+                mats.Add(Body.GetChild(9).GetChild(4).GetComponent<MeshRenderer>().material); //leadingEdgeLeft
+                mats.Add(Body.GetChild(9).GetChild(5).GetChild(0).GetChild(1).GetComponent<MeshRenderer>().material); //tiltHousingLeft
+                mats.Add(Body.GetChild(10).GetComponent<MeshRenderer>().material); //WingRight
+                mats.Add(Body.GetChild(10).GetChild(1).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material); //tiltHousingRight
+                mats.Add(Body.GetChild(10).GetChild(2).GetComponent<MeshRenderer>().material); //aileronRight
+                mats.Add(Body.GetChild(10).GetChild(3).GetComponent<MeshRenderer>().material); //leadingEdgeRight
+
+                mats.Add(Body.GetChild(22).GetComponent<MeshRenderer>().material);//TailplaneLeft
+                mats.Add(Body.GetChild(22).GetChild(0).GetComponent<MeshRenderer>().material);//leftElevator
+                mats.Add(Body.GetChild(22).GetChild(1).GetComponent<MeshRenderer>().material);//leftRudder
+                mats.Add(Body.GetChild(23).GetComponent<MeshRenderer>().material);//rightTailplane
+                mats.Add(Body.GetChild(23).GetChild(0).GetComponent<MeshRenderer>().material);//rightElevator
+                mats.Add(Body.GetChild(23).GetChild(1).GetComponent<MeshRenderer>().material);//rightRudder
+
+                Transform FrontGear = vehicle.Find("NewLandingGear").GetChild(0);
+                mats.Add(FrontGear.GetChild(1).GetComponent<MeshRenderer>().material);// frontGearBase
+                mats.Add(FrontGear.GetChild(2).GetComponent<MeshRenderer>().material);// frontGearSupportPiston
+                mats.Add(FrontGear.GetChild(6).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);// frontGearSteering
+                mats.Add(FrontGear.GetChild(6).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);// frontWheel
+                mats.Add(FrontGear.GetChild(6).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);// catHookBase
+                mats.Add(FrontGear.GetChild(6).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);// catHook
+                mats.Add(FrontGear.GetChild(6).GetChild(1).GetComponent<MeshRenderer>().material);// frontGearCylinder
+                mats.Add(FrontGear.GetChild(6).GetChild(1).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);// frontGearSupportCylinder
+                mats.Add(FrontGear.GetChild(6).GetChild(1).GetChild(1).GetComponent<MeshRenderer>().material);// frontGearPiston
+
+                mats.Add(LeftGear.GetChild(1).GetChild(1).GetComponent<MeshRenderer>().material);//leftGearArm
+                mats.Add(LeftGear.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//leftGearBracket
+                mats.Add(LeftGear.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//leftWheel
+                mats.Add(LeftGear.GetChild(1).GetChild(1).GetChild(1).GetComponent<MeshRenderer>().material);//leftGearPiston
+                mats.Add(LeftGear.GetChild(2).GetComponent<MeshRenderer>().material);//leftGearCylinder
+
+                mats.Add(RightGear.GetChild(1).GetChild(0).GetComponent<MeshRenderer>().material);//rightGearArm
+                mats.Add(RightGear.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//rightGearBracket
+                mats.Add(RightGear.GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//rightWheel
+                mats.Add(RightGear.GetChild(1).GetChild(0).GetChild(1).GetComponent<MeshRenderer>().material);//rightGearPiston
+                mats.Add(RightGear.GetChild(2).GetComponent<MeshRenderer>().material);//rightGearCylinder
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\vtol4Exterior2.png", mats));
+            }
+            if (File.Exists(selected.folderPath + @"\vtol4Interior.png"))
+            {
+                Debug.Log("Searching for objects with vtol4Interior material");
+                List<Material> mats = new List<Material>();
+                //vtol4AdjustableThrottle
+                mats.Add(Body.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material); //adjCollectiveBase
+                mats.Add(Body.GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material); //collectiveBaseHinge
+                mats.Add(Body.GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material); //collective
+                mats.Add(Body.GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material); //collectiveHandle
+                //vtol4adjustableJoystick
+                mats.Add(Body.GetChild(1).GetChild(0).GetComponent<MeshRenderer>().material);//adJoyBase
+                mats.Add(Body.GetChild(1).GetChild(1).GetChild(0).GetComponent<MeshRenderer>().material);//adJoyHeight
+                mats.Add(Body.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//adJoyFwd
+                mats.Add(Body.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//adJoyRight
+                mats.Add(Body.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//joystick
+                mats.Add(Body.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetComponent<MeshRenderer>().material);//dButtonBase
+                mats.Add(Body.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetComponent<MeshRenderer>().material);//dButton
+                mats.Add(Body.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetComponent<MeshRenderer>().material);//dButtonBase (1)
+                mats.Add(Body.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(2).GetChild(0).GetComponent<MeshRenderer>().material);//dButton
+                mats.Add(Body.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(3).GetComponent<MeshRenderer>().material);//dButtonBase (2)
+                mats.Add(Body.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(3).GetChild(0).GetComponent<MeshRenderer>().material);//dButton
+                mats.Add(Body.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(4).GetComponent<MeshRenderer>().material);//dButtonBase (3)
+                mats.Add(Body.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(4).GetChild(0).GetComponent<MeshRenderer>().material);//dButton
+                mats.Add(Body.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(5).GetComponent<MeshRenderer>().material);//dButtonBase (4)
+                mats.Add(Body.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(5).GetChild(0).GetComponent<MeshRenderer>().material);//dButton
+                mats.Add(Body.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(6).GetComponent<MeshRenderer>().material);//dButtonBase (5)
+                mats.Add(Body.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(6).GetChild(0).GetComponent<MeshRenderer>().material);//dButton
+
+                mats.Add(Body.GetChild(13).GetChild(1).GetComponent<MeshRenderer>().material); //Cube
+
+                mats.Add(vehicle.Find("helmPanel").GetComponent<MeshRenderer>().material);//helmPanel
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\vtol4Interior.png", mats));
+            }
+            if (File.Exists(selected.folderPath + @"\vtol4TiltEngine.png"))
+            {
+                Debug.Log("Searching for objects with vtol4TiltEngine material");
+                List<Material> mats = new List<Material>();
+                mats.Add(Body.GetChild(9).GetChild(5).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material); //tiltEngineLeft
+                mats.Add(Body.GetChild(10).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetComponent<MeshRenderer>().material); //tiltEngineRight
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\vtol4TiltEngine.png", mats));
+            }
+            Debug.Log("Loaded AV42C Skins\nvtol4exterior.png" + File.Exists(selected.folderPath + @"\vtol4Exterior.png") +
+                "\nvtol4Exterior2.png: " + File.Exists(selected.folderPath + @"\vtol4Exterior2.png") +
+                "\nvtol4Interior.png: " + File.Exists(selected.folderPath + @"\vtol4Interior.png") +
+                "\nvtol4TiltEngine.png: " + File.Exists(selected.folderPath + @"\vtol4TiltEngine.png"));
         }
 
-        private IEnumerator UpdateTexture(string path, Material material)
+        private IEnumerator UpdateTexture(string path, List<Material> material)
         {
             Debug.Log("Updating Texture from path: " + path);
             if (material == null)
@@ -337,21 +392,33 @@ namespace ModLoader
                 WWW www = new WWW("file:///" + path);
                 while (!www.isDone)
                     yield return null;
-                material.SetTexture("_MainTex", www.texture);
+                foreach (Material mat in material)
+                {
+                    yield return new WaitForEndOfFrame();
+                    mat.SetTexture("_MainTex", www.texture);
+                }
             }
         }
+
         private void ClampCount()
         {
             if (currentSkin < 0)
+            {
+                Debug.Log("Current Skin was below 0, moving to max amount which is " + (installedSkins.Count - 1));
                 currentSkin = installedSkins.Count - 1;
+            }
             else if (currentSkin > installedSkins.Count - 1)
+            {
+                Debug.Log("Current Skin was higher than the max amount of skins, reseting to 0");
                 currentSkin = 0;
+            }
         }
         private void UpdateUI()
         {
             if (installedSkins.Count == 0)
                 return;
             StartCoroutine(UpdateUIEnumerator());
+            Debug.Log("Current Skin = " + currentSkin);
         }
         private IEnumerator UpdateUIEnumerator()
         {
@@ -384,7 +451,7 @@ namespace ModLoader
         {
             SceneManager.sceneLoaded -= SceneLoaded;
         }
-
+        
         private class Skin
         {
             public string name;

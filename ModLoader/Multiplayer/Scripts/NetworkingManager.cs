@@ -16,7 +16,7 @@ namespace ModLoader.Multiplayer
     public class NetworkingManager : MonoBehaviour
     {
         //This handles all of the multiplayer code in the game scene
-
+        
         public UnityClient client;
         private ModLoaderManager manager;
         public string pilotName;
