@@ -25,6 +25,7 @@ namespace ModLoader
         {
             SceneManager.sceneLoaded += SceneLoaded;
             Directory.CreateDirectory(ModLoaderManager.instance.rootPath + @"\skins");
+            
         }
 
         private void SceneLoaded(Scene arg0, LoadSceneMode arg1)
@@ -194,23 +195,7 @@ namespace ModLoader
                     ApplyVTOL4((vehicle == null? GameObject.Find("VTOL4(Clone)") : vehicle).transform, selected);
                     break;
                 case VTOLVehicles.FA26B:
-                    /*
-                    if (File.Exists(selected.folderPath + @"\aFighterCanopyExt.png") && skins.ContainsKey("mat_aFighterCanopyExt"))
-                        StartCoroutine(UpdateTexture(selected.folderPath + @"\aFighterCanopyExt.png", skins["mat_aFighterCanopyExt"]));
-                    if (File.Exists(selected.folderPath + @"\aFighterCanopyInt.png") && skins.ContainsKey("mat_aFighterCanopyInt"))
-                        StartCoroutine(UpdateTexture(selected.folderPath + @"\aFighterCanopyInt.png", skins["mat_aFighterCanopyInt"]));
-                    if (File.Exists(selected.folderPath + @"\afighterExt1.png") && skins.ContainsKey("mat_afighterExt1"))
-                        StartCoroutine(UpdateTexture(selected.folderPath + @"\afighterExt1.png", skins["mat_afighterExt1"]));
-                    if (File.Exists(selected.folderPath + @"\afighterExt2.png") && skins.ContainsKey("mat_afighterExt2"))
-                        StartCoroutine(UpdateTexture(selected.folderPath + @"\afighterExt2.png", skins["mat_afighterExt2"]));
-                    if (File.Exists(selected.folderPath + @"\aFighterInterior.png") && skins.ContainsKey("mat_aFighterInterior"))
-                        StartCoroutine(UpdateTexture(selected.folderPath + @"\aFighterInterior.png", skins["mat_aFighterInterior"]));
-                    if (File.Exists(selected.folderPath + @"\aFighterInterior2.png") && skins.ContainsKey("mat_aFighterInterior2"))
-                        StartCoroutine(UpdateTexture(selected.folderPath + @"\aFighterInterior2.png", skins["mat_aFighterInterior2"]));
-                    if (File.Exists(selected.folderPath + @"\vgLowpoly.png") && skins.ContainsKey("mat_vgLowpoly"))
-                        StartCoroutine(UpdateTexture(selected.folderPath + @"\vgLowpoly.png", skins["mat_vgLowpoly"]));
-                    Debug.Log("Loaded FA-26B Skins");
-                    */
+                    ApplyFA26B((vehicle == null ? GameObject.Find("FA-26B(Clone)") : vehicle).transform, selected);
                     break;
                 case VTOLVehicles.F45A:
                     /*
@@ -378,6 +363,144 @@ namespace ModLoader
                 "\nvtol4Exterior2.png: " + File.Exists(selected.folderPath + @"\vtol4Exterior2.png") +
                 "\nvtol4Interior.png: " + File.Exists(selected.folderPath + @"\vtol4Interior.png") +
                 "\nvtol4TiltEngine.png: " + File.Exists(selected.folderPath + @"\vtol4TiltEngine.png"));
+        }
+        private void ApplyFA26B(Transform vehicle, Skin selected)
+        {
+            Debug.Log("Applying Skin...");
+            Transform aFighter2 = vehicle.Find("aFighter2");
+            Transform LandingGear = vehicle.Find("LandingGear");
+            Transform FrontGear = LandingGear.GetChild(1);
+            Transform LeftGear = LandingGear.GetChild(2);
+            Transform RightGear = LandingGear.GetChild(3);
+            if (File.Exists(selected.folderPath + @"\aFighterCanopyExt.png"))
+            {
+                List<Material> mats = new List<Material>();
+
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\aFighterCanopyExt.png", mats));
+            }
+            if (File.Exists(selected.folderPath + @"\aFighterCanopyInt.png"))
+            {
+                List<Material> mats = new List<Material>();
+
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\aFighterCanopyInt.png", mats));
+            }
+            if (File.Exists(selected.folderPath + @"\afighterExt1.png"))
+            {
+                //Broken
+                List<Material> mats = new List<Material>();
+
+                mats.Add(aFighter2.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//airbrakeCylinder
+                mats.Add(aFighter2.GetChild(0).GetChild(2).GetComponent<MeshRenderer>().material);//airBrake
+                mats.Add(aFighter2.GetChild(0).GetChild(2).GetChild(0).GetComponent<MeshRenderer>().material);//airbrakePiston
+
+                mats.Add(aFighter2.GetChild(1).GetComponent<MeshRenderer>().material);//body
+                mats.Add(aFighter2.GetChild(1).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//airFuelDoor
+                mats.Add(aFighter2.GetChild(1).GetChild(2).GetComponent<MeshRenderer>().material);//intakeLeft
+                mats.Add(aFighter2.GetChild(1).GetChild(3).GetComponent<MeshRenderer>().material);//intakeRight
+                mats.Add(aFighter2.GetChild(8).GetComponent<MeshRenderer>().material);//gunBarrels
+                mats.Add(aFighter2.GetChild(12).GetChild(1).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//landingHook
+
+                Transform AnimatedDoors = LandingGear.GetChild(5);
+                mats.Add(AnimatedDoors.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//frontDoorLeft
+                mats.Add(AnimatedDoors.GetChild(1).GetChild(0).GetComponent<MeshRenderer>().material);//frontDoorRear
+                mats.Add(AnimatedDoors.GetChild(2).GetChild(0).GetComponent<MeshRenderer>().material);//frontDoorRight
+                mats.Add(AnimatedDoors.GetChild(3).GetChild(0).GetComponent<MeshRenderer>().material);//rearLeftDoor1
+                mats.Add(AnimatedDoors.GetChild(4).GetChild(0).GetComponent<MeshRenderer>().material);//rearLeftDoor2
+                mats.Add(AnimatedDoors.GetChild(5).GetChild(0).GetComponent<MeshRenderer>().material);//rearRightDoor1
+                mats.Add(AnimatedDoors.GetChild(6).GetChild(0).GetComponent<MeshRenderer>().material);//rearRightDoor2
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\afighterExt1.png", mats));
+            }
+            if (File.Exists(selected.folderPath + @"\afighterExt2.png"))
+            {
+                List<Material> mats = new List<Material>();
+                mats.Add(aFighter2.GetChild(1).GetChild(1).GetComponent<MeshRenderer>().material);//cockpitFrame
+                mats.Add(aFighter2.GetChild(3).GetChild(1).GetChild(0).GetChild(2).GetComponent<MeshRenderer>().material);//canopyFrame
+                mats.Add(aFighter2.GetChild(3).GetChild(1).GetChild(0).GetChild(3).GetComponent<MeshRenderer>().material);//canopyHinge
+                mats.Add(aFighter2.GetChild(3).GetChild(1).GetChild(0).GetChild(3).GetChild(0).GetComponent<MeshRenderer>().material);//canopyCylinder
+                mats.Add(aFighter2.GetChild(3).GetChild(1).GetChild(0).GetChild(4).GetComponent<MeshRenderer>().material);//canopySlideRails
+                mats.Add(aFighter2.GetChild(3).GetChild(1).GetChild(1).GetComponent<MeshRenderer>().material);//canopyHingeBars
+                mats.Add(aFighter2.GetChild(3).GetChild(2).GetComponent<MeshRenderer>().material);//canopyPiston
+                mats.Add(aFighter2.GetChild(5).GetChild(0).GetComponent<MeshRenderer>().material);//elevonLeft
+                mats.Add(aFighter2.GetChild(6).GetChild(0).GetComponent<MeshRenderer>().material);//elevonRight
+                mats.Add(aFighter2.GetChild(16).GetComponent<MeshRenderer>().material);//verticalStabLeft
+                mats.Add(aFighter2.GetChild(16).GetChild(0).GetComponent<MeshRenderer>().material);//rudderLeft
+                mats.Add(aFighter2.GetChild(17).GetComponent<MeshRenderer>().material);//verticalStabRight
+                mats.Add(aFighter2.GetChild(17).GetChild(0).GetComponent<MeshRenderer>().material);//rudderRight
+
+                mats.Add(aFighter2.GetChild(19).GetChild(0).GetComponent<MeshRenderer>().material);//wingLeft
+                mats.Add(aFighter2.GetChild(19).GetChild(0).GetChild(1).GetComponent<MeshRenderer>().material);//flapLeft
+                mats.Add(aFighter2.GetChild(19).GetChild(0).GetChild(2).GetComponent<MeshRenderer>().material);//rootSlatLeft
+                mats.Add(aFighter2.GetChild(19).GetChild(0).GetChild(5).GetChild(0).GetComponent<MeshRenderer>().material);//wingFold
+                mats.Add(aFighter2.GetChild(19).GetChild(0).GetChild(5).GetChild(0).GetChild(2).GetComponent<MeshRenderer>().material);//aileronLeft
+                mats.Add(aFighter2.GetChild(19).GetChild(0).GetChild(5).GetChild(0).GetChild(3).GetComponent<MeshRenderer>().material);//tipSlatLeft
+                mats.Add(aFighter2.GetChild(20).GetChild(0).GetComponent<MeshRenderer>().material);//wingRight
+                mats.Add(aFighter2.GetChild(20).GetChild(0).GetChild(1).GetComponent<MeshRenderer>().material);//flapRight
+                mats.Add(aFighter2.GetChild(20).GetChild(0).GetChild(2).GetComponent<MeshRenderer>().material);//rootSlatRight
+                mats.Add(aFighter2.GetChild(20).GetChild(0).GetChild(3).GetChild(0).GetComponent<MeshRenderer>().material);//wingFoldRight
+                mats.Add(aFighter2.GetChild(20).GetChild(0).GetChild(3).GetChild(0).GetChild(3).GetComponent<MeshRenderer>().material);//aileronRight
+                mats.Add(aFighter2.GetChild(20).GetChild(0).GetChild(3).GetChild(0).GetChild(4).GetComponent<MeshRenderer>().material);//tipSlatRight
+
+                mats.Add(FrontGear.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//frontGearPiston
+                mats.Add(FrontGear.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//catHookCylinder
+                mats.Add(FrontGear.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//catHookPiston
+                mats.Add(FrontGear.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetComponent<MeshRenderer>().material);//frontWheels
+                mats.Add(FrontGear.GetChild(2).GetChild(0).GetComponent<MeshRenderer>().material);//frontGearCylinder
+                mats.Add(FrontGear.GetChild(2).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//frontGearSupport1
+                mats.Add(FrontGear.GetChild(2).GetChild(0).GetChild(1).GetComponent<MeshRenderer>().material);//frontGearSupport2
+                mats.Add(FrontGear.GetChild(4).GetComponent<MeshRenderer>().material);//frontGearHinge
+
+                mats.Add(LeftGear.GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//leftGearCylinder
+                mats.Add(LeftGear.GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//leftGearSupport1
+                mats.Add(LeftGear.GetChild(0).GetChild(0).GetChild(1).GetComponent<MeshRenderer>().material);//leftGearSupport2
+                mats.Add(LeftGear.GetChild(2).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//leftGearPiston
+                mats.Add(LeftGear.GetChild(2).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//leftWheel
+                mats.Add(LeftGear.GetChild(4).GetComponent<MeshRenderer>().material);//leftGearHinge
+
+                mats.Add(RightGear.GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//rightGearPiston
+                mats.Add(RightGear.GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//rightWheel
+                mats.Add(RightGear.GetChild(1).GetChild(0).GetComponent<MeshRenderer>().material);//rightGearCylinder
+                mats.Add(RightGear.GetChild(1).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//rightGearSupport1
+                mats.Add(RightGear.GetChild(1).GetChild(0).GetChild(1).GetComponent<MeshRenderer>().material);//rightGearSupport2
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\afighterExt2.png", mats));
+            }
+            if (File.Exists(selected.folderPath + @"\aFighterInterior.png"))
+            {
+                List<Material> mats = new List<Material>();
+                mats.Add(aFighter2.GetChild(4).GetComponent<MeshRenderer>().material);//dash
+                mats.Add(aFighter2.GetChild(10).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//heightAdjustModel
+                mats.Add(aFighter2.GetChild(10).GetChild(0).GetChild(0).GetChild(1).GetComponent<MeshRenderer>().material);//fwdAdjust
+                mats.Add(aFighter2.GetChild(10).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetComponent<MeshRenderer>().material);//rightAdjust
+                mats.Add(aFighter2.GetChild(10).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//joyYaw.001
+                mats.Add(aFighter2.GetChild(13).GetComponent<MeshRenderer>().material);//sidePanels
+                mats.Add(aFighter2.GetChild(14).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material);//throttle
+                mats.Add(aFighter2.GetChild(15).GetComponent<MeshRenderer>().material);//throttleTrack
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\aFighterInterior.png", mats));
+            }
+            if (File.Exists(selected.folderPath + @"\aFighterInterior2.png"))
+            {
+                List<Material> mats = new List<Material>();
+                mats.Add(aFighter2.GetChild(3).GetChild(1).GetChild(0).GetChild(2).GetChild(0).GetComponent<MeshRenderer>().material);//canopyFrame.001
+                mats.Add(aFighter2.GetChild(3).GetChild(1).GetChild(0).GetChild(2).GetChild(1).GetComponent<MeshRenderer>().material);//canopyFrame.002
+                mats.Add(aFighter2.GetChild(4).GetChild(2).GetComponent<MeshRenderer>().material);//dash.001
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\aFighterInterior2.png", mats));
+            }
+            if (File.Exists(selected.folderPath + @"\vgLowpoly.png"))
+            {
+                List<Material> mats = new List<Material>();
+                MeshRenderer[] meshRenders = aFighter2.GetChild(21).GetChild(0).GetComponentsInChildren<MeshRenderer>();
+                foreach (MeshRenderer meshRenderer in meshRenders)
+                {
+                    mats.Add(meshRenderer.material);
+                }
+
+                MeshRenderer[] meshRenders2 = aFighter2.GetChild(22).GetChild(0).GetComponentsInChildren<MeshRenderer>();
+                foreach (MeshRenderer meshRenderer in meshRenders2)
+                {
+                    mats.Add(meshRenderer.material);
+                }
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\vgLowpoly.png", mats));
+            }
+            Debug.Log("Loaded FA-26B Skins");
         }
 
         private IEnumerator UpdateTexture(string path, List<Material> material)
