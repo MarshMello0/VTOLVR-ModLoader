@@ -4,14 +4,10 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using DarkRift;
-using DarkRift.Client;
-using DarkRift.Client.Unity;
 using UnityEngine.CrashReportHandler;
 using Steamworks;
 using System.Collections;
 using System.IO;
-using ModLoader.Multiplayer;
 using System.Reflection;
 
 namespace ModLoader
@@ -77,11 +73,6 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
         private DiscordController discord;
         public string discordDetail, discordState;
         public int loadedModsCount;
-
-        //Multiplayer
-        public UnityClient client;
-        public bool doneFirstLoad;
-        public ModLoader.Vehicle multiplayerVehicle;
 
         //SinglePlayer
         public static List<ModItem> mods = new List<ModItem>();
@@ -183,96 +174,6 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             }
             Debug.Log("Creating new gameobject");
             new GameObject("Mod Loader", typeof(ModLoader));
-        }
-        public UnityClient GetUnityClient()
-        {
-            if (!client)
-            {
-                client = gameObject.AddComponent<UnityClient>();
-            }
-            return client;
-        }
-        public void StartMultiplayerProcedure(ModLoader.Vehicle vehicle, string pilotName)
-        {
-            StartCoroutine(StartMultiplayerEnumerator(vehicle, pilotName));
-        }
-
-        private IEnumerator StartMultiplayerEnumerator(ModLoader.Vehicle vehicle, string pilotName)
-        {
-            VTMapManager.nextLaunchMode = VTMapManager.MapLaunchModes.Scenario;
-            LoadingSceneController.LoadScene(3);
-
-            yield return new WaitForSeconds(5);
-            //After here we should be in the loader scene
-
-            Console.Log("Setting Pilot");
-            PilotSaveManager.current = PilotSaveManager.pilots[pilotName];
-
-            Console.Log("Going though All built in campaigns");
-            if (VTResources.GetBuiltInCampaigns() != null)
-            {
-                foreach (VTCampaignInfo info in VTResources.GetBuiltInCampaigns())
-                {
-
-                    if (vehicle == ModLoader.Vehicle.AV42C && info.campaignID == "av42cQuickFlight")
-                    {
-                        Console.Log("Setting Campaign");
-                        PilotSaveManager.currentCampaign = info.ToIngameCampaign();
-                        Console.Log("Setting Vehicle");
-                        PilotSaveManager.currentVehicle = VTResources.GetPlayerVehicle(info.vehicle);
-                        break;
-                    }
-
-                    if (vehicle == ModLoader.Vehicle.FA26B && info.campaignID == "fa26bFreeFlight")
-                    {
-                        Console.Log("Setting Campaign");
-                        PilotSaveManager.currentCampaign = info.ToIngameCampaign();
-                        Console.Log("Setting Vehicle");
-                        PilotSaveManager.currentVehicle = VTResources.GetPlayerVehicle(info.vehicle);
-                        break;
-                    }
-                }
-            }
-            else
-                Console.Log("Campaigns are null");
-
-            Console.Log("Going though All missions in that campaign");
-            foreach (CampaignScenario cs in PilotSaveManager.currentCampaign.missions)
-            {
-                Console.Log("CampaignScenario == " + cs.scenarioID);
-                if (cs.scenarioID == "freeFlight" || cs.scenarioID == "Free Flight")
-                {
-                    Console.Log("Setting Scenario");
-                    PilotSaveManager.currentScenario = cs;
-                    PilotSaveManager.currentScenario.baseBudget = 999999;
-                    PilotSaveManager.currentScenario.totalBudget = 999999;
-                    break;
-                }
-            }
-
-            VTScenario.currentScenarioInfo = VTResources.GetScenario(PilotSaveManager.currentScenario.scenarioID, PilotSaveManager.currentCampaign);
-
-            Console.Log(string.Format("Loading into game, Pilot:{3}, Campaign:{0}, Scenario:{1}, Vehicle:{2}",
-                PilotSaveManager.currentCampaign.campaignName, PilotSaveManager.currentScenario.scenarioName,
-                PilotSaveManager.currentVehicle.vehicleName, pilotName));
-
-            LoadingSceneController.instance.PlayerReady(); //<< Auto Ready
-
-            while (SceneManager.GetActiveScene().buildIndex != 7)
-            {
-                //Pausing this method till the loader scene is unloaded
-                if (SceneManager.GetActiveScene().buildIndex == 4)
-                {
-                    LoadingSceneController.instance.PlayerReady();
-                }
-                yield return null;
-            }
-
-            //Adding the networking script to the game which will handle all of the other stuff
-            NetworkingManager nm = new GameObject("Networking Manager").AddComponent<NetworkingManager>();
-            nm.pilotName = pilotName;
-            multiplayerVehicle = vehicle;
-            client.MessageReceived += nm.MessageReceived;
         }
 
 

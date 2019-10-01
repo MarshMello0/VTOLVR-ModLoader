@@ -39,12 +39,6 @@
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
-    <Reference Include="DarkRift">
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\DarkRift.dll</HintPath>
-    </Reference>
-    <Reference Include="DarkRift.Client">
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\DarkRift.Client.dll</HintPath>
-    </Reference>
     <Reference Include="netstandard">
       <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\netstandard.dll</HintPath>
     </Reference>
@@ -136,15 +130,6 @@
     <Compile Include="DiscordRpc.cs" />
     <Compile Include="ModLoader.cs" />
     <Compile Include="ModLoaderManager.cs" />
-    <Compile Include="Multiplayer\Scripts\Console.cs" />
-    <Compile Include="Multiplayer\Scripts\NetworkingManager.cs" />
-    <Compile Include="Multiplayer\Scripts\Player.cs" />
-    <Compile Include="Multiplayer\Scripts\Receiver.cs" />
-    <Compile Include="Multiplayer\Scripts\Sender.cs" />
-    <Compile Include="Multiplayer\Scripts\Tags.cs" />
-    <Compile Include="Multiplayer\Scripts\UnityClient.cs" />
-    <Compile Include="Multiplayer\Scripts\Vehicle Network Scripts\AV42cNetworkedObjectReceiver.cs" />
-    <Compile Include="Multiplayer\Scripts\Vehicle Network Scripts\AV42cNetworkedObjectSender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SkinManager.cs" />
     <Compile Include="UConsole.cs" />

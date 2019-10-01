@@ -9,11 +9,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using Steamworks;
-using ModLoader.Multiplayer;
-using DarkRift.Client.Unity;
-using DarkRift;
 using System.Net;
-using DarkRift.Client;
 using System.Reflection;
 
 namespace ModLoader
@@ -29,30 +25,6 @@ namespace ModLoader
         PoseBounds pb;
         public enum Page { warning, spmp,spMod,spList,mpPV,mpIPPort, mpServerInfo, mpBanned}
 
-
-        #region Multiplayer Variables
-        //Multiplayer
-
-        //This is the state which the client is currently in
-        public enum ConnectionState { Offline, Connecting, Lobby, Loading, InGame }
-        public ConnectionState state = ConnectionState.Offline;
-
-        //This is the information about what the player has chosen
-        public enum Vehicle { FA26B, AV42C, F45A }
-        public Vehicle vehicle = Vehicle.AV42C;
-        public string pilotName = "Pilot Name";
-
-
-        public UnityClient client { private set; get; }
-        public Text serverInfoText;
-        private Text bannedReasonText;
-        private string currentMap;
-
-        #endregion
-
-        #region Singleplayer Variables
-        //Singleplayer
-
         private Transform spTransform;
 
         private string mods = @"\mods";
@@ -65,7 +37,6 @@ namespace ModLoader
         private Material nextMaterial, previousMaterial, loadModMaterial, redMaterial, greenMaterial;
         private APIMod[] apimods = new APIMod[1];
 
-        #endregion
         private void Start()
         {
             manager = ModLoaderManager.instance;
@@ -74,42 +45,31 @@ namespace ModLoader
             Debug.Log("" + api.GetSteamID());
             SetInGameUI();
 
-            if (manager.doneFirstLoad)
-            {
-                //This user is returning from a multiplayer game
-                SwitchPage(Page.mpPV);
-                SetupMultiplayer();
-            }
-            else
-            {
-                //This is the first time they have loaded
-                manager.doneFirstLoad = true;
-                //Spawning UConsole
-                GameObject uConsole = Instantiate(manager.assets.LoadAsset<GameObject>("UConsole-Canvas"));
-                UConsole console = uConsole.AddComponent<UConsole>();
+            //Spawning UConsole
+            GameObject uConsole = Instantiate(manager.assets.LoadAsset<GameObject>("UConsole-Canvas"));
+            UConsole console = uConsole.AddComponent<UConsole>();
 
-                /* The CS and CSFile command don't work because it won't compile the dll
+            /* The CS and CSFile command don't work because it won't compile the dll
 
-                UCommand cs = new UCommand("cs", "cs <CSharp Code>");
-                UCommand csfile = new UCommand("csfile", "cs <FileName>");
+            UCommand cs = new UCommand("cs", "cs <CSharp Code>");
+            UCommand csfile = new UCommand("csfile", "cs <FileName>");
 
-                cs.callbacks.Add(csharp.CS);
-                csfile.callbacks.Add(csharp.CSFile);
+            cs.callbacks.Add(csharp.CS);
+            csfile.callbacks.Add(csharp.CSFile);
 
-                console.AddCommand(cs);
-                console.AddCommand(csfile);
-                */
-                UCommand load = new UCommand("loadmod", "loadmod <modname>");
-                UCommand reloadMods = new UCommand("reloadmods", "reloadmods");
-                UCommand listMods = new UCommand("listmods", "listmods");
-                load.callbacks.Add(ModLoaderManager.LoadCommand);
-                reloadMods.callbacks.Add(ModLoaderManager.ReloadMods);
-                listMods.callbacks.Add(ModLoaderManager.ListMods);
+            AddCommand(cs);
+            AddCommand(csfile);
+            */
+            UCommand load = new UCommand("loadmod", "loadmod <modname>");
+            UCommand reloadMods = new UCommand("reloadmods", "reloadmods");
+            UCommand listMods = new UCommand("listmods", "listmods");
+            load.callbacks.Add(ModLoaderManager.LoadCommand);
+            reloadMods.callbacks.Add(ModLoaderManager.ReloadMods);
+            listMods.callbacks.Add(ModLoaderManager.ListMods);
 
-                console.AddCommand(load);
-                console.AddCommand(reloadMods);
-                console.AddCommand(listMods);
-            }
+            //AddCommand(load);
+            //AddCommand(reloadMods);
+            //AddCommand(listMods);
         }
 
         #region Setting UI Mod Loader
@@ -184,7 +144,7 @@ namespace ModLoader
             mpButton.interactableName = "Not Available Yet";
             spButton.OnInteract.AddListener(delegate { SwitchPage(Page.spList); SetupSinglePlayer(); });
             //mpButton.OnInteract.AddListener(delegate { SwitchPage(Page.mpPV); SetupMultiplayer(); });
-            mpButton.OnInteract.AddListener(delegate { Console.Log("Multiplayer Button was pressed :P"); });
+            mpButton.OnInteract.AddListener(delegate { Log("Multiplayer Button was pressed :P"); });
             //SP Mod Page
             VRInteractable spModBack = spModPage.transform.GetChild(3).GetChild(0).gameObject.AddComponent<VRInteractable>();
             VRInteractable spModLoad = spModPage.transform.GetChild(2).GetChild(0).gameObject.AddComponent<VRInteractable>();
@@ -219,100 +179,6 @@ namespace ModLoader
             spListSwitch.OnInteract.AddListener(delegate {SwitchButton(); });
             spListNextPage.OnInteract.AddListener(delegate { NextPage(); });
             spListPreviousPage.OnInteract.AddListener(delegate { PreviousPage(); });
-            //MP Pilot and Vehicle
-            VRInteractable mpPVAV42 = mpPV.transform.GetChild(2).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            VRInteractable mpPVFA26 = mpPV.transform.GetChild(3).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            VRInteractable mpPVF45 = mpPV.transform.GetChild(4).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            VRInteractable pilot0 = mpPV.transform.GetChild(6).GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            VRInteractable pilot1 = mpPV.transform.GetChild(7).GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            VRInteractable pilot2 = mpPV.transform.GetChild(8).GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            VRInteractable mpPVContinue = mpPV.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            SetDefaultInteractable(mpPVAV42, pb);
-            SetDefaultInteractable(mpPVFA26, pb);
-            SetDefaultInteractable(mpPVF45, pb);
-            SetDefaultInteractable(pilot0, pb);
-            SetDefaultInteractable(pilot1, pb);
-            SetDefaultInteractable(pilot2, pb);
-            SetDefaultInteractable(mpPVContinue, pb);
-            mpPVAV42.interactableName = "Select Vehicle";
-            mpPVFA26.interactableName = "Select Vehicle";
-            mpPVF45.interactableName = "Select Vehicle";
-            pilot0.interactableName = "Select Pilot";
-            pilot1.interactableName = "Select Pilot";
-            pilot2.interactableName = "Select Pilot";
-            mpPVContinue.interactableName = "Continue";
-            mpPVAV42.OnInteract.AddListener(delegate { SwitchVehicle(Vehicle.AV42C); });
-            mpPVFA26.OnInteract.AddListener(delegate { SwitchVehicle(Vehicle.FA26B); });
-            mpPVF45.OnInteract.AddListener(delegate { SwitchVehicle(Vehicle.F45A); });
-            mpPVContinue.OnInteract.AddListener(delegate { SwitchPage(Page.mpIPPort); });
-
-            Console.Log("Pilot Stuff");
-            //Just loading all the pilots in so that we can check that the one they pick exists
-            PilotSaveManager.LoadPilotsFromFile();
-            Console.Log("Loaded " + PilotSaveManager.pilots.Count + " pilots");
-
-            List<PilotSave> pilots = new List<PilotSave>();
-            foreach (PilotSave pilotSave in PilotSaveManager.pilots.Values)
-            {
-                pilots.Add(pilotSave);
-            }
-            Debug.Log("Setting Pilot");
-            //Setting the pilot to the first value (would cause an error if they haven't got any pilots)
-            pilotName = pilots[0].pilotName;
-
-            Console.Log("Disabling Buttons");
-            //Dealing with Pilots
-            pilot0.transform.parent.parent.gameObject.SetActive(false);
-            pilot1.transform.parent.parent.gameObject.SetActive(false);
-            pilot2.transform.parent.parent.gameObject.SetActive(false);
-
-            Console.Log("Pilots count is " + pilots.Count);
-            if (pilots.Count >= 1)
-            {
-                Console.Log("1");
-                pilot0.transform.parent.parent.gameObject.SetActive(true);
-                mpPV.transform.GetChild(6).GetChild(1).GetComponent<Text>().text = pilots[0].pilotName;
-                pilot0.OnInteract.AddListener(delegate { pilotName = pilots[0].pilotName; ; });
-            }
-            if (pilots.Count >= 2)
-            {
-                Console.Log("2");
-                pilot1.transform.parent.parent.gameObject.SetActive(true);
-                mpPV.transform.GetChild(7).GetChild(1).GetComponent<Text>().text = pilots[1].pilotName;
-                pilot1.OnInteract.AddListener(delegate { pilotName = pilots[1].pilotName; });
-            }
-            if (pilots.Count >= 3)
-            {
-                Console.Log("3");
-                pilot2.transform.parent.parent.gameObject.SetActive(true);
-                mpPV.transform.GetChild(8).GetChild(1).GetComponent<Text>().text = pilots[2].pilotName;
-                pilot2.OnInteract.AddListener(delegate { pilotName = pilots[2].pilotName; });
-            }
-
-            //MP Server IP and Port
-            VRInteractable mpIPPortJoin = mpIPPort.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            SetDefaultInteractable(mpIPPortJoin, pb);
-            mpIPPortJoin.interactableName = "Join Lobby";
-            mpIPPortJoin.OnInteract.AddListener(delegate { ConnectToServer(); });
-
-            //MP Server Info
-            VRInteractable mpInfoJoin = mpServerInfo.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            VRInteractable mpInfoBack = mpServerInfo.transform.GetChild(1).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            SetDefaultInteractable(mpInfoJoin, pb);
-            SetDefaultInteractable(mpInfoBack, pb);
-            mpInfoJoin.interactableName = "Join Game";
-            mpInfoBack.interactableName = "Back";
-            mpInfoJoin.OnInteract.AddListener(delegate { JoinGame(); });
-            mpInfoBack.OnInteract.AddListener(delegate { client.Disconnect(); SwitchPage(Page.mpIPPort); });
-
-            serverInfoText = mpServerInfo.transform.GetChild(2).GetComponent<Text>();
-
-            //MP Banned
-            VRInteractable mpBannedOkay = mpBanned.transform.GetChild(0).GetChild(0).gameObject.AddComponent<VRInteractable>();
-            SetDefaultInteractable(mpBannedOkay, pb);
-            mpBannedOkay.interactableName = "Okay";
-            mpBannedOkay.OnInteract.AddListener(delegate { SwitchPage(Page.mpIPPort); });
-            bannedReasonText = mpBanned.transform.GetChild(1).gameObject.GetComponent<Text>();
         }
 
         public static VRInteractable SetDefaultInteractable(VRInteractable interactable, PoseBounds pb)
@@ -374,122 +240,9 @@ namespace ModLoader
                     break;
             }
 
-            Console.Log("Switched Page to " + page.ToString());
+            Log("Switched Page to " + page.ToString());
         }
 
-        #endregion
-
-        #region Multiplayer
-
-        private void SetupMultiplayer()
-        {
-            client = ModLoaderManager.instance.GetUnityClient();
-            client.MessageReceived += MessageReceived;
-        }
-        public void ConnectToServer(string ip = "marsh.vtolvr-mods.com", int port = 4296)
-        {
-            state = ConnectionState.Connecting;
-
-            ip = Dns.GetHostEntry(ip).AddressList[0].ToString(); //Does a DNS look up
-
-            try
-            {
-                //This causes an error if it doesn't connect
-                client.Connect(IPAddress.Parse(ip), port, DarkRift.IPVersion.IPv4);
-
-            }
-            catch
-            {
-                //Failed to connect
-                return;
-            }
-
-            //Sending a message of our information
-            using (DarkRiftWriter writer = DarkRiftWriter.Create())
-            {
-                writer.Write(SteamUser.GetSteamID().m_SteamID);
-                writer.Write(pilotName);
-                writer.Write(SteamFriends.GetPersonaName());
-                writer.Write(vehicle.ToString());
-                using (Message message = Message.Create((ushort)Tags.UserInfo, writer))
-                    client.SendMessage(message, SendMode.Reliable);
-            }
-        }
-
-        private void MessageReceived(object sender, MessageReceivedEventArgs e)
-        {
-            //This should only need to handle one message, 
-            //which is displaying the info about the server to the user
-            using (Message message = e.GetMessage())
-            {
-                using (DarkRiftReader reader = message.GetReader())
-                {
-                    ushort tag = (ushort)message.Tag;
-                    switch (tag)
-                    {
-                        case (ushort)Tags.LobbyInfo:
-                            while (reader.Position < reader.Length)
-                            {
-                                string serverName = reader.ReadString();
-                                string mapName = reader.ReadString();
-                                int playerCount = reader.ReadInt32();
-                                int maxPlayerCount = reader.ReadInt32();
-                                int maxBudget = reader.ReadInt32();
-                                bool allowWeapons = reader.ReadBoolean();
-                                bool useSteamName = reader.ReadBoolean();
-                                string playersNames = reader.ReadString();
-
-                                currentMap = mapName;
-                                serverInfoText.text = "Name: " + serverName + "\nMap: " + mapName
-                                    + "\nMaxBudget: " + maxBudget + " Allow Weapons: " + allowWeapons
-                                    + "\nUse Steam Name: " + useSteamName
-                                    + "\nPlayers: " + playerCount + "/" + maxPlayerCount + "\n"
-                                    + playersNames;
-
-                                state = ConnectionState.Lobby;
-                                SwitchPage(Page.mpServerInfo);
-                            }
-                            break;
-                        case (ushort)Tags.Banned:
-                            while (reader.Position < reader.Length)
-                            {
-                                string bannedReason = reader.ReadString();
-                                SwitchPage(Page.mpBanned);
-                                bannedReasonText.text = "You are banned from this server :(\n\nReason: \"" + bannedReason + "\"";
-                            }
-                            client.Disconnect();
-                            break;
-                    }
-
-                    //Need to check if the bann message was returned
-
-                }
-            }
-        }
-
-        public void JoinGame()
-        {
-            client.MessageReceived -= MessageReceived;
-
-            manager.StartMultiplayerProcedure(vehicle,pilotName);
-        }
-        public void SwitchVehicle(Vehicle newVehicle)
-        {
-            vehicle = newVehicle;
-            //Changing the buttons colours
-            switch (newVehicle)
-            {
-                case Vehicle.AV42C:
-                    Console.Log("Switched player's vehicle to AV-42C");
-                    break;
-                case Vehicle.F45A:
-                    Console.Log("Switched player's vehicle to F-45A");
-                    break;
-                case Vehicle.FA26B:
-                    Console.Log("Switched player's vehicle to F/A-26B");
-                    break;
-            }
-        }
         #endregion
 
         #region Singleplayer
