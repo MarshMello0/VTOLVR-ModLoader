@@ -18,7 +18,7 @@ using System.Reflection;
 
 namespace ModLoader
 {
-    [Info("ModLoader","","")]
+    [Info("ModLoader","This is the core script for the mod loader","0")]
     public class ModLoader : VTOLMOD
     {
         private ModLoaderManager manager;
