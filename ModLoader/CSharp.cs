@@ -40,18 +40,18 @@ namespace ModLoader
         public static bool FindCompiler()
         {
             string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.System);
-            List<CompailerFolder> possiablePaths = new List<CompailerFolder>();
+            List<CompilerFolder> possiablePaths = new List<CompilerFolder>();
             if (Directory.Exists(Path.GetFullPath(Path.Combine(folderPath, "../Microsoft.NET/Framework64"))))
             {
-                possiablePaths.Add(new CompailerFolder(Path.GetFullPath(Path.Combine(folderPath, "../Microsoft.NET/Framework64"))));
+                possiablePaths.Add(new CompilerFolder(Path.GetFullPath(Path.Combine(folderPath, "../Microsoft.NET/Framework64"))));
             }
             if (Directory.Exists("C:/Windows/Microsoft.NET/Framework64"))
             {
-                possiablePaths.Add(new CompailerFolder("C:/Windows/Microsoft.NET/Framework64"));
+                possiablePaths.Add(new CompilerFolder("C:/Windows/Microsoft.NET/Framework64"));
             }
             if (Directory.Exists(Path.Combine(Environment.GetEnvironmentVariable("windir"), "Microsoft.NET\\Framework64")))
             {
-                possiablePaths.Add(new CompailerFolder(Path.Combine(Environment.GetEnvironmentVariable("windir"), "Microsoft.NET\\Framework64")));
+                possiablePaths.Add(new CompilerFolder(Path.Combine(Environment.GetEnvironmentVariable("windir"), "Microsoft.NET\\Framework64")));
             }
 
             if (possiablePaths.Count == 0)
@@ -60,7 +60,7 @@ namespace ModLoader
                 return false;
             }
 
-            foreach (CompailerFolder folder in possiablePaths)
+            foreach (CompilerFolder folder in possiablePaths)
             {
                 string[] folders = Directory.GetDirectories(folder.path);
                 for (int i = 0; i < folders.Length; i++)
@@ -79,7 +79,7 @@ namespace ModLoader
             }
             string compiler = "";
             bool foundVersion4 = false;
-            foreach (CompailerFolder folder in possiablePaths)
+            foreach (CompilerFolder folder in possiablePaths)
             {
                 //Now we are searching for one with version 4 or any other
                 if (!foundVersion4)
@@ -217,11 +217,11 @@ namespace ModLoader
             }
         }
 
-        private class CompailerFolder
+        private class CompilerFolder
         {
             public string path = "", path3, path4;
             public bool version3, version4;
-            public CompailerFolder(string path)
+            public CompilerFolder(string path)
             {
                 this.path = path;
             }
