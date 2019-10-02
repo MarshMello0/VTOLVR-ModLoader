@@ -8,7 +8,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Steamworks;
 using System.Net;
 using System.Reflection;
 
@@ -253,23 +252,15 @@ namespace ModLoader
                 Directory.CreateDirectory(root + mods);
             spTransform = spList.transform;
 
-            modSlots[0] = new ModSlot(spTransform.GetChild(3).gameObject, spTransform.GetChild(3).GetChild(1).GetComponent<Text>(), spTransform.GetChild(3).GetChild(0).gameObject.AddComponent<VRInteractable>());
-            modSlots[1] = new ModSlot(spTransform.GetChild(4).gameObject, spTransform.GetChild(4).GetChild(1).GetComponent<Text>(), spTransform.GetChild(4).GetChild(0).gameObject.AddComponent<VRInteractable>());
-            modSlots[2] = new ModSlot(spTransform.GetChild(5).gameObject, spTransform.GetChild(5).GetChild(1).GetComponent<Text>(), spTransform.GetChild(5).GetChild(0).gameObject.AddComponent<VRInteractable>());
-            modSlots[3] = new ModSlot(spTransform.GetChild(6).gameObject, spTransform.GetChild(6).GetChild(1).GetComponent<Text>(), spTransform.GetChild(6).GetChild(0).gameObject.AddComponent<VRInteractable>());
-            modSlots[4] = new ModSlot(spTransform.GetChild(7).gameObject, spTransform.GetChild(7).GetChild(1).GetComponent<Text>(), spTransform.GetChild(7).GetChild(0).gameObject.AddComponent<VRInteractable>());
-            modSlots[5] = new ModSlot(spTransform.GetChild(8).gameObject, spTransform.GetChild(8).GetChild(1).GetComponent<Text>(), spTransform.GetChild(8).GetChild(0).gameObject.AddComponent<VRInteractable>());
-            modSlots[6] = new ModSlot(spTransform.GetChild(9).gameObject, spTransform.GetChild(9).GetChild(1).GetComponent<Text>(), spTransform.GetChild(9).GetChild(0).gameObject.AddComponent<VRInteractable>());
-            modSlots[7] = new ModSlot(spTransform.GetChild(10).gameObject, spTransform.GetChild(10).GetChild(1).GetComponent<Text>(), spTransform.GetChild(10).GetChild(0).gameObject.AddComponent<VRInteractable>());
+            for (int i = 0; i <= 7; i++)
+            {
+                modSlots[i] = new ModSlot(spTransform.GetChild(i + 3).gameObject, spTransform.GetChild(i + 3).GetChild(1).GetComponent<Text>(), spTransform.GetChild(i + 3).GetChild(0).gameObject.AddComponent<VRInteractable>());
+            }
 
-            SetDefaultInteractable(modSlots[0].interactable, pb);
-            SetDefaultInteractable(modSlots[1].interactable, pb);
-            SetDefaultInteractable(modSlots[2].interactable, pb);
-            SetDefaultInteractable(modSlots[3].interactable, pb);
-            SetDefaultInteractable(modSlots[4].interactable, pb);
-            SetDefaultInteractable(modSlots[5].interactable, pb);
-            SetDefaultInteractable(modSlots[6].interactable, pb);
-            SetDefaultInteractable(modSlots[7].interactable, pb);
+            for (int i = 0; i <= 7; i++)
+            {
+                SetDefaultInteractable(modSlots[i].interactable, pb);
+            }
 
             FindLocalMods();
 
@@ -437,8 +428,9 @@ namespace ModLoader
         public void SwitchButton()
         {
             //This is getting disabled till the json issue gets fixed after release of 2.0.0
-            return;
+            throw new NotImplementedException();
         }
+
         public class ModSlot
         {
             public GameObject slot;
@@ -468,11 +460,7 @@ namespace ModLoader
         [Serializable]
         public class APIMod
         {
-            public string Name;
-            public string Description;
-            public string Creator;
-            public string URL;
-            public string Version;
+            public string Name, Description, Creator, URL, Version;
         }
         #endregion
     }
