@@ -36,6 +36,9 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>..\dll\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\dll\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
     <Reference Include="netstandard">
       <HintPath>..\dll\netstandard.dll</HintPath>
     </Reference>
