@@ -35,8 +35,7 @@ namespace ModLoader
                 UConsole.instance.Log("Failed creating folder: " + e.Message);
                 return false;
             }
-            
-            
+
         }
         public static bool FindCompiler()
         {
@@ -54,7 +53,7 @@ namespace ModLoader
             {
                 possiablePaths.Add(new CompailerFolder(Path.Combine(Environment.GetEnvironmentVariable("windir"), "Microsoft.NET\\Framework64")));
             }
-            
+
             if (possiablePaths.Count == 0)
             {
                 UConsole.instance.Log("CSharp: None of the paths existed when seraching for csc.exe");
@@ -108,7 +107,7 @@ namespace ModLoader
                 UConsole.instance.Log("CSharp: compiler was null or empty");
                 return false;
             }
-               
+
         }
 
         public void CS(string[] args)
@@ -130,7 +129,7 @@ namespace ModLoader
 
             //Saving the .cs file
             string fileName = "cs_" + DateTime.Now.Ticks + ".cs";
-            File.WriteAllText(ModLoaderManager.instance.rootPath + csfileFolder +@"\"+ fileName, baseContent.Replace("USER_CODE", code));
+            File.WriteAllText(ModLoaderManager.instance.rootPath + csfileFolder + @"\" + fileName, baseContent.Replace("USER_CODE", code));
 
             CSFile(new string[] { fileName });
         }
@@ -146,7 +145,7 @@ namespace ModLoader
                 UConsole.instance.Log("You need to give a file name with .cs");
                 return;
             }
-            
+
             StartCoroutine(CSFileIEnumerator(args[0]));
         }
 
@@ -165,7 +164,7 @@ namespace ModLoader
             //references += "/\"" + ModLoaderManager.instance.rootPath + @"\ModLoader.dll" + "\"/";
             string tempDllPath = ModLoaderManager.instance.rootPath + tempFolder + @"\" + fileName.Remove(fileName.Length - 3) + ".dll";
             string arguments = string.Format("/r:{0} /out:\"{1}\" /target:library /nostdlib \"{2}\"", references, tempDllPath, ModLoaderManager.instance.rootPath + csfileFolder + @"\" + fileName);
-            
+
             //Running the csc.exe to create the .dll
             Process process = new Process();
             process.StartInfo.UseShellExecute = false;
@@ -220,11 +219,8 @@ namespace ModLoader
 
         private class CompailerFolder
         {
-            public string path = "";
-            public bool version4 = false;
-            public string path4;
-            public bool version3 = false;
-            public string path3;
+            public string path = "", path3, path4;
+            public bool version3, version4;
             public CompailerFolder(string path)
             {
                 this.path = path;
