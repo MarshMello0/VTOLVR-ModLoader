@@ -10,6 +10,17 @@ using UnityEngine;
 
 namespace ModLoader
 {
+    /* The CS and CSFile command don't work because it won't compile the dll
+
+UCommand cs = new UCommand("cs", "cs <CSharp Code>");
+UCommand csfile = new UCommand("csfile", "cs <FileName>");
+
+cs.callbacks.Add(csharp.CS);
+csfile.callbacks.Add(csharp.CSFile);
+
+AddCommand(cs);
+AddCommand(csfile);
+*/
     public class CSharp : MonoBehaviour
     {
         public static CSharp instance;

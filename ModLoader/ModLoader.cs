@@ -18,7 +18,6 @@ namespace ModLoader
     public class ModLoader : VTOLMOD
     {
         private ModLoaderManager manager;
-        private CSharp csharp;
         private VTOLAPI api;
         //UI Objects
         GameObject warningPage, spmp, sp, mp, spModPage, spList, mpPV, mpIPPort, mpServerInfo, mpBanned;
@@ -37,39 +36,56 @@ namespace ModLoader
         private Material nextMaterial, previousMaterial, loadModMaterial, redMaterial, greenMaterial;
         private APIMod[] apimods = new APIMod[1];
 
+        //New
+        private GameObject modsPage;
+
+        //InGameObjects
+        private GameObject MainScreen;
+
         private void Start()
         {
             manager = ModLoaderManager.instance;
-            csharp = CSharp.instance;
             api = VTOLAPI.instance;
-            Debug.Log("" + api.GetSteamID());
-            SetInGameUI();
 
             //Spawning UConsole
             GameObject uConsole = Instantiate(manager.assets.LoadAsset<GameObject>("UConsole-Canvas"));
             UConsole console = uConsole.AddComponent<UConsole>();
 
-            /* The CS and CSFile command don't work because it won't compile the dll
+            SceneManager.sceneLoaded += SceneLoaded;
+        }
 
-            UCommand cs = new UCommand("cs", "cs <CSharp Code>");
-            UCommand csfile = new UCommand("csfile", "cs <FileName>");
+        private void SceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
+        {
+            if (scene.name == "ReadyRoom")
+                CreateUI();
+        }
 
-            cs.callbacks.Add(csharp.CS);
-            csfile.callbacks.Add(csharp.CSFile);
+        private void CreateUI()
+        {
+            GameObject NewPilotButton = GameObject.Find("NewPilotButton");
+            GameObject CampaignDisplay = GameObject.Find("CampaignDisplay");
+            MainScreen = GameObject.Find("MainScreen");
+            GameObject ModsButton = Instantiate(NewPilotButton, NewPilotButton.transform.parent);
+            Vector3 oldPos = NewPilotButton.transform.position;
+            ModsButton.transform.position = new Vector3(oldPos.x, oldPos.y - 0.3035235f, oldPos.z);
 
-            AddCommand(cs);
-            AddCommand(csfile);
-            */
-            UCommand load = new UCommand("loadmod", "loadmod <modname>");
-            UCommand reloadMods = new UCommand("reloadmods", "reloadmods");
-            UCommand listMods = new UCommand("listmods", "listmods");
-            load.callbacks.Add(ModLoaderManager.LoadCommand);
-            reloadMods.callbacks.Add(ModLoaderManager.ReloadMods);
-            listMods.callbacks.Add(ModLoaderManager.ListMods);
+            ModsButton.GetComponentInChildren<Text>().text = "Mods";
+            ModsButton.GetComponent<Image>().color = Color.cyan;
 
-            //AddCommand(load);
-            //AddCommand(reloadMods);
-            //AddCommand(listMods);
+            VRInteractable modsInteractable = ModsButton.GetComponent<VRInteractable>();
+            modsInteractable.interactableName = "Open Mods";
+            modsInteractable.OnInteract = new UnityEvent();
+            modsInteractable.OnInteract.AddListener(delegate { OpenModsPage(); });
+
+
+            modsPage = Instantiate(CampaignDisplay, CampaignDisplay.transform.parent);
+            
+        }
+        public void OpenModsPage()
+        {
+            Log("Opened the mods page");
+            modsPage.SetActive(true);
+            MainScreen.SetActive(false);
         }
 
         #region Setting UI Mod Loader
