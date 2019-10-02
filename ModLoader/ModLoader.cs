@@ -14,7 +14,7 @@ using System.Reflection;
 
 namespace ModLoader
 {
-    [Info("ModLoader","This is the core script for the mod loader","0")]
+    [Info("ModLoader", "This is the core script for the mod loader", "0")]
     public class ModLoader : VTOLMOD
     {
         private ModLoaderManager manager;
@@ -23,7 +23,7 @@ namespace ModLoader
         //UI Objects
         GameObject warningPage, spmp, sp, mp, spModPage, spList, mpPV, mpIPPort, mpServerInfo, mpBanned;
         PoseBounds pb;
-        public enum Page { warning, spmp,spMod,spList,mpPV,mpIPPort, mpServerInfo, mpBanned}
+        public enum Page { warning, spmp, spMod, spList, mpPV, mpIPPort, mpServerInfo, mpBanned }
 
         private Transform spTransform;
 
@@ -126,7 +126,6 @@ namespace ModLoader
             pb.pose = GloveAnimation.Poses.Point;
             pb.size = new Vector3(canvasRect.rect.width, canvasRect.rect.height, 155.0f);
 
-
             //Adding Scripts
 
             //Warning Page
@@ -166,7 +165,7 @@ namespace ModLoader
             spListNextPage.interactableName = "Next Page";
             spListPreviousPage.interactableName = "Previous Page";
             spListStart.interactableName = "Start Game";
-           
+
             spListStart.OnInteract.AddListener(delegate { SceneManager.LoadScene(2); });
 
             SetButtons(spListNextPage.gameObject, spListPreviousPage.gameObject);
@@ -176,7 +175,7 @@ namespace ModLoader
                 spModPage.transform.GetChild(1).GetComponent<Text>(),
                 spModPage.transform.GetChild(2).GetChild(0).GetChild(0).GetComponent<MeshRenderer>().material,
                 spModPage.transform.GetChild(2).GetChild(1).GetComponent<Text>());
-            spListSwitch.OnInteract.AddListener(delegate {SwitchButton(); });
+            spListSwitch.OnInteract.AddListener(delegate { SwitchButton(); });
             spListNextPage.OnInteract.AddListener(delegate { NextPage(); });
             spListPreviousPage.OnInteract.AddListener(delegate { PreviousPage(); });
         }
@@ -465,7 +464,6 @@ namespace ModLoader
                 currentPage = 0;
             }
         }
-        
 
         [Serializable]
         public class APIMod
