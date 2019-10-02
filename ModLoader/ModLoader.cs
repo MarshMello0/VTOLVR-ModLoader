@@ -62,7 +62,7 @@ namespace ModLoader
         private void CreateUI()
         {
             GameObject NewPilotButton = GameObject.Find("NewPilotButton");
-            GameObject CampaignDisplay = GameObject.Find("CampaignDisplay");
+            GameObject CampaignDisplay = GameObject.Find("InteractableCanvas").transform.GetChild(0).GetChild(7).GetChild(0).GetChild(0).gameObject;
             MainScreen = GameObject.Find("MainScreen");
             GameObject ModsButton = Instantiate(NewPilotButton, NewPilotButton.transform.parent);
             Vector3 oldPos = NewPilotButton.transform.position;

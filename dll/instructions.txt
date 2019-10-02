@@ -6,3 +6,6 @@ Add the following dll's to this folder:
 	- UnityEngine.dll
 	- UnityEngine.UI.dll
 	- UnityEngine.CoreModule.dll
+	- UnityEngine.AssetBundle.dll
+	- UnityEngine.CrashReportingModule.dll
+	- UnityEngine.UnityWebRequestWWWModule.dll
