@@ -1,0 +1,7 @@
+Add the following dll's to this folder:
+
+	- Assembly-CSharp.dll
+	- netstandard.dll
+	- UnityEngine.dll
+	- UnityEngine.UI.dll
+	- UnityEngine.CoreModule.dll
