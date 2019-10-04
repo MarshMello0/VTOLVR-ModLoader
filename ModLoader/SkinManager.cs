@@ -569,6 +569,7 @@ namespace ModLoader
         {
             yield return new WaitForSeconds(3);
             Debug.Log("In game scene, setting skins");
+            ApplySkin();
         }
         private void OnDestroy()
         {

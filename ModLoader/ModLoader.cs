@@ -55,8 +55,49 @@ namespace ModLoader
 
         private void SceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
         {
-            if (scene.name == "ReadyRoom")
-                CreateUI();
+            switch (scene.name)
+            {
+                case "ReadyRoom":
+                    CreateUI();
+                    break;
+                case "Akutan":
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void SpawnPlane()
+        {
+            Log("Waiting 4 Seconds");
+            //yield return new WaitForSeconds(4);
+            Log("Spawning");
+            if (manager.assets == null)
+            {
+                LogError("Manager Assets is null");
+                manager.CreateAssetBundle();
+            }
+            
+            GameObject prefab = manager.assets.LoadAsset<GameObject>("PlanePrefab");
+            if (prefab == null)
+                LogError("Prefab is null");
+            GameObject customPlane = Instantiate(prefab);
+            Log("Spawned");
+            customPlane.transform.GetChild(0).gameObject.AddComponent<Rigidbody>();
+            customPlane.AddComponent<FloatingOriginShifter>();
+            customPlane.AddComponent<FloatingOriginTransform>();
+            Log("Added Components");
+            GameObject player = GameObject.Find("FA-26B(Clone)");
+            if (player == null)
+            {
+                Log("Player is null");
+                customPlane.transform.position = new Vector3(0, 50, 0);
+            }
+            else
+                customPlane.transform.position = player.transform.position + new Vector3(10, 0, 0);
+            
+
+            Log("Spawned Plane " + customPlane.transform.position);
         }
 
         private void CreateUI()

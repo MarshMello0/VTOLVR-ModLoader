@@ -100,7 +100,48 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             SetPaths();
             CreateAssetBundle();
 
-            gameObject.AddComponent<CSharp>();
+            //gameObject.AddComponent<CSharp>();
+            
+        }
+        IEnumerator Test()
+        {
+            Debug.Log("Spawning");
+            yield return new WaitForSeconds(4);
+            GameObject prefab = assets.LoadAsset<GameObject>("PlanePrefab");
+            GameObject spawnedPrefab = Instantiate(prefab);
+            spawnedPrefab.transform.position = new Vector3(0, 10, 0);
+            //spawnedPrefab.transform.localScale = new Vector3(1, 1, 1);
+            Debug.Log("Spawned");
+
+            Debug.Log("Finding player");
+            GameObject player = GameObject.Find("FA-26B(Clone)");
+            if (player == null)
+            {
+                Debug.Log("Player is null");
+                //spawnedPrefab.transform.position = new Vector3(0, 50, 0);
+            }
+            else
+            {
+                spawnedPrefab.transform.position = player.transform.position + new Vector3(5, 10, 5);
+                spawnedPrefab.transform.rotation = Quaternion.Euler(0, 90, 0);
+                Debug.Log("Moved Aircraft to " + spawnedPrefab.transform.position + "\nPlayer is at " + player.transform.position);
+
+
+                Debug.Log("Adding Physics");
+                spawnedPrefab.AddComponent<BoxCollider>();
+                spawnedPrefab.AddComponent<Rigidbody>();
+                Debug.Log("Loading Textures");
+                Material mat = assets.LoadAsset<Material>("Plane");
+                Debug.Log("Loaded Material");
+                Debug.Log("Applying");
+
+                MeshRenderer mr = spawnedPrefab.transform.GetChild(0).GetComponent<MeshRenderer>();
+                mr.materials[0] = mat;
+                Debug.Log("Appied one");
+                mr.materials[1] = mat;
+                Debug.Log("Appied all of them");
+            }
+
         }
         private void CreateAPI()
         {
@@ -110,14 +151,14 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
         {
             rootPath = Directory.GetCurrentDirectory() + @"\VTOLVR_Modloader";
         }
-        private void CreateAssetBundle()
+        public void CreateAssetBundle()
         {
             assets = AssetBundle.LoadFromFile(rootPath + assetsPath);
             if (assets == null)
             {
                 Debug.Log("Failed to load AssetBundle!");
                 return;
-            }
+            }            
         }
         private void SceneLoaded(Scene arg0, LoadSceneMode arg1)
         {
@@ -131,6 +172,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                 case "Akutan":
                     discordDetail = "Flying the " + PilotSaveManager.currentVehicle.vehicleName;
                     discordState = "Akutan: " + PilotSaveManager.currentCampaign.campaignName + " " + PilotSaveManager.currentScenario.scenarioName;
+                    //StartCoroutine(Test());
                     break;
                 case "CustomMapBase":
                     discordDetail = "Flying the " + PilotSaveManager.currentVehicle.vehicleName;
