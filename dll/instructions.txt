@@ -9,3 +9,4 @@ Add the following dll's to this folder:
 	- UnityEngine.AssetBundle.dll
 	- UnityEngine.CrashReportingModule.dll
 	- UnityEngine.UnityWebRequestWWWModule.dll
+	- UnityEngine.PhysicsModule.dll
