@@ -37,22 +37,42 @@ namespace VTOLVR_ModLoader
         private string[] neededDLLFiles = new string[] { @"\Plugins\discord-rpc.dll" };
 
         private Updates updates;
+
+        private bool holdingDown;
+        private Point lm = new Point();
         public MainWindow()
         {
             InitializeComponent();
             root = Directory.GetCurrentDirectory();
-            CheckFolder();
+            CheckBaseFolder();
             CheckForUpdates();
         }
-        private void CheckFolder()
+        private void CheckBaseFolder()
         {
+            /*
+             This checks the base folder, the other files such as the .dll don't need to be there.
+             However, this does need to be in the vtol vr game folder
+             */
+
             //Checking the folder which this is in
             string[] pathSplit = root.Split('\\');
             if (pathSplit[pathSplit.Length - 1] != "VTOLVR_ModLoader")
             {
-                MessageBox.Show("It seems I am not in the folder \"VTOLVR_ModLoader\", place make sure I am in there other wise the in game menu won't load","Wrong Folder");
+                MessageBox.Show("It seems I am not in the folder \"VTOLVR_ModLoader\", place make sure I am in there other wise the in game menu won't load", "Wrong Folder");
                 Quit();
             }
+
+            //Now it should be in the correct folder, but just need to check if its in the games folder
+            string vtolexe = root.Replace("VTOLVR_ModLoader", "VTOLVR.exe");
+            if (!File.Exists(vtolexe))
+            {
+                MessageBox.Show("It seems the VTOLVR_ModLoader folder isn't with the other games files\nPlease move me to VTOL VR's game root directory.", "Wrong Folder Location");
+                Quit();
+            }
+        }
+        private void CheckFolder()
+        {
+
 
             //Checking if the files we need to run are there
             foreach (string file in needFiles)
@@ -206,9 +226,6 @@ namespace VTOLVR_ModLoader
         }
         private void OpenGame(object sender, RoutedEventArgs e)
         {
-            //Changing UI
-            launchButton.Visibility = Visibility.Hidden;
-            loadingText.Visibility = Visibility.Visible;
             LoadingDots();
             GifState(gifStates.Play);
 
@@ -223,11 +240,11 @@ namespace VTOLVR_ModLoader
         {
             //This will constanly loop, but we will just change the text before it when we need to change it
             int delay = 500;
-            loadingText.Content = continueText + ".";
+            //progressText.Content = continueText + ".";
             await Task.Delay(delay);
-            loadingText.Content = continueText + "..";
+            //progressText.Content = continueText + "..";
             await Task.Delay(delay);
-            loadingText.Content = continueText + "...";
+            //progressText.Content = continueText + "...";
             await Task.Delay(delay);
             if (continueDots)
                 LoadingDots();
@@ -269,7 +286,7 @@ namespace VTOLVR_ModLoader
                     GifState(gifStates.Paused);
                     continueText = "Launching Game";
                     launchButton.Visibility = Visibility.Visible;
-                    loadingText.Visibility = Visibility.Hidden;
+                    //loadingText.Visibility = Visibility.Hidden;
                     MessageBox.Show("Couldn't Find VTOL VR Process");
                     return;
                 }
@@ -294,6 +311,56 @@ namespace VTOLVR_ModLoader
         private void Quit()
         {
             Process.GetCurrentProcess().Kill();
+        }
+
+        private void WebsiteMods(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://vtolvr-mods.com/mods.php");
+        }
+
+        private void WebsiteSkins(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://vtolvr-mods.com/skins.php");
+        }
+
+        private void Discord(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://discord.gg/49HDD7m");
+        }
+
+        private void Github(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://github.com/MarshMello0/VTOLVR-ModLoader");
+        }
+
+        private void Quit(object sender, RoutedEventArgs e)
+        {
+            Quit();
+        }
+
+        private void TopBarDown(object sender, MouseButtonEventArgs e)
+        {
+            holdingDown = true;
+            lm = Mouse.GetPosition(Application.Current.MainWindow);
+        }
+
+        private void TopBarUp(object sender, MouseButtonEventArgs e)
+        {
+            holdingDown = false;
+        }
+
+        private void TopBarMove(object sender, MouseEventArgs e)
+        {
+            if (holdingDown)
+            {
+                this.Left += Mouse.GetPosition(Application.Current.MainWindow).X - lm.X;
+                this.Top += Mouse.GetPosition(Application.Current.MainWindow).Y - lm.Y;
+            }
+        }
+
+        private void TopBarLeave(object sender, MouseEventArgs e)
+        {
+            holdingDown = false;
         }
     }
 }
