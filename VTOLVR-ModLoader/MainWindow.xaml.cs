@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using WpfAnimatedGif;
 using System.Net;
 using System.Xml.Serialization;
+using System.ComponentModel;
 
 namespace VTOLVR_ModLoader
 {
@@ -30,16 +31,29 @@ namespace VTOLVR_ModLoader
         private static string updatefile = @"\updates.xml";
         private static string url = @"https://vtolvr-mods.com";
         private string root;
-        private bool continueDots = true;
-        private string continueText = "Launching Game";
 
-        private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe", "ModLoader.dll", "WpfAnimatedGif.dll", "modloader.assets" };
+        private static int currentDLLVersion = 2;
+        private static int currentAssetsVersion = 2;
+        private static int currentEXEVersion = 2;
+
+        //Startup
+        private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe" };
         private string[] neededDLLFiles = new string[] { @"\Plugins\discord-rpc.dll" };
 
-        private Updates updates;
-
+        
+        //Moving Window
         private bool holdingDown;
         private Point lm = new Point();
+        private bool isBusy;
+
+        //Updates 
+        private Updates updates;
+        private int assetsversion;
+        private string assetsURL;
+
+        private int dllNewVersion, assetsNewVersion;
+
+        #region Startup
         public MainWindow()
         {
             InitializeComponent();
@@ -49,11 +63,6 @@ namespace VTOLVR_ModLoader
         }
         private void CheckBaseFolder()
         {
-            /*
-             This checks the base folder, the other files such as the .dll don't need to be there.
-             However, this does need to be in the vtol vr game folder
-             */
-
             //Checking the folder which this is in
             string[] pathSplit = root.Split('\\');
             if (pathSplit[pathSplit.Length - 1] != "VTOLVR_ModLoader")
@@ -69,11 +78,14 @@ namespace VTOLVR_ModLoader
                 MessageBox.Show("It seems the VTOLVR_ModLoader folder isn't with the other games files\nPlease move me to VTOL VR's game root directory.", "Wrong Folder Location");
                 Quit();
             }
+
+            CheckFolder();
         }
+        /// <summary>
+        /// Checks for files which the Mod Loader needs to work such as .dll files
+        /// </summary>
         private void CheckFolder()
         {
-
-
             //Checking if the files we need to run are there
             foreach (string file in needFiles)
             {
@@ -109,54 +121,93 @@ namespace VTOLVR_ModLoader
             MessageBox.Show("I can't seem to find " + file + " in VTOL VR > VTOLVR_Data, please make sure this file is here otherwise the mod loader won't work", "Missing File");
             Quit();
         }
+        #endregion
+
+        #region Auto Updater
         private void CheckForUpdates()
         {
+            SetProgress(0, "Checking for updates...");
+            SetPlayButton(true);
             if (CheckForInternet())
             {
                 if (!LoadUpdatesFile())
-                    updates = new Updates(2, 2, 2);
+                    updates = new Updates(currentEXEVersion, currentDLLVersion, currentAssetsVersion);
 
                 using (var client = new WebClient())
                 {
-                    string result = "";
                     try
                     {
-                        result = client.DownloadString(url + "/update.php");
+                        WebClient webClient = new WebClient();
+                        webClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(DownloadedUpdate);
+                        webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DownloadUpdateProgress);
+                        webClient.DownloadStringAsync(new Uri(url + "/update.php"));
                     }
                     catch (Exception e)
                     {
-                        MessageBox.Show("It seems we can't load " + url + "\nMaybe its down?\n\n" + e.Message, "Server Down");
+                        SetProgress(100, "Unable to connect to the server");
+                        SetPlayButton(false);
                         return;
                     }
-
-                    try
-                    {
-                        string[] split = result.Split('|');
-
-                        int exeversion = int.Parse(split[0]);
-                        int dllversion = int.Parse(split[1]);
-                        int assetsversion = int.Parse(split[3]);
-
-                        if (exeversion > updates.exeversion)
-                            UpdateExe();
-                        if (assetsversion > updates.assetversion)
-                            UpdateAssets(split[4], assetsversion);
-                        if (dllversion > updates.dllversion)
-                            UpdateDLL(split[2], dllversion);
-
-
-                    }
-                    catch (Exception e)
-                    {
-                        MessageBox.Show("There was a strange error\n" + e.Message + "\nAuto updating seems to be broken.", "Super Strange Error");
-                        return;
-                    }
-
-
-
-                    SaveUpdatesFile();
                 }
             }
+        }
+        private void DownloadUpdateProgress(object sender, DownloadProgressChangedEventArgs e)
+        {
+            SetProgress(50 * (e.ProgressPercentage / 100), "Checking for updates...");
+        }
+        private void DownloadedUpdate(object sender, DownloadStringCompletedEventArgs e)
+        {
+            //When the download is done of the update.php this method runs
+            if (!e.Cancelled && e.Error == null)
+            {
+                try
+                {
+                    string result = e.Result;
+                    SetProgress(50, "Checking for updates...");
+                    string[] split = result.Split('|');
+
+                    int exeversion = int.Parse(split[0]);
+                    int dllversion = int.Parse(split[1]);
+                    assetsversion = int.Parse(split[3]);
+                    assetsURL = split[4];
+                    if (exeversion > updates.exeversion)
+                        UpdateExe();
+                    else
+                    {
+                        if (dllversion > updates.dllversion)
+                        {
+                            UpdateDLL(split[2], dllversion);
+                            return;
+                        }
+                        else
+                        {
+                            if (assetsversion > updates.assetversion)
+                            {
+                                UpdateAssets(assetsURL, assetsversion);
+                                return;
+                            }
+                        }
+                    }
+                }
+                catch 
+                {
+                    SetProgress(100, "There was a strange error. Auto updating seems to be broken.");
+                    SetPlayButton(false);
+                    return;
+                }
+
+                SaveUpdatesFile();
+                SetProgress(100, "Finished checking for updates");
+                SetPlayButton(false);
+            }
+            else
+            {
+                //This is if it failed
+                SetProgress(100, "Unable to connect to the server");
+                SetPlayButton(false);
+                return;
+            }
+            
         }
         private bool CheckForInternet()
         {
@@ -193,28 +244,93 @@ namespace VTOLVR_ModLoader
         }
         private void UpdateDLL(string url, int newVersion)
         {
-            using (var client = new WebClient())
+            try
             {
                 if (File.Exists(root + @"\ModLoader.dll"))
                     File.Delete(root + @"\ModLoader.dll");
-                client.DownloadFile(MainWindow.url + url, @"ModLoader.dll");
+
+                WebClient client = new WebClient();
+                client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DLLProgress);
+                client.DownloadFileCompleted += new System.ComponentModel.AsyncCompletedEventHandler(DLLDone);
+                client.DownloadFileAsync(new Uri(MainWindow.url + url), @"ModLoader.dll");
+                dllNewVersion = newVersion;
             }
-            updates.dllversion = newVersion;
+            catch (Exception e)
+            {
+                MessageBox.Show("Failed downloading the .dll file, please print screen this and send to @. Marsh.Mello .#3194 on discord\n" + e.ToString());
+            }
+
         }
+
+        private void DLLDone(object sender, AsyncCompletedEventArgs e)
+        {
+            if (e.Cancelled && e.Error != null)
+            {
+                SetProgress(100, "Failed downloading \"ModLoader.dll\"");
+            }
+            else
+            {
+                updates.dllversion = dllNewVersion;
+                if (assetsversion > updates.assetversion)
+                    UpdateAssets(assetsURL, assetsversion);
+                else
+                {
+                    SaveUpdatesFile();
+                    SetProgress(100, "Finished downloading updates");
+                    SetPlayButton(false);
+                }
+            }
+        }
+
+        private void DLLProgress(object sender, DownloadProgressChangedEventArgs e)
+        {
+            SetProgress(e.ProgressPercentage / 100, "Downloading \"ModLoader.dll\"...");
+        }
+
         private void UpdateAssets(string url, int newVersion)
         {
-            using (var client = new WebClient())
+            try
             {
                 if (File.Exists(root + @"\modloader.assets"))
                     File.Delete(root + @"\modloader.assets");
-                client.DownloadFile(MainWindow.url + url, @"modloader.assets");
+
+                WebClient client = new WebClient();
+                client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(AssetsProgress);
+                client.DownloadFileCompleted += new System.ComponentModel.AsyncCompletedEventHandler(AssetsDone);
+                client.DownloadFileAsync(new Uri(MainWindow.url + url), @"modloader.assets");
+                assetsNewVersion = newVersion;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Failed downloading the .dll file, please print screen this and send to @. Marsh.Mello .#3194 on discord\n" + e.ToString());
             }
             updates.assetversion = newVersion;
         }
+
+        private void AssetsDone(object sender, AsyncCompletedEventArgs e)
+        {
+            if (e.Cancelled && e.Error != null)
+            {
+                SetProgress(100, "Failed downloading \"modloader.assets\"");
+            }
+            else
+            {
+                updates.assetversion = assetsversion;
+
+                SaveUpdatesFile();
+                SetProgress(100, "Finished downloading updates");
+                SetPlayButton(false);
+            }
+        }
+
+        private void AssetsProgress(object sender, DownloadProgressChangedEventArgs e)
+        {
+            SetProgress(e.ProgressPercentage / 100, "Downloading \"modloader.assets\"...");
+        }
+
         private void UpdateExe()
         {
             MessageBox.Show("There is an update to the launcher\nPlease head over to " + url + " to download the latest version.","Launcher Update!");
-            Quit();
         }
         private void SaveUpdatesFile()
         {
@@ -224,9 +340,16 @@ namespace VTOLVR_ModLoader
                 xml.Serialize(stream, updates);
             }
         }
+
+        #endregion
+
+        #region Launching Game
         private void OpenGame(object sender, RoutedEventArgs e)
         {
-            LoadingDots();
+            if (isBusy)
+                return;
+            SetPlayButton(false);
+            SetProgress(0, "Launching Game");
             GifState(gifStates.Play);
 
             //Launching the game
@@ -235,19 +358,6 @@ namespace VTOLVR_ModLoader
             //Searching For Process
             WaitForProcess();
 
-        }
-        private async void LoadingDots()
-        {
-            //This will constanly loop, but we will just change the text before it when we need to change it
-            int delay = 500;
-            //progressText.Content = continueText + ".";
-            await Task.Delay(delay);
-            //progressText.Content = continueText + "..";
-            await Task.Delay(delay);
-            //progressText.Content = continueText + "...";
-            await Task.Delay(delay);
-            if (continueDots)
-                LoadingDots();
         }
         private void GifState(gifStates state, int frame = 0)
         {
@@ -272,7 +382,7 @@ namespace VTOLVR_ModLoader
             for (int i = 1; i <= maxTries; i++)
             {
                 //Doing 5 tries to search for the process
-                continueText = "Searching for Process";
+                SetProgress(10 * i, "Searching for process...   (Attempt " + i + ")");
                 await Task.Delay(5000);
 
                 if (Process.GetProcessesByName("vtolvr").Length == 1)
@@ -284,20 +394,18 @@ namespace VTOLVR_ModLoader
                 {
                     //If we couldn't find it, go back to how it was at the start
                     GifState(gifStates.Paused);
-                    continueText = "Launching Game";
-                    launchButton.Visibility = Visibility.Visible;
-                    //loadingText.Visibility = Visibility.Hidden;
-                    MessageBox.Show("Couldn't Find VTOL VR Process");
+                    SetProgress(100, "Couldn't find VTOLVR process.");
+                    SetPlayButton(true);
                     return;
                 }
             }
 
             //A delay just to make sure the game has fully launched,
-            continueText = "Waiting for Game";
+            SetProgress(50, "Waiting for game...");
             await Task.Delay(10000);
 
             //Injecting Default Mod
-            continueText = "Injecting Mod Loader";
+            SetProgress(75, "Injecting Mod Loader...");
             InjectDefaultMod();
             //Closing Exe
             Quit();
@@ -307,7 +415,21 @@ namespace VTOLVR_ModLoader
             //Injecting the default mod
             string defaultStart = string.Format("inject -p {0} -a {1} -n {2} -c {3} -m {4}", "vtolvr", "ModLoader.dll", "ModLoader", "Load", "Init");
             Process.Start(root + injector, defaultStart);
+            Quit();
         }
+        #endregion
+
+        private void SetProgress(int barValue, string text)
+        {
+            progressText.Text = text;
+            progressBar.Value = barValue;
+        }
+        private void SetPlayButton(bool disabled)
+        {
+            launchButton.Content = disabled ? "Busy" : "Play";
+            isBusy = disabled;
+        }
+
         private void Quit()
         {
             Process.GetCurrentProcess().Kill();

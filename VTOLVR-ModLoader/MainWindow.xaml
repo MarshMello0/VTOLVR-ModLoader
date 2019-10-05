@@ -182,7 +182,7 @@
 
                 <Button Grid.Column="1" Grid.Row="1" FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"
                             Content="Play" FontSize="30" Foreground="White" Background="#FF3D3D3D" 
-                        BorderBrush="{x:Null}" x:Name="launchButton" Click="OpenGame"/>
+                        BorderBrush="{x:Null}" x:Name="launchButton" Click="OpenGame" BorderThickness="1"/>
             </Grid>
         </Grid>
     </Grid>
