@@ -32,7 +32,7 @@ namespace VTOLVR_ModLoader
         private static string updatefile = @"\updates.xml";
         private static string updatesFeedFile = @"\feed.xml";
         private static string updatesFeed = @"/files/updatesfeed.xml";
-        private static string url = @"http://localhost";
+        private static string url = @"http://vtolvr-mods.com";
         private string root;
 
         private static int currentDLLVersion = 2;
@@ -62,7 +62,7 @@ namespace VTOLVR_ModLoader
             InitializeComponent();
         }
 
-        private void Loaded(object sender, EventArgs e)
+        private void Start(object sender, EventArgs e)
         {
             root = Directory.GetCurrentDirectory();
             CheckBaseFolder();

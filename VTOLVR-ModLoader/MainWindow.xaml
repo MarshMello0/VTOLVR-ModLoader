@@ -7,8 +7,7 @@
         xmlns:local="clr-namespace:VTOLVR_ModLoader"
         mc:Ignorable="d"
         Title="VTOL VR Modloader" Height="400" Width="800" ResizeMode="NoResize" Icon="Logo.ico" 
-        Background="#FF4B4B4B" WindowStartupLocation="CenterScreen" WindowStyle="None" 
-        Activated="Loaded" Closing="WindowClosing">
+        Background="#FF4B4B4B" WindowStartupLocation="CenterScreen" WindowStyle="None" Closing="WindowClosing" Initialized="Start">
     <Grid>
         
         <Grid.RowDefinitions>
