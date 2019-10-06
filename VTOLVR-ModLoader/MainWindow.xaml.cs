@@ -19,6 +19,7 @@ using WpfAnimatedGif;
 using System.Net;
 using System.Xml.Serialization;
 using System.ComponentModel;
+using Caliburn.Micro;
 
 namespace VTOLVR_ModLoader
 {
@@ -29,7 +30,9 @@ namespace VTOLVR_ModLoader
         private static string modsFolder = @"\mods";
         private static string injector = @"\injector.exe";
         private static string updatefile = @"\updates.xml";
-        private static string url = @"https://vtolvr-mods.com";
+        private static string updatesFeedFile = @"\feed.xml";
+        private static string updatesFeed = @"/files/updatesfeed.xml";
+        private static string url = @"http://localhost";
         private string root;
 
         private static int currentDLLVersion = 2;
@@ -57,9 +60,13 @@ namespace VTOLVR_ModLoader
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void Loaded(object sender, EventArgs e)
+        {
             root = Directory.GetCurrentDirectory();
             CheckBaseFolder();
-            CheckForUpdates();
+            GetUpdateFeed();
         }
         private void CheckBaseFolder()
         {
@@ -124,6 +131,58 @@ namespace VTOLVR_ModLoader
         #endregion
 
         #region Auto Updater
+        private void GetUpdateFeed()
+        {
+            SetProgress(0, "Getting Update Feed...");
+            SetPlayButton(true);
+            if (CheckForInternet())
+            {
+                try
+                {
+                    if (File.Exists(root + updatesFeedFile))
+                        File.Delete(root + updatesFeedFile);
+
+                    WebClient client = new WebClient();
+                    client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(FeedProgress);
+                    client.DownloadFileCompleted += new AsyncCompletedEventHandler(FeedDone);
+                    client.DownloadFileAsync(new Uri(url + updatesFeed), root + updatesFeedFile);
+                }
+                catch (Exception e)
+                {
+                    SetPlayButton(true);
+                    SetProgress(100, "Failed to connect to server");
+                    CheckForUpdates();
+                }
+                
+            }
+        }
+
+        private void FeedDone(object sender, AsyncCompletedEventArgs e)
+        {
+            if (!e.Cancelled && e.Error == null)
+            {
+                using (FileStream stream = new FileStream(root + updatesFeedFile, FileMode.Open))
+                {
+                    XmlSerializer xml = new XmlSerializer(typeof(UpdateFeed));
+                    UpdateFeed deserialized = (UpdateFeed)xml.Deserialize(stream);
+                    updateFeed.ItemsSource = deserialized.feed;
+                }
+                CheckForUpdates();
+            }
+            else
+            {
+                SetProgress(100, "Failed to connect to server.");
+                Console.WriteLine("Failed getting feed \n" + e.Error.ToString());
+                SetPlayButton(true);
+                CheckForUpdates();
+            }
+        }
+
+        private void FeedProgress(object sender, DownloadProgressChangedEventArgs e)
+        {
+            SetProgress(e.ProgressPercentage / 100, "Downloading update feed...");
+        }
+
         private void CheckForUpdates()
         {
             SetProgress(0, "Checking for updates...");
@@ -421,6 +480,7 @@ namespace VTOLVR_ModLoader
 
         private void SetProgress(int barValue, string text)
         {
+            
             progressText.Text = text;
             progressBar.Value = barValue;
         }
@@ -478,6 +538,12 @@ namespace VTOLVR_ModLoader
                 this.Left += Mouse.GetPosition(Application.Current.MainWindow).X - lm.X;
                 this.Top += Mouse.GetPosition(Application.Current.MainWindow).Y - lm.Y;
             }
+        }
+
+        private void WindowClosing(object sender, CancelEventArgs e)
+        {
+            if (File.Exists(root + updatesFeedFile))
+                File.Delete(root + updatesFeedFile);
         }
 
         private void TopBarLeave(object sender, MouseEventArgs e)

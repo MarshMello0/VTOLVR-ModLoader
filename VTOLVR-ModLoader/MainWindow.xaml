@@ -6,8 +6,11 @@
         xmlns:gif="http://wpfanimatedgif.codeplex.com"
         xmlns:local="clr-namespace:VTOLVR_ModLoader"
         mc:Ignorable="d"
-        Title="VTOL VR Modloader" Height="400" Width="800" ResizeMode="NoResize" Icon="Logo.ico" Background="#FF4B4B4B" WindowStartupLocation="CenterScreen" WindowStyle="None">
+        Title="VTOL VR Modloader" Height="400" Width="800" ResizeMode="NoResize" Icon="Logo.ico" 
+        Background="#FF4B4B4B" WindowStartupLocation="CenterScreen" WindowStyle="None" 
+        Activated="Loaded" Closing="WindowClosing">
     <Grid>
+        
         <Grid.RowDefinitions>
             <RowDefinition Height="0.1*"/>
             <RowDefinition Height="*"/>
@@ -18,7 +21,6 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="0.1*"/>
-                <ColumnDefinition Width="0.01*"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock Text=" VTOL VR Mod Loader 2.0" Grid.Column="0" Foreground="White" 
@@ -130,6 +132,35 @@
                             Click="Github"/>
                 </Grid>
             </Grid>
+
+
+            <ScrollViewer Grid.Column="1" ScrollViewer.VerticalScrollBarVisibility="Hidden"> <!-- Updates Feed -->
+                <ItemsControl x:Name="updateFeed" >
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="0,0,0,50" >
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Title}" 
+                                           FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"
+                                           Foreground="White" FontSize="20" TextWrapping="Wrap"
+                                               Background="#FF3D3D3D"/>
+
+                                    <TextBlock Text="{Binding Date}" 
+                                           FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"
+                                           Foreground="White" FontSize="8" TextWrapping="Wrap"
+                                               Background="#FF3D3D3D"/>
+                                    <TextBlock  Text="{Binding Description}" 
+                                           FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"
+                                           Foreground="White" FontSize="10" TextWrapping="Wrap"
+                                                Background="#FF3D3D3D"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            
+
         </Grid>
 
         <Grid Grid.Row="2" Background="#696969">
