@@ -37,6 +37,10 @@ namespace ModLoader
 
         //New
         private GameObject modsPage;
+        private ScrollRect Scroll_View;
+        private Text SelectButton;
+        private int selectedMod = -1;
+        private float buttonHeight = 548;
 
         //InGameObjects
         private GameObject MainScreen;
@@ -47,8 +51,8 @@ namespace ModLoader
             api = VTOLAPI.instance;
 
             //Spawning UConsole
-            GameObject uConsole = Instantiate(manager.assets.LoadAsset<GameObject>("UConsole-Canvas"));
-            UConsole console = uConsole.AddComponent<UConsole>();
+            //GameObject uConsole = Instantiate(manager.assets.LoadAsset<GameObject>("UConsole-Canvas"));
+            //UConsole console = uConsole.AddComponent<UConsole>();
 
             SceneManager.sceneLoaded += SceneLoaded;
         }
@@ -66,66 +70,110 @@ namespace ModLoader
                     break;
             }
         }
-
-        private void SpawnPlane()
-        {
-            Log("Waiting 4 Seconds");
-            //yield return new WaitForSeconds(4);
-            Log("Spawning");
-            if (manager.assets == null)
-            {
-                LogError("Manager Assets is null");
-                manager.CreateAssetBundle();
-            }
-            
-            GameObject prefab = manager.assets.LoadAsset<GameObject>("PlanePrefab");
-            if (prefab == null)
-                LogError("Prefab is null");
-            GameObject customPlane = Instantiate(prefab);
-            Log("Spawned");
-            customPlane.transform.GetChild(0).gameObject.AddComponent<Rigidbody>();
-            customPlane.AddComponent<FloatingOriginShifter>();
-            customPlane.AddComponent<FloatingOriginTransform>();
-            Log("Added Components");
-            GameObject player = GameObject.Find("FA-26B(Clone)");
-            if (player == null)
-            {
-                Log("Player is null");
-                customPlane.transform.position = new Vector3(0, 50, 0);
-            }
-            else
-                customPlane.transform.position = player.transform.position + new Vector3(10, 0, 0);
-            
-
-            Log("Spawned Plane " + customPlane.transform.position);
-        }
-
         private void CreateUI()
         {
+            GameObject InteractableCanvas = GameObject.Find("InteractableCanvas");
+            VRPointInteractableCanvas InteractableCanvasScript = InteractableCanvas.GetComponent<VRPointInteractableCanvas>();
             GameObject NewPilotButton = GameObject.Find("NewPilotButton");
-            GameObject CampaignDisplay = GameObject.Find("InteractableCanvas").transform.GetChild(0).GetChild(7).GetChild(0).GetChild(0).gameObject;
+            GameObject CampaignDisplay = InteractableCanvas.transform.GetChild(0).GetChild(7).GetChild(0).GetChild(0).gameObject;
             MainScreen = GameObject.Find("MainScreen");
             GameObject ModsButton = Instantiate(NewPilotButton, NewPilotButton.transform.parent);
+            ModsButton.name = "ModsButton";
             Vector3 oldPos = NewPilotButton.transform.position;
             ModsButton.transform.position = new Vector3(oldPos.x, oldPos.y - 0.3035235f, oldPos.z);
-
             ModsButton.GetComponentInChildren<Text>().text = "Mods";
             ModsButton.GetComponent<Image>().color = Color.cyan;
 
             VRInteractable modsInteractable = ModsButton.GetComponent<VRInteractable>();
             modsInteractable.interactableName = "Open Mods";
             modsInteractable.OnInteract = new UnityEvent();
-            modsInteractable.OnInteract.AddListener(delegate { OpenModsPage(); });
+            modsInteractable.OnInteract.AddListener(OpenModsPage);
+            InteractableCanvasScript.RefreshInteractables();
 
-
+            Log(modsInteractable.gameObject.name);
             modsPage = Instantiate(CampaignDisplay, CampaignDisplay.transform.parent);
-            
+            modsPage.SetActive(true);
+            //Select Button
+            SelectButton = modsPage.transform.GetChild(3).GetComponentInChildren<Text>();
+            SelectButton.text = "Load";
+            VRInteractable selectVRI = SelectButton.transform.GetComponentInParent<VRInteractable>();
+            selectVRI.interactableName = "Load Current Mod";
+            selectVRI.OnInteract = new UnityEvent();
+            selectVRI.OnInteract.AddListener(LoadMod);
+            Destroy(modsPage.transform.GetChild(8).GetChild(0).GetChild(3).gameObject);//percentCompleteText
+            Destroy(modsPage.transform.GetChild(6).gameObject);//ResetButton
+            Destroy(modsPage.transform.GetChild(2).gameObject);//PrevButton
+            Destroy(modsPage.transform.GetChild(1).gameObject);//NextButton
+            modsPage.transform.GetChild(0).GetComponent<Text>().text = "Select a Mod";
+
+            //Storing the prefab button for each item
+            GameObject CampaignListTemplate = modsPage.transform.GetChild(5).GetChild(0).GetChild(0).GetChild(1).gameObject;
+            Scroll_View = modsPage.transform.GetChild(5).GetComponent<ScrollRect>();
+
+            buttonHeight = ((RectTransform)CampaignListTemplate.transform).rect.height;
+            if (ModLoaderManager.mods.Count == 0)
+            {
+                ModLoaderManager.FindMods();
+            }
+
+            for (int i = 0; i < ModLoaderManager.mods.Count; i++)
+            {
+                ModLoaderManager.mods[i].listGO = Instantiate(CampaignListTemplate, Scroll_View.content);
+                ModLoaderManager.mods[i].listGO.transform.localPosition = new Vector3(0f, -i * buttonHeight, 0f);
+                ModLoaderManager.mods[i].listGO.GetComponent<VRUIListItemTemplate>().Setup(ModLoaderManager.mods[i].name,i,OpenMod);
+            }
+
+            Scroll_View.content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, (2f + ModLoaderManager.mods.Count) * buttonHeight);
+            Scroll_View.ClampVertical();
+            InteractableCanvasScript.RefreshInteractables();
+            CampaignDisplay.SetActive(false);
+            CampaignListTemplate.SetActive(false);
+            //modsPage.SetActive(false);
+
+        }
+        public void LoadMod()
+        {
+            if (selectedMod < 0)
+                return;
+
+            ModItem item = ModLoaderManager.mods[selectedMod];
+            if (item.isLoaded)
+            {
+                Debug.Log(item.name + " is already loaded");
+                return;
+            }
+
+            IEnumerable<Type> source = from t in item.assembly.GetTypes() where t.IsSubclassOf(typeof(VTOLMOD)) select t;
+            if (source != null && source.Count() == 1)
+            {
+                new GameObject(item.name, source.First());
+                ModLoaderManager.mods[selectedMod].isLoaded = true;
+
+                ModLoaderManager.instance.loadedModsCount++;
+                ModLoaderManager.instance.UpdateDiscord();
+            }
+            else
+            {
+                Debug.LogError("Source is null");
+            }
+        }
+        public void OpenMod(int id)
+        {
+            selectedMod = id;
+            SelectButton.text = ModLoaderManager.mods[id].isLoaded ? "Loaded!" : "Load";
+            Scroll_View.ViewContent((RectTransform)ModLoaderManager.mods[selectedMod].listGO.transform);
         }
         public void OpenModsPage()
         {
             Log("Opened the mods page");
             modsPage.SetActive(true);
             MainScreen.SetActive(false);
+        }
+        public void CloseModsPage()
+        {
+            Log("Closing the mods page");
+            modsPage.SetActive(false);
+            MainScreen.SetActive(true);
         }
 
         #region Setting UI Mod Loader

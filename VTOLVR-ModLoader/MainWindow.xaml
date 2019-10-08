@@ -16,7 +16,7 @@
             <RowDefinition Height="0.3*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Background="#FF3D3D3D"> <!-- Top Bar -->
+        <Grid Grid.Row="0" Background="#FF2E2E2E"> <!-- Top Bar -->
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="0.1*"/>

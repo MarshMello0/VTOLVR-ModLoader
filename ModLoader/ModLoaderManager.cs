@@ -103,6 +103,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             //gameObject.AddComponent<CSharp>();
             
         }
+        /*
         IEnumerator Test()
         {
             Debug.Log("Spawning");
@@ -143,6 +144,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             }
 
         }
+        */
         private void CreateAPI()
         {
             gameObject.AddComponent<VTOLAPI>();
@@ -172,7 +174,6 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                 case "Akutan":
                     discordDetail = "Flying the " + PilotSaveManager.currentVehicle.vehicleName;
                     discordState = "Akutan: " + PilotSaveManager.currentCampaign.campaignName + " " + PilotSaveManager.currentScenario.scenarioName;
-                    //StartCoroutine(Test());
                     break;
                 case "CustomMapBase":
                     discordDetail = "Flying the " + PilotSaveManager.currentVehicle.vehicleName;
@@ -305,6 +306,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
         public Assembly assembly { private set; get; }
         public string path { private set; get; }
         public bool isLoaded = false;
+        public GameObject listGO; 
         public ModItem(string name, string description, string version)
         {
             this.name = name;
