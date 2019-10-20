@@ -510,9 +510,16 @@ namespace VTOLVR_ModLoader
             Process.Start("https://discord.gg/49HDD7m");
         }
 
-        private void Github(object sender, RoutedEventArgs e)
+        private void ModCreator(object sender, RoutedEventArgs e)
         {
-            Process.Start("https://github.com/MarshMello0/VTOLVR-ModLoader");
+            Mod newMod = new Mod();
+            newMod.name = "No Gravity";
+            newMod.description = "Adds a button to your controller to turn the gravity on and off";
+            using (FileStream stream = new FileStream(root + @"\info.xml", FileMode.Create))
+            {
+                XmlSerializer xml = new XmlSerializer(typeof(Mod));
+                xml.Serialize(stream, newMod);
+            }
         }
 
         private void Quit(object sender, RoutedEventArgs e)
@@ -550,5 +557,12 @@ namespace VTOLVR_ModLoader
         {
             holdingDown = false;
         }
+    }
+
+    public class Mod
+    {
+        public string name;
+        public string description;
+        public Mod() { }
     }
 }

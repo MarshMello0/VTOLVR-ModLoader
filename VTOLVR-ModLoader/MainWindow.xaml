@@ -127,8 +127,8 @@
                     </Grid.ColumnDefinitions>
 
                     <Button Grid.Column="1" Grid.Row="1" FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"
-                            Content="Github" Foreground="White" Background="#FF3D3D3D" BorderBrush="{x:Null}" 
-                            Click="Github"/>
+                            Content="Mod Creator" Foreground="White" Background="#FF3D3D3D" BorderBrush="{x:Null}" 
+                            Click="ModCreator"/>
                 </Grid>
             </Grid>
 

@@ -91,7 +91,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             
             discord = gameObject.AddComponent<DiscordController>();
             discordDetail = "Launching Game";
-            discordState = "using . Marsh.Mello .'s Mod Loader";
+            discordState = "Using . Marsh.Mello .'s Mod Loader";
             UpdateDiscord();
 
             SteamAPI.Init();
@@ -168,7 +168,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             switch (sceneName)
             {
                 case "SamplerScene":
-                    discordDetail = "Selecting Mods";
+                    discordDetail = "Selecting mods";
                     StartCoroutine(CreateModLoader());
                     break;
                 case "Akutan":
@@ -216,7 +216,8 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                 yield return null;
             }
             Debug.Log("Creating new gameobject");
-            new GameObject("Mod Loader", typeof(ModLoader));
+            GameObject modloader = new GameObject("Mod Loader", typeof(ModLoader));
+            DontDestroyOnLoad(modloader);
         }
 
 
