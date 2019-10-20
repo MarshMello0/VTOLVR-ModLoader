@@ -7,7 +7,7 @@ public class VTOLMOD : MonoBehaviour
 
     private void Awake()
     {
-        modName = GetType().GetModName();
+        modName = gameObject.name;
     }
     public void Log(object message)
     {
@@ -20,20 +20,5 @@ public class VTOLMOD : MonoBehaviour
     public void LogError(object message)
     {
         Debug.LogError(modName + ": " + message);
-    }
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public class Info : Attribute
-    {
-        public string name { private set; get; }
-        public string version { private set; get; }
-        public string description { private set; get; }
-
-        public Info(string name, string description, string version)
-        {
-            this.name = name;
-            this.description = description;
-            this.version = version;
-        }
     }
 }

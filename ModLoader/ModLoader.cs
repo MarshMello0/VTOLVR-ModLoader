@@ -13,7 +13,6 @@ using System.Reflection;
 
 namespace ModLoader
 {
-    [Info("ModLoader", "This is the core script for the mod loader", "0")]
     public class ModLoader : VTOLMOD
     {
         private ModLoaderManager manager;
@@ -141,7 +140,7 @@ namespace ModLoader
             }
 
             Log("Loaded " + currentMods.Count + " mods");
-            Scroll_View.content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, (2f + ModLoaderManager.mods.Count) * buttonHeight);
+            Scroll_View.content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, (2f + currentMods.Count) * buttonHeight);
             Scroll_View.ClampVertical();
             InteractableCanvasScript.RefreshInteractables();
             CampaignDisplay.SetActive(false);
@@ -234,23 +233,6 @@ namespace ModLoader
             returnValue.poseBounds = pb;
             returnValue.button = VRInteractable.Buttons.Trigger;
             return returnValue;
-        }
-    }
-
-    public static class Extensions
-    {
-        public static ModItem GetInfo(this Type type)
-        {
-            VTOLMOD.Info info = type.GetCustomAttributes(typeof(VTOLMOD.Info), true).FirstOrDefault<object>() as VTOLMOD.Info;
-            ModItem item = new ModItem(info.name, info.description, info.version);
-            return item;
-        }
-
-        public static string GetModName(this Type type)
-        {
-            VTOLMOD.Info info = type.GetCustomAttributes(typeof(VTOLMOD.Info), true).FirstOrDefault<object>() as VTOLMOD.Info;
-            string name = info.name;
-            return name;
         }
     }
 }
