@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
+using System.IO.Compression;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,7 +44,7 @@ namespace VTOLVR_ModLoader
         private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe" };
         private string[] neededDLLFiles = new string[] { @"\Plugins\discord-rpc.dll" };
 
-        
+
         //Moving Window
         private bool holdingDown;
         private Point lm = new Point();
@@ -153,7 +154,7 @@ namespace VTOLVR_ModLoader
                     SetProgress(100, "Failed to connect to server");
                     CheckForUpdates();
                 }
-                
+
             }
         }
 
@@ -248,25 +249,25 @@ namespace VTOLVR_ModLoader
                         }
                     }
                 }
-                catch 
+                catch
                 {
                     SetProgress(100, "There was a strange error. Auto updating seems to be broken.");
-                    SetPlayButton(false);
+                    CheckModsDependency();
                     return;
                 }
 
                 SaveUpdatesFile();
                 SetProgress(100, "Finished checking for updates");
-                SetPlayButton(false);
+                CheckModsDependency();
             }
             else
             {
                 //This is if it failed
                 SetProgress(100, "Unable to connect to the server");
-                SetPlayButton(false);
+                CheckModsDependency();
                 return;
             }
-            
+
         }
         private bool CheckForInternet()
         {
@@ -279,7 +280,7 @@ namespace VTOLVR_ModLoader
                         return true;
                     }
                 }
-                
+
             }
             catch
             {
@@ -389,7 +390,7 @@ namespace VTOLVR_ModLoader
 
         private void UpdateExe()
         {
-            MessageBox.Show("There is an update to the launcher\nPlease head over to " + url + " to download the latest version.","Launcher Update!");
+            MessageBox.Show("There is an update to the launcher\nPlease head over to " + url + " to download the latest version.", "Launcher Update!");
         }
         private void SaveUpdatesFile()
         {
@@ -478,6 +479,51 @@ namespace VTOLVR_ModLoader
         }
         #endregion
 
+        private void CheckModsDependency()
+        {
+            DirectoryInfo folder = new DirectoryInfo(root + modsFolder);
+            FileInfo[] files = folder.GetFiles("*.zip");
+            float zipAmount = 100 / files.Length;
+            int filesMoved = 0;
+            for (int i = 0; i < files.Length; i++)
+            {
+                FileInfo fileInfo = files[i];
+                try
+                {
+                    FileStream file = File.OpenRead(fileInfo.FullName);
+
+                    using (ZipArchive zip = new ZipArchive(file, ZipArchiveMode.Read))
+                    {
+                        foreach (ZipArchiveEntry entry in zip.Entries)
+                        {
+                            if (entry.FullName.Contains("Dependencies/"))
+                            {
+                                string name = entry.FullName.Split('/')[1];
+                                if (name.Length > 0)
+                                {
+                                    MemoryStream ms = new MemoryStream();
+                                    entry.Open().CopyTo(ms);
+                                    FileStream file1 = new FileStream(Directory.GetParent(Directory.GetCurrentDirectory()).FullName +
+                                        @"\VTOLVR_Data\Managed\" + entry.Name,
+                                        FileMode.Create, FileAccess.Write);
+                                    ms.WriteTo(file1);
+                                    file1.Close();
+                                    ms.Close();
+                                    filesMoved++;
+                                }
+
+                            }
+                        }
+                    }
+                    file.Close();
+                    SetProgress((int)Math.Ceiling(zipAmount * i), "Moved dependencies for" + fileInfo.Name);
+                }
+                catch { }
+                
+            }
+            SetProgress(100, filesMoved == 0 ? "No Dependencies to move" : "Moved " + filesMoved + " dependencies");
+            SetPlayButton(false);
+        }
         private void SetProgress(int barValue, string text)
         {
             
@@ -513,13 +559,15 @@ namespace VTOLVR_ModLoader
         private void ModCreator(object sender, RoutedEventArgs e)
         {
             Mod newMod = new Mod();
-            newMod.name = "No Gravity";
-            newMod.description = "Adds a button to your controller to turn the gravity on and off";
+            newMod.name = "Mod Name";
+            newMod.description = "Mod Description";
             using (FileStream stream = new FileStream(root + @"\info.xml", FileMode.Create))
             {
                 XmlSerializer xml = new XmlSerializer(typeof(Mod));
                 xml.Serialize(stream, newMod);
             }
+
+            MessageBox.Show("Created info.xml in \n\"" + root + "\"", "Created Info.xml", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void Quit(object sender, RoutedEventArgs e)
@@ -527,6 +575,7 @@ namespace VTOLVR_ModLoader
             Quit();
         }
 
+        #region Moving Window
         private void TopBarDown(object sender, MouseButtonEventArgs e)
         {
             holdingDown = true;
@@ -557,6 +606,8 @@ namespace VTOLVR_ModLoader
         {
             holdingDown = false;
         }
+
+        #endregion
     }
 
     public class Mod
