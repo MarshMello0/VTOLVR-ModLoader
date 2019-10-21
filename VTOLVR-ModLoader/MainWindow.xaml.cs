@@ -52,6 +52,7 @@ namespace VTOLVR_ModLoader
         //Updates
         private bool hasVersions;
         private int newDLLVersion;
+        WebClient client;
         #region Releasing Update
         private void CreateUpdatedFeed()
         {
@@ -182,7 +183,7 @@ namespace VTOLVR_ModLoader
             SetPlayButton(true);
             if (CheckForInternet())
             {
-                WebClient client = new WebClient();
+                client = new WebClient();
                 client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DataProgress);
                 client.DownloadFileCompleted += new AsyncCompletedEventHandler(DataDone);
                 client.DownloadFileAsync(new Uri(url + dataURL), root + dataFileTemp);
@@ -214,6 +215,7 @@ namespace VTOLVR_ModLoader
                 SetPlayButton(true);
                 LoadData();
             }
+            client.Dispose();
         }
         private void LoadData()
         {
@@ -269,11 +271,13 @@ namespace VTOLVR_ModLoader
                 if (File.Exists(root + @"\ModLoader.dll"))
                     File.Delete(root + @"\ModLoader.dll");
 
-                WebClient client = new WebClient();
-                client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DLLProgress);
-                client.DownloadFileCompleted += new System.ComponentModel.AsyncCompletedEventHandler(DLLDone);
-                client.DownloadFileAsync(new Uri(MainWindow.url + url), @"ModLoader.dll");
-                newDLLVersion = newVersion;
+                using (client = new WebClient())
+                {
+                    client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DLLProgress);
+                    client.DownloadFileCompleted += new AsyncCompletedEventHandler(DLLDone);
+                    client.DownloadFileAsync(new Uri(url), @"ModLoader.dll");
+                    newDLLVersion = newVersion;
+                }
             }
             catch (Exception e)
             {
@@ -283,6 +287,7 @@ namespace VTOLVR_ModLoader
         }
         private void DLLDone(object sender, AsyncCompletedEventArgs e)
         {
+            
             if (e.Cancelled && e.Error != null)
             {
                 SetProgress(100, "Failed downloading \"ModLoader.dll\"");
@@ -301,6 +306,7 @@ namespace VTOLVR_ModLoader
         private void DLLProgress(object sender, DownloadProgressChangedEventArgs e)
         {
             SetProgress(e.ProgressPercentage / 100, "Downloading \"ModLoader.dll\"...");
+            Console.WriteLine("Downloading \"ModLoader.dll\"... [" + e.ProgressPercentage / 100 + "]");
         }
         private void UpdateExe()
         {
