@@ -66,12 +66,15 @@ namespace ModLoader
                                         break;
                                     }
                                 case "xml":
-                                    XmlSerializer xml = new XmlSerializer(typeof(Mod));
-                                    Mod info = (Mod)xml.Deserialize(item.Open());
-                                    currentMod.name = info.name;
-                                    currentMod.description = info.description;
-                                    hasInfo = true;
-                                    Debug.Log("Found xml file");
+                                    if (item.Name.ToLower() == "info.xml")
+                                    {
+                                        XmlSerializer xml = new XmlSerializer(typeof(Mod));
+                                        Mod info = (Mod)xml.Deserialize(item.Open());
+                                        currentMod.name = info.name;
+                                        currentMod.description = info.description;
+                                        hasInfo = true;
+                                        Debug.Log("Found xml file");
+                                    }
                                     break;
                                 case "assets":
                                     break;
