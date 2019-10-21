@@ -33,7 +33,7 @@ namespace VTOLVR_ModLoader
         private static string dataFile = @"\data.xml";
         private static string dataFileTemp = @"\data_TEMP.xml";
         private static string dataURL = @"/files/data.xml";
-        private static string url = @"http://marsh.vtolvr-mods.com:81/";
+        private static string url = @"http://vtolvr-mods.com/";
         private static string versionsFile = @"\versions.xml";
         private string root;
 
