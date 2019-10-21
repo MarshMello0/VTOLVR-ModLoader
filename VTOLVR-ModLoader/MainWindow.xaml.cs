@@ -31,14 +31,17 @@ namespace VTOLVR_ModLoader
         private static string modsFolder = @"\mods";
         private static string injector = @"\injector.exe";
         private static string updatefile = @"\updates.xml";
+        private static string dataFile = @"\data.xml";
+        private static string dataFileTemp = @"\data_TEMP.xml";
+        private static string dataURL = @"/files/data.xml";
         private static string updatesFeedFile = @"\feed.xml";
         private static string updatesFeed = @"/files/updatesfeed.xml";
-        private static string url = @"http://vtolvr-mods.com";
+        private static string url = @"http://marsh.vtolvr-mods.com:81";
         private string root;
 
-        private static int currentDLLVersion = 2;
+        private static int currentDLLVersion = 200;
         private static int currentAssetsVersion = 2;
-        private static int currentEXEVersion = 2;
+        private static int currentEXEVersion = 200;
 
         //Startup
         private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe" };
@@ -50,13 +53,36 @@ namespace VTOLVR_ModLoader
         private Point lm = new Point();
         private bool isBusy;
 
-        //Updates 
-        private Updates updates;
-        private int assetsversion;
-        private string assetsURL;
+        #region Releasing Update
+        private void CreateUpdatedFeed()
+        {
+            Data newData = new Data();
+            if (File.Exists(root + @"\Data.xml"))
+            {
+                using (FileStream stream = new FileStream(root + @"\Data.xml", FileMode.Open))
+                {
+                    XmlSerializer xml = new XmlSerializer(typeof(Data));
+                    newData = (Data)xml.Deserialize(stream);
+                }
+            }
 
-        private int dllNewVersion, assetsNewVersion;
+            Update newUpdate = new Update("Title", "20/10/2019", "Description");
+            FileUpdate newFileUpdate = new FileUpdate(200, 200);
 
+            List<Update> updates = newData.updateFeed.ToList();
+            List<FileUpdate> fileUpdates = newData.fileUpdates.ToList();
+            updates.Insert(0,newUpdate);
+            fileUpdates.Insert(0,newFileUpdate);
+            newData.updateFeed = updates.ToArray();
+            newData.fileUpdates = fileUpdates.ToArray();
+
+            using (FileStream stream = new FileStream(root + @"\Data.xml", FileMode.Create))
+            {
+                XmlSerializer xml = new XmlSerializer(typeof(Data));
+                xml.Serialize(stream, newData);
+            }
+        }
+        #endregion
         #region Startup
         public MainWindow()
         {
@@ -67,7 +93,8 @@ namespace VTOLVR_ModLoader
         {
             root = Directory.GetCurrentDirectory();
             CheckBaseFolder();
-            GetUpdateFeed();
+            GetData();
+            //CreateUpdatedFeed();
         }
         private void CheckBaseFolder()
         {
@@ -132,142 +159,69 @@ namespace VTOLVR_ModLoader
         #endregion
 
         #region Auto Updater
-        private void GetUpdateFeed()
+        private void GetData()
         {
-            SetProgress(0, "Getting Update Feed...");
+            SetProgress(0, "Getting Data Feed...");
             SetPlayButton(true);
             if (CheckForInternet())
             {
-                try
-                {
-                    if (File.Exists(root + updatesFeedFile))
-                        File.Delete(root + updatesFeedFile);
-
-                    WebClient client = new WebClient();
-                    client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(FeedProgress);
-                    client.DownloadFileCompleted += new AsyncCompletedEventHandler(FeedDone);
-                    client.DownloadFileAsync(new Uri(url + updatesFeed), root + updatesFeedFile);
-                }
-                catch (Exception e)
-                {
-                    SetPlayButton(true);
-                    SetProgress(100, "Failed to connect to server");
-                    CheckForUpdates();
-                }
-
+                WebClient client = new WebClient();
+                client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DataProgress);
+                client.DownloadFileCompleted += new AsyncCompletedEventHandler(DataDone);
+                client.DownloadFileAsync(new Uri(url + dataURL), root + dataFileTemp);
+            }
+            else
+            {
+                SetProgress(100, "Failed to connect to the internet");
+                SetPlayButton(false);
             }
         }
-
-        private void FeedDone(object sender, AsyncCompletedEventArgs e)
+        private void DataProgress(object sender, DownloadProgressChangedEventArgs e)
+        {
+            SetProgress(e.ProgressPercentage / 100, "Downloading data...");
+        }
+        private void DataDone(object sender, AsyncCompletedEventArgs e)
         {
             if (!e.Cancelled && e.Error == null)
             {
-                using (FileStream stream = new FileStream(root + updatesFeedFile, FileMode.Open))
-                {
-                    XmlSerializer xml = new XmlSerializer(typeof(UpdateFeed));
-                    UpdateFeed deserialized = (UpdateFeed)xml.Deserialize(stream);
-                    updateFeed.ItemsSource = deserialized.feed;
-                }
-                CheckForUpdates();
+                if (File.Exists(root + dataFile))
+                    File.Delete(root + dataFile);
+                File.Move(root + dataFileTemp, root + dataFile);
+                SetProgress(100, "Downloaded Data.xml");
+                LoadData();
             }
             else
             {
                 SetProgress(100, "Failed to connect to server.");
                 Console.WriteLine("Failed getting feed \n" + e.Error.ToString());
                 SetPlayButton(true);
-                CheckForUpdates();
+                LoadData();
             }
         }
-
-        private void FeedProgress(object sender, DownloadProgressChangedEventArgs e)
+        private void LoadData()
         {
-            SetProgress(e.ProgressPercentage / 100, "Downloading update feed...");
-        }
-
-        private void CheckForUpdates()
-        {
-            SetProgress(0, "Checking for updates...");
-            SetPlayButton(true);
-            if (CheckForInternet())
+            using (FileStream stream = new FileStream(root + dataFile, FileMode.Open))
             {
-                if (!LoadUpdatesFile())
-                    updates = new Updates(currentEXEVersion, currentDLLVersion, currentAssetsVersion);
+                XmlSerializer xml = new XmlSerializer(typeof(Data));
+                Data deserialized = (Data)xml.Deserialize(stream);
+                //Updating Feed from file
+                updateFeed.ItemsSource = deserialized.updateFeed;
 
-                using (var client = new WebClient())
+                //Checking versions
+                if (currentEXEVersion < deserialized.fileUpdates[0].exeVersion)
                 {
-                    try
-                    {
-                        WebClient webClient = new WebClient();
-                        webClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(DownloadedUpdate);
-                        webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DownloadUpdateProgress);
-                        webClient.DownloadStringAsync(new Uri(url + "/update.php"));
-                    }
-                    catch (Exception e)
-                    {
-                        SetProgress(100, "Unable to connect to the server");
-                        SetPlayButton(false);
-                        return;
-                    }
-                }
-            }
-        }
-        private void DownloadUpdateProgress(object sender, DownloadProgressChangedEventArgs e)
-        {
-            SetProgress(50 * (e.ProgressPercentage / 100), "Checking for updates...");
-        }
-        private void DownloadedUpdate(object sender, DownloadStringCompletedEventArgs e)
-        {
-            //When the download is done of the update.php this method runs
-            if (!e.Cancelled && e.Error == null)
-            {
-                try
-                {
-                    string result = e.Result;
-                    SetProgress(50, "Checking for updates...");
-                    string[] split = result.Split('|');
-
-                    int exeversion = int.Parse(split[0]);
-                    int dllversion = int.Parse(split[1]);
-                    assetsversion = int.Parse(split[3]);
-                    assetsURL = split[4];
-                    if (exeversion > updates.exeversion)
-                        UpdateExe();
-                    else
-                    {
-                        if (dllversion > updates.dllversion)
-                        {
-                            UpdateDLL(split[2], dllversion);
-                            return;
-                        }
-                        else
-                        {
-                            if (assetsversion > updates.assetversion)
-                            {
-                                UpdateAssets(assetsURL, assetsversion);
-                                return;
-                            }
-                        }
-                    }
-                }
-                catch
-                {
-                    SetProgress(100, "There was a strange error. Auto updating seems to be broken.");
+                    UpdateExe();
                     CheckModsDependency();
-                    return;
                 }
-
-                SaveUpdatesFile();
-                SetProgress(100, "Finished checking for updates");
-                CheckModsDependency();
-            }
-            else
-            {
-                //This is if it failed
-                SetProgress(100, "Unable to connect to the server");
-                CheckModsDependency();
-                return;
+                else if (currentDLLVersion < deserialized.fileUpdates[0].dllVersion)
+                {
+                    UpdateDLL(url + "/files/updates/dll/" + deserialized.fileUpdates[0].dllVersion + "/ModLoader.dll",
+                        deserialized.fileUpdates[0].dllVersion);
+                }
             }
 
+            SetPlayButton(false);
+            
         }
         private bool CheckForInternet()
         {
@@ -287,21 +241,6 @@ namespace VTOLVR_ModLoader
                 return false;
             }
         }
-        private bool LoadUpdatesFile()
-        {
-            if (File.Exists(root + updatefile))
-            {
-                using (FileStream stream = new FileStream(root + updatefile, FileMode.Open))
-                {
-                    XmlSerializer xml = new XmlSerializer(typeof(Updates));
-                    Updates deserialized = (Updates)xml.Deserialize(stream);
-                    updates = new Updates(deserialized.exeversion, deserialized.dllversion, deserialized.assetversion);
-                    return true;
-                }
-            }
-            else
-                return false;
-        }
         private void UpdateDLL(string url, int newVersion)
         {
             try
@@ -313,7 +252,6 @@ namespace VTOLVR_ModLoader
                 client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DLLProgress);
                 client.DownloadFileCompleted += new System.ComponentModel.AsyncCompletedEventHandler(DLLDone);
                 client.DownloadFileAsync(new Uri(MainWindow.url + url), @"ModLoader.dll");
-                dllNewVersion = newVersion;
             }
             catch (Exception e)
             {
@@ -321,84 +259,28 @@ namespace VTOLVR_ModLoader
             }
 
         }
-
         private void DLLDone(object sender, AsyncCompletedEventArgs e)
         {
             if (e.Cancelled && e.Error != null)
             {
                 SetProgress(100, "Failed downloading \"ModLoader.dll\"");
+                MessageBox.Show("There was a strange error, please download the mod loader again from the website." +
+                    "\n" + e.Error.Message);
             }
             else
             {
-                updates.dllversion = dllNewVersion;
-                if (assetsversion > updates.assetversion)
-                    UpdateAssets(assetsURL, assetsversion);
-                else
-                {
-                    SaveUpdatesFile();
-                    SetProgress(100, "Finished downloading updates");
-                    SetPlayButton(false);
-                }
+                SetProgress(100, "Finished downloading updates");
+                SetPlayButton(false);
+                CheckModsDependency();
             }
         }
-
         private void DLLProgress(object sender, DownloadProgressChangedEventArgs e)
         {
             SetProgress(e.ProgressPercentage / 100, "Downloading \"ModLoader.dll\"...");
         }
-
-        private void UpdateAssets(string url, int newVersion)
-        {
-            try
-            {
-                if (File.Exists(root + @"\modloader.assets"))
-                    File.Delete(root + @"\modloader.assets");
-
-                WebClient client = new WebClient();
-                client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(AssetsProgress);
-                client.DownloadFileCompleted += new System.ComponentModel.AsyncCompletedEventHandler(AssetsDone);
-                client.DownloadFileAsync(new Uri(MainWindow.url + url), @"modloader.assets");
-                assetsNewVersion = newVersion;
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Failed downloading the .dll file, please print screen this and send to @. Marsh.Mello .#3194 on discord\n" + e.ToString());
-            }
-            updates.assetversion = newVersion;
-        }
-
-        private void AssetsDone(object sender, AsyncCompletedEventArgs e)
-        {
-            if (e.Cancelled && e.Error != null)
-            {
-                SetProgress(100, "Failed downloading \"modloader.assets\"");
-            }
-            else
-            {
-                updates.assetversion = assetsversion;
-
-                SaveUpdatesFile();
-                SetProgress(100, "Finished downloading updates");
-                SetPlayButton(false);
-            }
-        }
-
-        private void AssetsProgress(object sender, DownloadProgressChangedEventArgs e)
-        {
-            SetProgress(e.ProgressPercentage / 100, "Downloading \"modloader.assets\"...");
-        }
-
         private void UpdateExe()
         {
             MessageBox.Show("There is an update to the launcher\nPlease head over to " + url + " to download the latest version.", "Launcher Update!");
-        }
-        private void SaveUpdatesFile()
-        {
-            using (FileStream stream = new FileStream(root + updatefile, FileMode.Create))
-            {
-                XmlSerializer xml = new XmlSerializer(typeof(Updates));
-                xml.Serialize(stream, updates);
-            }
         }
 
         #endregion
@@ -481,6 +363,7 @@ namespace VTOLVR_ModLoader
 
         private void CheckModsDependency()
         {
+            SetPlayButton(true);
             DirectoryInfo folder = new DirectoryInfo(root + modsFolder);
             FileInfo[] files = folder.GetFiles("*.zip");
             float zipAmount = 100 / files.Length;
@@ -526,7 +409,6 @@ namespace VTOLVR_ModLoader
         }
         private void SetProgress(int barValue, string text)
         {
-            
             progressText.Text = text;
             progressBar.Value = barValue;
         }

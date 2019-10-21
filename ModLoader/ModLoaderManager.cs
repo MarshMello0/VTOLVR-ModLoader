@@ -110,6 +110,8 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
         }
         public void CreateAssetBundle()
         {
+            //Stopped Loading of asset bundle as its not used
+            return;
             assets = AssetBundle.LoadFromFile(rootPath + assetsPath);
             if (assets == null)
             {

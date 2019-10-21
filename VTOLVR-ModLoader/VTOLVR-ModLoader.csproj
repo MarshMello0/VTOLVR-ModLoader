@@ -87,6 +87,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Data.cs" />
     <Compile Include="Update.cs" />
     <Compile Include="Updates.cs" />
     <Page Include="MainWindow.xaml">
