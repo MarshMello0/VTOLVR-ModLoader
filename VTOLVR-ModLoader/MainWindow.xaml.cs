@@ -37,7 +37,7 @@ namespace VTOLVR_ModLoader
         private static string versionsFile = @"\versions.xml";
         private string root;
 
-        private static int currentDLLVersion = 100;
+        private static int currentDLLVersion = 200;
         private static int currentEXEVersion = 200;
 
         //Startup
