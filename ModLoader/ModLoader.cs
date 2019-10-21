@@ -180,7 +180,7 @@ namespace ModLoader
             IEnumerable<Type> source = from t in selectedMod.assembly.GetTypes() where t.IsSubclassOf(typeof(VTOLMOD)) select t;
             if (source != null && source.Count() == 1)
             {
-                new GameObject(selectedMod.name, source.First());
+                DontDestroyOnLoad(new GameObject(selectedMod.name, source.First()));
                 selectedMod.isLoaded = true;
                 SelectButton.text = "Loaded!";
 
