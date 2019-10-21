@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ModLoader</RootNamespace>
     <AssemblyName>ModLoader</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,6 +22,9 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,100 +33,65 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\dll\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>..\dll\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\netstandard.dll</HintPath>
+      <HintPath>..\dll\netstandard.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Unity.TextMeshPro">
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\Unity.TextMeshPro.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\dll\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>..\dll\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\dll\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.CrashReportingModule">
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.CrashReportingModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="UnityEngine.CrashReportingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>..\dll\UnityEngine.CrashReportingModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.JSONSerializeModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
+      <HintPath>..\dll\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.TextCoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.TextCoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UIElementsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.UIModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestAssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestAudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestTextureModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\dll\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestWWWModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Program Files\Steam\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
+      <HintPath>..\dll\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CSharp.cs" />
     <Compile Include="DiscordController.cs" />
     <Compile Include="DiscordRpc.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="JsonHelper.cs" />
     <Compile Include="ModLoader.cs" />
+    <Compile Include="ModLoaderManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SPModManager.cs" />
+    <Compile Include="SkinManager.cs" />
     <Compile Include="UConsole.cs" />
+    <Compile Include="VTOLAPI.cs" />
     <Compile Include="VTOLMOD.cs" />
+    <Compile Include="ZipReader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
