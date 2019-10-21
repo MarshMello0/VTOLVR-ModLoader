@@ -30,17 +30,13 @@ namespace VTOLVR_ModLoader
 
         private static string modsFolder = @"\mods";
         private static string injector = @"\injector.exe";
-        private static string updatefile = @"\updates.xml";
         private static string dataFile = @"\data.xml";
         private static string dataFileTemp = @"\data_TEMP.xml";
         private static string dataURL = @"/files/data.xml";
-        private static string updatesFeedFile = @"\feed.xml";
-        private static string updatesFeed = @"/files/updatesfeed.xml";
-        private static string url = @"http://marsh.vtolvr-mods.com:81";
+        private static string url = @"http://vtolvr-mods.com";
         private string root;
 
         private static int currentDLLVersion = 200;
-        private static int currentAssetsVersion = 2;
         private static int currentEXEVersion = 200;
 
         //Startup
@@ -480,8 +476,7 @@ namespace VTOLVR_ModLoader
 
         private void WindowClosing(object sender, CancelEventArgs e)
         {
-            if (File.Exists(root + updatesFeedFile))
-                File.Delete(root + updatesFeedFile);
+
         }
 
         private void TopBarLeave(object sender, MouseEventArgs e)
