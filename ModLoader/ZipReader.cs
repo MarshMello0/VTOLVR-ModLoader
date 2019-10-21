@@ -160,16 +160,19 @@ namespace ModLoader
         public static bool GetNewMods(string path, ref List<Mod> currentMods)
         {
             List<Mod> mods = GetMods(path);
-            List<Mod> newMods = mods.Except(currentMods).ToList();
-            if (newMods.Count > 0)
+            Dictionary<string,Mod> currentModsDictionary = currentMods.ToDictionary(x => x.name);
+            bool newMods = false;
+            foreach (Mod mod in mods)
             {
-                currentMods.AddRange(newMods);
-                return true;
+                if (!currentModsDictionary.ContainsKey(mod.name))
+                {
+                    newMods = true;
+                    currentModsDictionary.Add(mod.name, mod);
+                }
             }
-            else
-            {
-                return false;
-            }
+            currentMods = currentModsDictionary.Values.ToList();
+
+            return newMods;
         }
     }
 

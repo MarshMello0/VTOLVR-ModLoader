@@ -63,7 +63,7 @@ public class VTOLAPI : MonoBehaviour
     /// Returns which vehicle the player is using in a Enum.
     /// </summary>
     /// <returns></returns>
-    public VTOLVehicles GetPlayersVehicleEnum()
+    public static VTOLVehicles GetPlayersVehicleEnum()
     {
         if (PilotSaveManager.currentVehicle == null)
             return VTOLVehicles.None;

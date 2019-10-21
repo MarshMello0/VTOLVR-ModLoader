@@ -180,9 +180,12 @@ namespace ModLoader
             IEnumerable<Type> source = from t in selectedMod.assembly.GetTypes() where t.IsSubclassOf(typeof(VTOLMOD)) select t;
             if (source != null && source.Count() == 1)
             {
-                DontDestroyOnLoad(new GameObject(selectedMod.name, source.First()));
+                GameObject newModGo = new GameObject(selectedMod.name, source.First());
+                newModGo.name = selectedMod.name;
+                DontDestroyOnLoad(newModGo);
                 selectedMod.isLoaded = true;
                 SelectButton.text = "Loaded!";
+                Log("Loaded Mod " + selectedMod.name);
 
                 ModLoaderManager.instance.loadedModsCount++;
                 ModLoaderManager.instance.UpdateDiscord();
@@ -204,7 +207,7 @@ namespace ModLoader
             SelectButton.text = selectedMod.isLoaded ? "Loaded!" : "Load";
             Scroll_View.ViewContent((RectTransform)selectedMod.listGO.transform);
             selectionTF.position = selectedMod.listGO.transform.position;
-            selectionTF.GetComponent<Image>().color = new Color(90, 50, 0, 255);
+            selectionTF.GetComponent<Image>().color = new Color(0.3529411764705882f, 0.196078431372549f, 0);
             modInfoUI.campaignName.text = selectedMod.name;
             modInfoUI.campaignDescription.text = selectedMod.description;
             //modInfoUI.campaignImage.color = Color.white;

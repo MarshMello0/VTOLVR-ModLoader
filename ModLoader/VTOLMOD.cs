@@ -4,7 +4,6 @@ using ModLoader;
 public class VTOLMOD : MonoBehaviour
 {
     private string modName;
-
     private void Awake()
     {
         modName = gameObject.name;

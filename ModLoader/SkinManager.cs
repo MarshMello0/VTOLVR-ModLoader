@@ -150,12 +150,22 @@ namespace ModLoader
                     currentSkin.hasF45A = true;
                 }
 
-                if (currentSkin.hasAv42c || currentSkin.hasFA26B || currentSkin.hasF45A)
+                if (VTOLAPI.GetPlayersVehicleEnum() == VTOLVehicles.AV42C && currentSkin.hasAv42c)
                 {
                     currentSkin.folderPath = folder;
                     installedSkins.Add(currentSkin);
-                    Debug.Log("Added Skin " + currentSkin.name);
                 }
+                else if (VTOLAPI.GetPlayersVehicleEnum() == VTOLVehicles.FA26B && currentSkin.hasFA26B)
+                {
+                    currentSkin.folderPath = folder;
+                    installedSkins.Add(currentSkin);
+                }
+                else if (VTOLAPI.GetPlayersVehicleEnum() == VTOLVehicles.F45A && currentSkin.hasF45A)
+                {
+                    currentSkin.folderPath = folder;
+                    installedSkins.Add(currentSkin);
+                }
+
             }
         }
         public void Next()
@@ -188,7 +198,7 @@ namespace ModLoader
             Skin selected = installedSkins[selectedSkin];
 
             Debug.Log("\nSkin: " + selected.name + " \nPath: " + selected.folderPath + "\nHasAV42C: " + selected.hasAv42c);
-            switch (VTOLAPI.instance.GetPlayersVehicleEnum())
+            switch (VTOLAPI.GetPlayersVehicleEnum())
             {
                 case VTOLVehicles.AV42C:
                     ApplyVTOL4((vehicle == null? GameObject.Find("VTOL4(Clone)") : vehicle).transform, selected);
@@ -540,12 +550,12 @@ namespace ModLoader
             if (installedSkins.Count == 0)
                 return;
             StartCoroutine(UpdateUIEnumerator());
-            Debug.Log("Current Skin = " + currentSkin);
+            Log("Current Skin = " + currentSkin);
         }
         private IEnumerator UpdateUIEnumerator()
         {
             string preview = @"";
-            switch (VTOLAPI.instance.GetPlayersVehicleEnum())
+            switch (VTOLAPI.GetPlayersVehicleEnum())
             {
                 case VTOLVehicles.AV42C:
                     preview = @"\0.png";
