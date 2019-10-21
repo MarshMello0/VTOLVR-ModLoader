@@ -36,9 +36,13 @@ namespace ModLoader
                     Debug.Log("On zip " + file.Name);
                     foreach (ZipArchiveEntry item in zip.Entries)
                     {
+                        Debug.Log("On entry of zip: " + item.Name);
                         try
                         {
-                            string itemExtention = item.Name.Split('.')[1];
+                            string[] split = item.Name.Split('.');
+                            if (split.Length <= 1)
+                                continue;
+                            string itemExtention = split[1];
 
                             switch (itemExtention)
                             {
@@ -127,7 +131,7 @@ namespace ModLoader
                     {
                         currentMod.assembly = lastAssembly;
                         currentMod.name = file.Name;
-                        currentMod.description = "This only a .dll file, please make mods into .zip with a xml file when release the mod.";
+                        currentMod.description = "This only a .dll file, please make mods into .zip with a xml file when releasing the mod.";
                         hasDLL = true;
                         Debug.Log("Found dll file");
                     }

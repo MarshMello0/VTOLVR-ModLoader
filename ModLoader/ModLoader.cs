@@ -21,11 +21,12 @@ namespace ModLoader
         private GameObject modsPage;
         private ScrollRect Scroll_View;
         private Text SelectButton;
+        private RectTransform selectionTF;
         private Mod selectedMod;
         private float buttonHeight = 548;
         private List<Mod> currentMods = new List<Mod>();
 
-        //InGameObjects
+        
         private GameObject MainScreen;
         private CampaignInfoUI modInfoUI;
         private void Start()
@@ -74,7 +75,7 @@ namespace ModLoader
 
             VRInteractable modsInteractable = ModsButton.GetComponent<VRInteractable>();
             modsInteractable.interactableName = "Open Mods";
-            modsInteractable.OnInteract = GenerateEvent(delegate { ModsPageState(true); });
+            modsInteractable.OnInteract = GenerateEvent(delegate { ModsPageState(true); SetDefaultText(); });
 
             modsPage = Instantiate(CampaignDisplay, CampaignDisplay.transform.parent);
             modsPage.SetActive(true);
@@ -102,6 +103,9 @@ namespace ModLoader
             Destroy(modsPage.transform.GetChild(2).gameObject);//PrevButton
             Destroy(modsPage.transform.GetChild(1).gameObject);//NextButton
             modsPage.transform.GetChild(0).GetComponent<Text>().text = "Select a Mod";
+
+            //Getting the selection colour transform
+            selectionTF = (RectTransform)modsPage.transform.GetChild(5).GetChild(0).GetChild(0).GetChild(0).transform;
 
             //Storing the prefab button for each item
             GameObject CampaignListTemplate = modsPage.transform.GetChild(5).GetChild(0).GetChild(0).GetChild(1).gameObject;
@@ -135,7 +139,6 @@ namespace ModLoader
                 currentMods[i].listGO.GetComponent<VRUIListItemTemplate>().Setup(currentMods[i].name,i,OpenMod);
                 Button currentButton = currentMods[i].listGO.transform.GetChild(2).GetComponent<Button>();
                 currentButton.onClick.RemoveAllListeners(); //Trying to remove the existing button click
-                //currentButton.onClick.AddListener(delegate { OpenMod(i); });
                 Log("Added Mod:\n" + currentMods[i].name + "\n" + currentMods[i].description);
             }
 
@@ -178,7 +181,8 @@ namespace ModLoader
             if (source != null && source.Count() == 1)
             {
                 new GameObject(selectedMod.name, source.First());
-                //ModLoaderManager.mods[selectedMod].isLoaded = true;
+                selectedMod.isLoaded = true;
+                SelectButton.text = "Loaded!";
 
                 ModLoaderManager.instance.loadedModsCount++;
                 ModLoaderManager.instance.UpdateDiscord();
@@ -199,10 +203,12 @@ namespace ModLoader
             selectedMod = currentMods[id];
             SelectButton.text = selectedMod.isLoaded ? "Loaded!" : "Load";
             Scroll_View.ViewContent((RectTransform)selectedMod.listGO.transform);
+            selectionTF.position = selectedMod.listGO.transform.position;
+            selectionTF.GetComponent<Image>().color = new Color(90, 50, 0, 255);
             modInfoUI.campaignName.text = selectedMod.name;
             modInfoUI.campaignDescription.text = selectedMod.description;
-            modInfoUI.campaignImage.color = Color.white;
-            modInfoUI.campaignImage.material.SetTexture("_MainTex", selectedMod.image);
+            //modInfoUI.campaignImage.color = Color.white;
+            //modInfoUI.campaignImage.material.SetTexture("_MainTex", selectedMod.image);
         }
         private void SetDefaultText()
         {
@@ -210,6 +216,7 @@ namespace ModLoader
             modInfoUI.campaignName.text = "";
             modInfoUI.campaignDescription.text = "";
             modInfoUI.campaignImage.color = new Color(0, 0, 0, 0);
+            selectionTF.GetComponent<Image>().color = new Color(0, 0, 0, 0);
         }
         /// <summary>
         /// Opens or closes the mods page
