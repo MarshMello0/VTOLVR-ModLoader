@@ -88,8 +88,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Data.cs" />
-    <Compile Include="Update.cs" />
-    <Compile Include="Updates.cs" />
+    <Compile Include="Versions.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

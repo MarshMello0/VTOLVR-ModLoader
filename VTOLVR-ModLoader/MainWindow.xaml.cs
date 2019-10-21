@@ -33,10 +33,11 @@ namespace VTOLVR_ModLoader
         private static string dataFile = @"\data.xml";
         private static string dataFileTemp = @"\data_TEMP.xml";
         private static string dataURL = @"/files/data.xml";
-        private static string url = @"http://vtolvr-mods.com";
+        private static string url = @"http://marsh.vtolvr-mods.com:81/";
+        private static string versionsFile = @"\versions.xml";
         private string root;
 
-        private static int currentDLLVersion = 200;
+        private static int currentDLLVersion = 100;
         private static int currentEXEVersion = 200;
 
         //Startup
@@ -48,7 +49,9 @@ namespace VTOLVR_ModLoader
         private bool holdingDown;
         private Point lm = new Point();
         private bool isBusy;
-
+        //Updates
+        private bool hasVersions;
+        private int newDLLVersion;
         #region Releasing Update
         private void CreateUpdatedFeed()
         {
@@ -89,8 +92,8 @@ namespace VTOLVR_ModLoader
         {
             root = Directory.GetCurrentDirectory();
             CheckBaseFolder();
+            LoadVersions();
             GetData();
-            //CreateUpdatedFeed();
         }
         private void CheckBaseFolder()
         {
@@ -151,6 +154,24 @@ namespace VTOLVR_ModLoader
         {
             MessageBox.Show("I can't seem to find " + file + " in VTOL VR > VTOLVR_Data, please make sure this file is here otherwise the mod loader won't work", "Missing File");
             Quit();
+        }
+        private void LoadVersions()
+        {
+            if (File.Exists(root + versionsFile))
+            {
+                using (FileStream stream = new FileStream(root + versionsFile, FileMode.Open))
+                {
+                    XmlSerializer xml = new XmlSerializer(typeof(Versions));
+                    Versions deserialized = (Versions)xml.Deserialize(stream);
+                    currentDLLVersion = deserialized.currentDLLVersion;
+                    currentEXEVersion = deserialized.currentEXEVersion;
+                    hasVersions = true;
+                }
+            }
+            else
+            {
+                hasVersions = false;
+            }
         }
         #endregion
 
@@ -214,6 +235,10 @@ namespace VTOLVR_ModLoader
                     UpdateDLL(url + "/files/updates/dll/" + deserialized.fileUpdates[0].dllVersion + "/ModLoader.dll",
                         deserialized.fileUpdates[0].dllVersion);
                 }
+                else if (!hasVersions)
+                {
+                    UpdateVersions();
+                }
             }
 
             SetPlayButton(false);
@@ -248,6 +273,7 @@ namespace VTOLVR_ModLoader
                 client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DLLProgress);
                 client.DownloadFileCompleted += new System.ComponentModel.AsyncCompletedEventHandler(DLLDone);
                 client.DownloadFileAsync(new Uri(MainWindow.url + url), @"ModLoader.dll");
+                newDLLVersion = newVersion;
             }
             catch (Exception e)
             {
@@ -265,6 +291,8 @@ namespace VTOLVR_ModLoader
             }
             else
             {
+                currentDLLVersion = newDLLVersion;
+                UpdateVersions();
                 SetProgress(100, "Finished downloading updates");
                 SetPlayButton(false);
                 CheckModsDependency();
@@ -277,6 +305,14 @@ namespace VTOLVR_ModLoader
         private void UpdateExe()
         {
             MessageBox.Show("There is an update to the launcher\nPlease head over to " + url + " to download the latest version.", "Launcher Update!");
+        }
+        private void UpdateVersions()
+        {
+            using (FileStream stream = File.Create(root + versionsFile))
+            {
+                XmlSerializer xml = new XmlSerializer(typeof(Versions));
+                xml.Serialize(stream, new Versions(currentDLLVersion,currentEXEVersion));
+            }
         }
 
         #endregion
