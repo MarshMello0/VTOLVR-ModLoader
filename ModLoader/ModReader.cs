@@ -53,7 +53,9 @@ namespace ModLoader
                 for (int j = 0; j < subFiles.Length; j++)
                 {
                     lastAssembly = Assembly.Load(File.ReadAllBytes(subFiles[j]));
-                    source = from t in lastAssembly.GetTypes() where t.IsSubclassOf(typeof(VTOLMOD)) select t;
+                    source = from t in lastAssembly.GetTypes()
+                             where t.IsSubclassOf(typeof(VTOLMOD))
+                             select t;
                     if (source.Count() != 1)
                     {
                         Debug.LogError("The mod " + subFiles[j] + " doesn't specify a mod class or specifies more than one");
@@ -86,7 +88,9 @@ namespace ModLoader
                 try
                 {
                     lastAssembly = Assembly.Load(File.ReadAllBytes(dllFiles[i]));
-                    source = from t in lastAssembly.GetTypes() where t.IsSubclassOf(typeof(VTOLMOD)) select t;
+                    source = from t in lastAssembly.GetTypes()
+                             where t.IsSubclassOf(typeof(VTOLMOD))
+                             select t;
                     
                     if (source.Count() != 1)
                     {

@@ -177,7 +177,10 @@ namespace ModLoader
                 return;
             }
 
-            IEnumerable<Type> source = from t in Assembly.Load(File.ReadAllBytes(selectedMod.dllPath)).GetTypes() where t.IsSubclassOf(typeof(VTOLMOD)) select t;
+            IEnumerable<Type> source = 
+                from t in Assembly.Load(File.ReadAllBytes(selectedMod.dllPath)).GetTypes()
+                where t.IsSubclassOf(typeof(VTOLMOD))
+                select t;
             if (source != null && source.Count() == 1)
             {
                 GameObject newModGo = new GameObject(selectedMod.name, source.First());
