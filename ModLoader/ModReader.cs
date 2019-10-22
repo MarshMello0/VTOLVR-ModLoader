@@ -9,10 +9,11 @@ using System.Xml.Serialization;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 namespace ModLoader
 {
-    public class ModReader
+    public class ModReader : MonoBehaviour
     {
         /// <summary>
         /// Gets all of the mods info localed in the path into memory
@@ -65,17 +66,7 @@ namespace ModLoader
 
                 if (File.Exists(folders[i] + @"\preview.png"))
                 {
-                    try
-                    {
-                        Texture2D texture = new Texture2D(600, 600, TextureFormat.RGBA32, false);
-                        texture.LoadRawTextureData(File.ReadAllBytes(folders[i] + @"\preview.png"));
-                        texture.Apply();
-                        currentMod.image = texture;
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError("Failed to load preview image \n" + folders[i] + @"\preview.png" + "\n" + e.ToString());
-                    }
+                    currentMod.imagePath = folders[i] + @"\preview.png";
                 }
 
                 if (hasInfo && hasDLL)
@@ -159,7 +150,7 @@ namespace ModLoader
         [XmlIgnore]
         public bool isLoaded;
         [XmlIgnore]
-        public Texture2D image;
+        public string imagePath;
 
         public Mod() { }
     }

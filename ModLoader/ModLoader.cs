@@ -210,10 +210,14 @@ namespace ModLoader
             selectionTF.GetComponent<Image>().color = new Color(0.3529411764705882f, 0.196078431372549f, 0);
             modInfoUI.campaignName.text = selectedMod.name;
             modInfoUI.campaignDescription.text = selectedMod.description;
-            if (selectedMod.image != null)
+            if (!string.IsNullOrWhiteSpace(selectedMod.imagePath))
             {
                 modInfoUI.campaignImage.color = Color.white;
-                modInfoUI.campaignImage.material.SetTexture("_MainTex", selectedMod.image);
+                StartCoroutine(SetModPreviewImage(modInfoUI.campaignImage, selectedMod.imagePath));
+            }
+            else
+            {
+                modInfoUI.campaignImage.color = new Color(0, 0, 0, 0);
             }
         }
         private void SetDefaultText()
@@ -246,6 +250,17 @@ namespace ModLoader
             returnValue.poseBounds = pb;
             returnValue.button = VRInteractable.Buttons.Trigger;
             return returnValue;
+        }
+
+        private IEnumerator SetModPreviewImage(RawImage raw, string path)
+        {
+            Debug.Log("Setting texture from path \n" + path);
+            if (raw == null)
+                Debug.Log("Mat is null");
+            WWW www = new WWW("file:///" + path);
+            while (!www.isDone)
+                yield return null;
+            raw.texture = www.texture;
         }
     }
 }
