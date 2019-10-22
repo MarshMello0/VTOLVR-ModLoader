@@ -408,6 +408,13 @@ namespace VTOLVR_ModLoader
             SetProgress(0, "Extracting  mods...");
             DirectoryInfo folder = new DirectoryInfo(root + modsFolder);
             FileInfo[] files = folder.GetFiles("*.zip");
+            if (files.Length == 0)
+            {
+                SetPlayButton(false);
+                SetProgress(100, "No new mods where found");
+                MoveDependencies();
+                return;
+            }
             float zipAmount = 100 / files.Length;
             string currentFolder;
             
