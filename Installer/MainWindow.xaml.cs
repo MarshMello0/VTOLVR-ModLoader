@@ -72,11 +72,22 @@ namespace Installer
         }
         private void InstallFiles()
         {
+            if (Directory.Exists(vtFolder + @"VTOLVR_ModLoader"))
+            {
+                //It must be already installed
+                SetProgress(100);
+                currentPage++;
+                SwitchPage();
+                return;
+            }
             SetProgress(0);
             //Extracting the zip from resources to files
             string path = vtFolder + @"modloader.zip";
-
             File.WriteAllBytes(path, Properties.Resources.ModLoader);
+            
+            //Stopping a possiable error
+            if (File.Exists(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll"))
+                File.Delete(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll");
 
             ZipFile.ExtractToDirectory(path, vtFolder);
             SetProgress(50);
