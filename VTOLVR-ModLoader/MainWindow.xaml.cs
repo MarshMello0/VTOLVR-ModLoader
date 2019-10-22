@@ -212,6 +212,8 @@ namespace VTOLVR_ModLoader
             {
                 SetProgress(100, "Failed to connect to server.");
                 Console.WriteLine("Failed getting feed \n" + e.Error.ToString());
+                if (File.Exists(root + dataFileTemp))
+                    File.Delete(root + dataFileTemp);
                 SetPlayButton(true);
                 LoadData();
             }
@@ -426,7 +428,7 @@ namespace VTOLVR_ModLoader
                 modsExtracted++;
 
                 //Deleting the zip
-                File.Delete(files[i].FullName);
+                //File.Delete(files[i].FullName);
             }
 
             SetPlayButton(false);
