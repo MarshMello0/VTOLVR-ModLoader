@@ -91,7 +91,7 @@
     <Compile Include="UConsole.cs" />
     <Compile Include="VTOLAPI.cs" />
     <Compile Include="VTOLMOD.cs" />
-    <Compile Include="ZipReader.cs" />
+    <Compile Include="ModReader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
