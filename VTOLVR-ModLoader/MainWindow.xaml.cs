@@ -426,7 +426,7 @@ namespace VTOLVR_ModLoader
                 modsExtracted++;
 
                 //Deleting the zip
-                //File.Delete(files[i].FullName);
+                File.Delete(files[i].FullName);
             }
 
             SetPlayButton(false);
