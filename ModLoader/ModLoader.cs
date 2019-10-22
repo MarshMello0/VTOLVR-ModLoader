@@ -116,12 +116,12 @@ namespace ModLoader
             if (currentMods.Count == 0)
             {
                 Log("Finding mods");
-                currentMods = ZipReader.GetMods(ModLoaderManager.instance.rootPath + @"\mods");
+                currentMods = ModReader.GetMods(ModLoaderManager.instance.rootPath + @"\mods");
             }
             else
             {
                 Log("Searching for any new mods\nCurrent Count = " + currentMods.Count);
-                if (ZipReader.GetNewMods(ModLoaderManager.instance.rootPath + @"\mods",ref currentMods))
+                if (ModReader.GetNewMods(ModLoaderManager.instance.rootPath + @"\mods",ref currentMods))
                 {
                     Log("Found new mods\nNew count = " + currentMods.Count);
                 }
@@ -177,7 +177,7 @@ namespace ModLoader
                 return;
             }
 
-            IEnumerable<Type> source = from t in selectedMod.assembly.GetTypes() where t.IsSubclassOf(typeof(VTOLMOD)) select t;
+            IEnumerable<Type> source = from t in Assembly.Load(File.ReadAllBytes(selectedMod.dllPath)).GetTypes() where t.IsSubclassOf(typeof(VTOLMOD)) select t;
             if (source != null && source.Count() == 1)
             {
                 GameObject newModGo = new GameObject(selectedMod.name, source.First());
@@ -210,8 +210,11 @@ namespace ModLoader
             selectionTF.GetComponent<Image>().color = new Color(0.3529411764705882f, 0.196078431372549f, 0);
             modInfoUI.campaignName.text = selectedMod.name;
             modInfoUI.campaignDescription.text = selectedMod.description;
-            //modInfoUI.campaignImage.color = Color.white;
-            //modInfoUI.campaignImage.material.SetTexture("_MainTex", selectedMod.image);
+            if (selectedMod.image != null)
+            {
+                modInfoUI.campaignImage.color = Color.white;
+                modInfoUI.campaignImage.material.SetTexture("_MainTex", selectedMod.image);
+            }
         }
         private void SetDefaultText()
         {

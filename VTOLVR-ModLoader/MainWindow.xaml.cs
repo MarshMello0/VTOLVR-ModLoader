@@ -230,7 +230,7 @@ namespace VTOLVR_ModLoader
                 if (currentEXEVersion < deserialized.fileUpdates[0].exeVersion)
                 {
                     UpdateExe();
-                    CheckModsDependency();
+                    ExtractMods();
                 }
                 else if (currentDLLVersion < deserialized.fileUpdates[0].dllVersion)
                 {
@@ -244,7 +244,8 @@ namespace VTOLVR_ModLoader
             }
 
             SetPlayButton(false);
-            
+            ExtractMods();
+
         }
         private bool CheckForInternet()
         {
@@ -300,7 +301,7 @@ namespace VTOLVR_ModLoader
                 UpdateVersions();
                 SetProgress(100, "Finished downloading updates");
                 SetPlayButton(false);
-                CheckModsDependency();
+                ExtractMods();
             }
         }
         private void DLLProgress(object sender, DownloadProgressChangedEventArgs e)
@@ -399,51 +400,80 @@ namespace VTOLVR_ModLoader
         }
         #endregion
 
-        private void CheckModsDependency()
+        private void ExtractMods()
         {
             SetPlayButton(true);
+            SetProgress(0, "Extracting  mods...");
             DirectoryInfo folder = new DirectoryInfo(root + modsFolder);
             FileInfo[] files = folder.GetFiles("*.zip");
             float zipAmount = 100 / files.Length;
-            int filesMoved = 0;
+            string currentFolder;
+            
+            int modsExtracted = 0;
             for (int i = 0; i < files.Length; i++)
             {
-                FileInfo fileInfo = files[i];
-                try
-                {
-                    FileStream file = File.OpenRead(fileInfo.FullName);
-
-                    using (ZipArchive zip = new ZipArchive(file, ZipArchiveMode.Read))
-                    {
-                        foreach (ZipArchiveEntry entry in zip.Entries)
-                        {
-                            if (entry.FullName.Contains("Dependencies/"))
-                            {
-                                string name = entry.FullName.Split('/')[1];
-                                if (name.Length > 0)
-                                {
-                                    MemoryStream ms = new MemoryStream();
-                                    entry.Open().CopyTo(ms);
-                                    FileStream file1 = new FileStream(Directory.GetParent(Directory.GetCurrentDirectory()).FullName +
-                                        @"\VTOLVR_Data\Managed\" + entry.Name,
-                                        FileMode.Create, FileAccess.Write);
-                                    ms.WriteTo(file1);
-                                    file1.Close();
-                                    ms.Close();
-                                    filesMoved++;
-                                }
-
-                            }
-                        }
-                    }
-                    file.Close();
-                    SetProgress((int)Math.Ceiling(zipAmount * i), "Moved dependencies for" + fileInfo.Name);
-                }
-                catch { }
+                SetProgress((int)Math.Ceiling(zipAmount * i), "Extracting mods... [" + files[i].Name + "]");
+                //This should remove the .zip at the end for the folder path
+                currentFolder = files[i].FullName.Split('.')[0];
                 
+                //We don't want to overide any mod folder incase of user data
+                //So mod users have to update by hand
+                if (Directory.Exists(currentFolder))
+                    continue;
+
+                Directory.CreateDirectory(currentFolder);
+                ZipFile.ExtractToDirectory(files[i].FullName, currentFolder);
+                modsExtracted++;
+
+                //Deleting the zip
+                //File.Delete(files[i].FullName);
             }
-            SetProgress(100, filesMoved == 0 ? "No Dependencies to move" : "Moved " + filesMoved + " dependencies");
+
             SetPlayButton(false);
+            SetProgress(100, modsExtracted == 0? "No mods where extracted": "Extracted " + modsExtracted + 
+                (modsExtracted == 1? " mod": " mods"));
+            MoveDependencies();
+
+        }
+
+        private void MoveDependencies()
+        {
+            SetPlayButton(true);
+            string[] modFolders = Directory.GetDirectories(root + modsFolder);
+            int depsMoved = 0;
+
+            string fileName;
+            string[] split;
+            for (int i = 0; i < modFolders.Length; i++)
+            {
+                string[] subFolders = Directory.GetDirectories(modFolders[i]);
+                for (int j = 0; j < subFolders.Length; j++)
+                {
+                    Console.WriteLine("Checking " + subFolders[j].ToLower());
+                    if (subFolders[j].ToLower().Contains("dependencies"))
+                    {
+                        Console.WriteLine("Found the folder dependencies");
+                        string[] depFiles = Directory.GetFiles(subFolders[j], "*.dll");
+                        for (int k = 0; k < depFiles.Length; k++)
+                        {
+                            split = depFiles[k].Split('\\');
+                            fileName = split[split.Length - 1];
+                            Console.WriteLine("Moved file \n" + Directory.GetParent(Directory.GetCurrentDirectory()).FullName +
+                                        @"\VTOLVR_Data\Managed\" + fileName);
+                            File.Copy(depFiles[k], Directory.GetParent(Directory.GetCurrentDirectory()).FullName +
+                                        @"\VTOLVR_Data\Managed\" + fileName,
+                                        true);
+                            
+                            depsMoved++;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            SetPlayButton(false);
+            SetProgress(100, depsMoved == 0? "Checked Dependencies" : "Moved " + depsMoved 
+                + (depsMoved == 1? " dependency" : " dependencies"));
         }
         private void SetProgress(int barValue, string text)
         {
