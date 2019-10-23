@@ -84,8 +84,8 @@ namespace Installer
             //Extracting the zip from resources to files
             string path = vtFolder + @"modloader.zip";
             File.WriteAllBytes(path, Properties.Resources.ModLoader);
-            
-            //Stopping a possiable error
+
+            //Stopping a possible error
             if (File.Exists(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll"))
                 File.Delete(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll");
 
@@ -197,7 +197,7 @@ namespace Installer
         private void OpenFileBrowser()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.InitialDirectory = "C:\\";
+            openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
             openFileDialog.Filter = "exe files (*.exe)|*.exe";
             openFileDialog.FilterIndex = 0;
             openFileDialog.RestoreDirectory = true;
