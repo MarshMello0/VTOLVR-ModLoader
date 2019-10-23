@@ -87,6 +87,10 @@ namespace Installer
                 //Stopping a possible error
                 if (File.Exists(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll"))
                     File.Delete(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll");
+                if (File.Exists(vtFolder + @"VTOLVR_Data\Managed\0Harmony.dll"))
+                    File.Delete(@"VTOLVR_Data\Managed\0Harmony.dll");
+                if (File.Exists(@"VTOLVR_Data\Managed\mscorlib.dll"))
+                    File.Delete(@"VTOLVR_Data\Managed\mscorlib.dll");
 
                 ZipFile.ExtractToDirectory(path, vtFolder);
                 SetProgress(50);

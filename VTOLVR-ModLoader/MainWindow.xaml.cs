@@ -42,7 +42,7 @@ namespace VTOLVR_ModLoader
 
         //Startup
         private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe" };
-        private string[] neededDLLFiles = new string[] { @"\Plugins\discord-rpc.dll" };
+        private string[] neededDLLFiles = new string[] { @"\Plugins\discord-rpc.dll" , @"\Managed\0Harmony.dll" };
 
 
         //Moving Window
