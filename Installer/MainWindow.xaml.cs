@@ -33,7 +33,7 @@ namespace Installer
         private Point lm = new Point();
 
         //Pages
-        public enum Page{ About, SelectFolder, Confirm, Extracting,Finished}
+        public enum Page{ About, SelectFolder, Confirm, Extracting,Finished,Error}
         private Page currentPage;
 
         //
@@ -42,9 +42,6 @@ namespace Installer
         {
             InitializeComponent();
             SwitchPage();
-            /*
-           
-            */
         }
         private void Window_Initialized(object sender, EventArgs e)
         {
@@ -83,25 +80,38 @@ namespace Installer
             SetProgress(0);
             //Extracting the zip from resources to files
             string path = vtFolder + @"modloader.zip";
-            File.WriteAllBytes(path, Properties.Resources.ModLoader);
+            try
+            {
+                File.WriteAllBytes(path, Properties.Resources.ModLoader);
 
-            //Stopping a possible error
-            if (File.Exists(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll"))
-                File.Delete(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll");
+                //Stopping a possible error
+                if (File.Exists(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll"))
+                    File.Delete(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll");
 
-            ZipFile.ExtractToDirectory(path, vtFolder);
-            SetProgress(50);
-            File.Delete(path);
-            SetProgress(75);
+                ZipFile.ExtractToDirectory(path, vtFolder);
+                SetProgress(50);
+                File.Delete(path);
+                SetProgress(75);
 
-            if (dShortcut.IsChecked == true)
-                CreateShortcut(
-                    Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + @"\VTOL VR Mod Loader.lnk",
-                    vtFolder + @"VTOLVR_ModLoader\VTOLVR-ModLoader.exe");
-            if (smShortcut.IsChecked == true)
-                CreateShortcut(
-                    Environment.GetFolderPath(Environment.SpecialFolder.StartMenu) + @"\VTOL VR Mod Loader.lnk",
-                    vtFolder + @"VTOLVR_ModLoader\VTOLVR-ModLoader.exe");
+                if (dShortcut.IsChecked == true)
+                    CreateShortcut(
+                        Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + @"\VTOL VR Mod Loader.lnk",
+                        vtFolder + @"VTOLVR_ModLoader\VTOLVR-ModLoader.exe");
+                if (smShortcut.IsChecked == true)
+                    CreateShortcut(
+                        Environment.GetFolderPath(Environment.SpecialFolder.StartMenu) + @"\VTOL VR Mod Loader.lnk",
+                        vtFolder + @"VTOLVR_ModLoader\VTOLVR-ModLoader.exe");
+            }
+            catch (Exception e)
+            {
+                errorTextBox.Text = e.ToString();
+                currentPage = Page.Error;
+                backButton.Visibility = Visibility.Hidden;
+                nextButotn.Visibility = Visibility.Hidden;
+                cancelButton.Content = "Close";
+                SwitchPage();
+                return;
+            }
             SetProgress(100);
             currentPage++;
             SwitchPage();
@@ -124,6 +134,7 @@ namespace Installer
             confirmPage.Visibility = Visibility.Hidden;
             extractingPage.Visibility = Visibility.Hidden;
             finishedPage.Visibility = Visibility.Hidden;
+            errorPage.Visibility = Visibility.Hidden;
             switch (currentPage)
             {
                 case Page.About:
@@ -147,6 +158,9 @@ namespace Installer
                     cancelButton.Visibility = Visibility.Hidden;
                     backButton.Content = "Launch";
                     nextButotn.Content = "Close";
+                    break;
+                case Page.Error:
+                    errorPage.Visibility = Visibility.Visible;
                     break;
             }
         }

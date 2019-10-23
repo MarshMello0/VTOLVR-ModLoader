@@ -120,8 +120,17 @@
                                  x:Name="progressBar"/>
                 </StackPanel>
 
-                <StackPanel Grid.Row="1" Grid.Column="1" x:Name="finishedPage" Visibility="Visible">
+                <StackPanel Grid.Row="1" Grid.Column="1" x:Name="finishedPage" Visibility="Hidden">
                     <TextBlock Text='VTOL VR Mod Loader was successfully installed!' 
+                               Grid.Column="0" Foreground="White" FontFamily="/Installer;component/#Squares Bold" 
+                               TextWrapping="Wrap" FontSize="13" Padding="0,0,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="1" x:Name="errorPage" Visibility="Visible">
+                    <TextBlock Text='There was an error!' 
+                               Grid.Column="0" Foreground="White" FontFamily="/Installer;component/#Squares Bold" 
+                               TextWrapping="Wrap" FontSize="13" Padding="0,0,0,0"/>
+                    <TextBlock Text='' x:Name="errorTextBox"
                                Grid.Column="0" Foreground="White" FontFamily="/Installer;component/#Squares Bold" 
                                TextWrapping="Wrap" FontSize="13" Padding="0,0,0,0"/>
                 </StackPanel>
