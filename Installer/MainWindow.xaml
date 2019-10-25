@@ -1,0 +1,170 @@
+﻿<Window x:Class="Installer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
+        xmlns:local="clr-namespace:Installer"
+        mc:Ignorable="d"
+        Title="VTOL VR Modloader Installer" Height="387" Width="495" ResizeMode="NoResize"  
+        Background="#FF4B4B4B" WindowStartupLocation="CenterScreen" WindowStyle="None" Closing="WindowClosing" Initialized="Window_Initialized">
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.1*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="0.15*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Background="#FF2E2E2E">
+            <!-- Top Bar -->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.1*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text=" VTOL VR Mod Loader Installer" Grid.Column="0" Foreground="White" 
+                       FontFamily="/Installer;component/#Squares Bold"
+                       FontSize="20" VerticalAlignment="Center" 
+                       MouseDown="TopBarDown" MouseUp="TopBarUp" MouseMove="TopBarMove" MouseLeave="TopBarLeave"/>
+            <Button Grid.Column="1" Foreground="White"
+                       FontFamily="/Installer;component/#Squares Bold"
+                       FontSize="20" Background="#FF3D3D3D" BorderBrush="{x:Null}" Click="CancelButton_Click"
+                    Content="x">
+            </Button>
+        </Grid>
+
+        <Grid Grid.Row="1" Background="#696969">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.01*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.01*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="0.01*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Middle Section -->
+            <Grid Grid.Column="1" Grid.Row="1" Background="#FF3D3D3D">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.05*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="0.05*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="0.05*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="0.05*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="1" Grid.Column="1" x:Name="aboutPage" Visibility="Hidden">
+                    <Image Source="Logo.png" Height="150"/>
+                    <TextBlock Text='The Setup Wizard will install VTOL VR Mod Loader on your computer. Click "Next" to continue or "Cancel" to exit the Setup Wizard.'
+                               Grid.Column="0" Foreground="White" FontFamily="/Installer;component/#Squares Bold" 
+                               TextWrapping="Wrap" FontSize="13" VerticalAlignment="Center" 
+                               HorizontalAlignment="Center" Padding="0,10,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="1" x:Name="folderPage" Visibility="Hidden">
+                    <TextBlock Text='Please select the folder containting the VTOLVR.exe file, otherwise the Mod Loader wont work' 
+                               Grid.Column="0" Foreground="White" FontFamily="/Installer;component/#Squares Bold" 
+                               TextWrapping="Wrap" FontSize="13" VerticalAlignment="Center" 
+                               HorizontalAlignment="Center" Padding="0,0,0,0"/>
+
+                    <TextBlock Text='Folder:' 
+                               Grid.Column="0" Foreground="White" FontFamily="/Installer;component/#Squares Bold" 
+                               TextWrapping="Wrap" FontSize="13" Padding="0,50,0,0"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="0.05*"/>
+                            <ColumnDefinition Width="0.2*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox x:Name="folderBox" Grid.Column="0"/>
+                        <Button Grid.Column="2" FontFamily="/Installer;component/#Squares Bold"
+                            Content="Browse..." FontSize="10" Foreground="White" Background="#FF3D3D3D" 
+                        BorderBrush="{x:Null}" x:Name="browseButton" Click="BrowseButton_Click" BorderThickness="1"/>
+                    </Grid>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="1" x:Name="confirmPage" Visibility="Hidden">
+                    <TextBlock Text='Do you want a Desktop or Start Menu Shortcut?' 
+                               Grid.Column="0" Foreground="White" FontFamily="/Installer;component/#Squares Bold" 
+                               TextWrapping="Wrap" FontSize="13" VerticalAlignment="Center" 
+                               HorizontalAlignment="Center" Padding="0,0,0,0"/>
+                    <CheckBox Content="Start Menu Shortcut" IsChecked="True" 
+                              Foreground="White" FontFamily="/Installer;component/#Squares Bold" 
+                              Margin="0,20,0,0" x:Name="smShortcut"
+                              ToolTip="Will create a shortcut to start the modloader from your desktop."/>
+                    <CheckBox Content="Desktop Shortcut" IsChecked="True" 
+                              Foreground="White" FontFamily="/Installer;component/#Squares Bold" 
+                              Margin="0,20,0,0" x:Name="dShortcut"
+                              ToolTip="Will create a shortcut to start the modloader from your desktop."/>
+                    <TextBlock Text='Click "Next" to begin the installation.' 
+                               Grid.Column="0" Foreground="White" FontFamily="/Installer;component/#Squares Bold" 
+                               TextWrapping="Wrap" FontSize="13" VerticalAlignment="Center" 
+                               HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="1" x:Name="extractingPage" Visibility="Hidden">
+                    <TextBlock Text='Extracting...' 
+                               Grid.Column="0" Foreground="White" FontFamily="/Installer;component/#Squares Bold" 
+                               TextWrapping="Wrap" FontSize="13" Padding="0,0,0,0"/>
+                    <ProgressBar Foreground="#696969" Height="25"
+                                 Background="{x:Null}" BorderBrush="Black" Value="100" 
+                                 x:Name="progressBar"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="1" x:Name="finishedPage" Visibility="Hidden">
+                    <TextBlock Text='VTOL VR Mod Loader was successfully installed!' 
+                               Grid.Column="0" Foreground="White" FontFamily="/Installer;component/#Squares Bold" 
+                               TextWrapping="Wrap" FontSize="13" Padding="0,0,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="1" x:Name="errorPage" Visibility="Visible">
+                    <TextBlock Text='There was an error!' 
+                               Grid.Column="0" Foreground="White" FontFamily="/Installer;component/#Squares Bold" 
+                               TextWrapping="Wrap" FontSize="13" Padding="0,0,0,0"/>
+                    <TextBlock Text='' x:Name="errorTextBox"
+                               Grid.Column="0" Foreground="White" FontFamily="/Installer;component/#Squares Bold" 
+                               TextWrapping="Wrap" FontSize="13" Padding="0,0,0,0"/>
+                </StackPanel>
+
+
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="2" Background="#696969">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.1*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.2*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.25*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="0.5*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="0.5*"/>
+            </Grid.RowDefinitions>
+
+            <Button Grid.Column="1" Grid.Row="1" FontFamily="/Installer;component/#Squares Bold"
+                            Content="Back" FontSize="15" Foreground="White" Background="#FF3D3D3D" 
+                        BorderBrush="{x:Null}" x:Name="backButton" Click="BackButton_Click" BorderThickness="1"/>
+            <Button Grid.Column="3" Grid.Row="1" FontFamily="/Installer;component/#Squares Bold"
+                            Content="Next" FontSize="15" Foreground="White" Background="#FF3D3D3D" 
+                        BorderBrush="{x:Null}" x:Name="nextButotn" Click="NextButotn_Click" BorderThickness="1"/>
+            <Button Grid.Column="5" Grid.Row="1" FontFamily="/Installer;component/#Squares Bold"
+                            Content="Cancel" FontSize="15" Foreground="White" Background="#FF3D3D3D" 
+                        BorderBrush="{x:Null}" x:Name="cancelButton" Click="CancelButton_Click" BorderThickness="1"/>
+        </Grid>
+    </Grid>
+</Window>

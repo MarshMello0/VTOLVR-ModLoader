@@ -101,6 +101,7 @@ namespace ModLoader
                     {
                         currentMod.name = currentName;
                         currentMod.description = "This only a .dll file, please make mods into .zip with a xml file when releasing the mod.";
+                        currentMod.dllPath = dllFiles[i];
                         hasDLL = true;
                     }
                 }
