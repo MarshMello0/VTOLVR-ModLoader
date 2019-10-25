@@ -79,23 +79,27 @@ namespace Installer
                 return;
             }
             SetProgress(0);
-            //Extracting the zip from resources to files
-            string path = vtFolder + @"modloader.zip";
+            
             try
             {
-                File.WriteAllBytes(path, Properties.Resources.ModLoader);
+                if (File.Exists(vtFolder + @"ModLoader.zip"))
+                    File.Delete(vtFolder + @"ModLoader.zip");
+
+                //Extracting the zip from resources to files
+                File.WriteAllBytes(vtFolder + "ModLoader.zip", Properties.Resources.ModLoader);
 
                 //Stopping a possible error
                 if (File.Exists(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll"))
                     File.Delete(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll");
                 if (File.Exists(vtFolder + @"VTOLVR_Data\Managed\0Harmony.dll"))
-                    File.Delete(@"VTOLVR_Data\Managed\0Harmony.dll");
-                if (File.Exists(@"VTOLVR_Data\Managed\mscorlib.dll"))
-                    File.Delete(@"VTOLVR_Data\Managed\mscorlib.dll");
+                    File.Delete(vtFolder + @"VTOLVR_Data\Managed\0Harmony.dll");
+                if (File.Exists(vtFolder + @"VTOLVR_Data\Managed\mscorlib.dll"))
+                    File.Delete(vtFolder + @"VTOLVR_Data\Managed\mscorlib.dll");
 
-                ZipFile.ExtractToDirectory(path, vtFolder);
+
+                ZipFile.ExtractToDirectory(vtFolder + @"ModLoader.zip", vtFolder);
                 SetProgress(50);
-                File.Delete(path);
+                File.Delete(vtFolder + @"ModLoader.zip");
                 SetProgress(75);
 
                 if (dShortcut.IsChecked == true)
