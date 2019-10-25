@@ -70,6 +70,8 @@ namespace Installer
         }
         private void InstallFiles()
         {
+            //If they change the folder path by typing it in by hand
+            vtFolder = folderBox.Text;
             if (Directory.Exists(vtFolder + @"VTOLVR_ModLoader"))
             {
                 //It must be already installed
