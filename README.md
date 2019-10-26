@@ -12,11 +12,8 @@ Please note, modding in VTOL VR isn't officially supported by the developers. Mo
 
 
 ## Contributing to the mod loader
-This is this all the source code for the exe, mod loader.dll, logo files, multiplayer mod, unity project and server files. 
+This is this all the source code for the launcher, mod loader.dll, logo files and unity project. 
 This project is open-source, so anyone can help out improving. Just create a fork, improve upon the code, and do a pull request. However, if you just want to create a mod you don't need to touch this source code, head over to the [creating a mod page](https://vtolvr-mods.com/creating-a-mod.php "creating a mod page") on the website to learn how.
 
 The logo was created in Adobe Illustrator and the gif was created in Adobe Photoshop.
-Modloader, Multiplayer, ServerPlugin and ModLoader exe are all in one visual studio project in C#.
-The Standalone Server is what runs the Server Plugin and doesn't need to be changed apart from moving the .dll.
-
-Class Diagram Plan shows a plan of the base logic how the mod loader works, however, it isn't 100% up to date but is a good place to start understanding how everything works. It was created in [SINVAS UML](https://sourceforge.net/projects/sinvas-uml/ "SINVAS UML").
+Modloader,Installer and Launcher are all in one visual studio project in C#.
