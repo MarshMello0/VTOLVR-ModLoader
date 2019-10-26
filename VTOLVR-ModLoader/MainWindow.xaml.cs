@@ -29,6 +29,7 @@ namespace VTOLVR_ModLoader
         private enum gifStates { Paused, Play, Frame }
 
         private static string modsFolder = @"\mods";
+        private static string skinsFolder = @"\skins";
         private static string injector = @"\injector.exe";
         private static string dataFile = @"\data.xml";
         private static string dataFileTemp = @"\data_TEMP.xml";
@@ -444,6 +445,42 @@ namespace VTOLVR_ModLoader
             MoveDependencies();
 
         }
+        private void ExtractSkins()
+        {
+            SetPlayButton(true);
+            SetProgress(0, "Extracting  skins...");
+            DirectoryInfo folder = new DirectoryInfo(root + skinsFolder);
+            FileInfo[] files = folder.GetFiles("*.zip");
+            if (files.Length == 0)
+            {
+                SetPlayButton(false);
+                SetProgress(100, "No new skins where found");
+                return;
+            }
+            float zipAmount = 100 / files.Length;
+            string currentFolder;
+
+            int skinsExtracted = 0;
+            for (int i = 0; i < files.Length; i++)
+            {
+                SetProgress((int)Math.Ceiling(zipAmount * i), "Extracting skins... [" + files[i].Name + "]");
+                //This should remove the .zip at the end for the folder path
+                currentFolder = files[i].FullName.Split('.')[0];
+
+                //We don't want to overide any mod folder incase of user data
+                //So mod users have to update by hand
+                if (Directory.Exists(currentFolder))
+                    continue;
+
+                Directory.CreateDirectory(currentFolder);
+                ZipFile.ExtractToDirectory(files[i].FullName, currentFolder);
+                skinsExtracted++;
+            }
+
+            SetPlayButton(false);
+            SetProgress(100, skinsExtracted == 0 ? "No new skins where found" : "Extracted " + skinsExtracted +
+                (skinsExtracted == 1 ? " skin" : " skins"));
+        }
 
         private void MoveDependencies()
         {
@@ -483,6 +520,8 @@ namespace VTOLVR_ModLoader
             SetPlayButton(false);
             SetProgress(100, depsMoved == 0? "Checked Dependencies" : "Moved " + depsMoved 
                 + (depsMoved == 1? " dependency" : " dependencies"));
+
+            ExtractSkins();
         }
         private void SetProgress(int barValue, string text)
         {
