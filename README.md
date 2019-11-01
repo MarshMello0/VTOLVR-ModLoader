@@ -16,4 +16,4 @@ This is this all the source code for the launcher, mod loader.dll, logo files an
 This project is open-source, so anyone can help out improving. Just create a fork, improve upon the code, and do a pull request. However, if you just want to create a mod you don't need to touch this source code, head over to the [creating a mod page](https://vtolvr-mods.com/creating-a-mod.php "creating a mod page") on the website to learn how.
 
 The logo was created in Adobe Illustrator and the gif was created in Adobe Photoshop.
-Modloader,Installer and Launcher are all in one visual studio project in C#.
+Modloader, Installer and Launcher are all in one visual studio project in C#.
