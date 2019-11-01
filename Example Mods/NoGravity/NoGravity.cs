@@ -11,9 +11,21 @@ public class NoGravity : VTOLMOD
     private float coolDown = 2f;
     private float currentTimer;
 
-    private void Awake()
+    public override void ModLoaded()
     {
-        Log("Loaded!");
+        base.ModLoaded();
+
+        Settings setting = new Settings(thisMod);
+        setting.CreateBoolSetting("Bool Setting", new Action<bool>[] { Test});
+        setting.CreateFloatSetting("Float Setting", null);
+        setting.CreateIntSetting("Int Setting", null);
+        setting.CreateStringSetting("String Setting", null);
+
+        VTOLAPI.CreateSettingsMenu(setting);
+    }
+    public void Test(bool state)
+    {
+        Log("Test " + state);
     }
 
     private void Update()

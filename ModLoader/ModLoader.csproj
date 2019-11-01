@@ -90,6 +90,7 @@
     <Compile Include="ModLoader.cs" />
     <Compile Include="ModLoaderManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SettingsMenu.cs" />
     <Compile Include="SkinManager.cs" />
     <Compile Include="UConsole.cs" />
     <Compile Include="VTOLAPI.cs" />

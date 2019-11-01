@@ -3,21 +3,36 @@ using UnityEngine;
 using ModLoader;
 public class VTOLMOD : MonoBehaviour
 {
-    private string modName;
-    private void Awake()
+    public Mod thisMod { private set; get; } = null;
+    public virtual void ModLoaded()
     {
-        modName = gameObject.name;
+        Log("Loaded!");
     }
     public void Log(object message)
     {
-        Debug.Log(modName + ": " + message);
+        if (thisMod == null)
+            Debug.Log(gameObject.name + ": " + message);
+        else
+            Debug.Log(thisMod.name + ": " + message);
     }
     public void LogWarning(object message)
     {
-        Debug.LogWarning(modName + ": " + message);
+        if (thisMod == null)
+            Debug.LogWarning(gameObject.name + ": " + message);
+        else
+            Debug.LogWarning(thisMod.name + ": " + message);
     }
     public void LogError(object message)
     {
-        Debug.LogError(modName + ": " + message);
+        if (thisMod == null)
+            Debug.LogError(gameObject.name + ": " + message);
+        else
+            Debug.LogError(thisMod.name + ": " + message);
+    }
+
+    public void SetModInfo(Mod thisMod)
+    {
+        if (this.thisMod == null)
+            this.thisMod = thisMod;
     }
 }

@@ -81,5 +81,10 @@ public class VTOLAPI : MonoBehaviour
                 return VTOLVehicles.None;
         }
     }
+
+    public static void CreateSettingsMenu(Settings newSettings)
+    {
+        ModLoader.ModLoader.instance.CreateSettingsMenu(newSettings);
+    }
 }
 
