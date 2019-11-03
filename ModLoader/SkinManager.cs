@@ -22,6 +22,9 @@ namespace ModLoader
         private RawImage skinPreview;
         private void Start()
         {
+            Mod mod = new Mod();
+            mod.name = "Skin Manger";
+            SetModInfo(mod);
             SceneManager.sceneLoaded += SceneLoaded;
             Directory.CreateDirectory(ModLoaderManager.instance.rootPath + @"\skins");
             
