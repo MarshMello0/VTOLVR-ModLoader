@@ -113,8 +113,8 @@ namespace ModLoader
             modsPage.transform.GetChild(6).GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
             modsPage.transform.GetChild(6).GetComponentInChildren<Text>().text = "Mod\nSettings";
             VRInteractable settingsInteractable = modsPage.transform.GetChild(6).GetComponent<VRInteractable>();
-            settingsInteractable.interactableName = "Open Mod Settings";
-            settingsInteractable.OnInteract = GenerateEvent(delegate { OpenPage(Pages.Settings); });
+            settingsInteractable.interactableName = "Comming soon!";
+            settingsInteractable.OnInteract = GenerateEvent(delegate { Debug.Log("Pressed the mods setting button"); });//settingsInteractable.OnInteract = GenerateEvent(delegate { OpenPage(Pages.Settings); });
 
             //Creating the Settings Page
             settingsPage = Instantiate(CampaignDisplay,CampaignDisplay.transform.parent);
