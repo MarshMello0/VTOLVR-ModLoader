@@ -4,58 +4,52 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using System.Collections;
-
-namespace NoGravity
+using Valve.VR;
+public class NoGravity : VTOLMOD
 {
-    public class Load
+    private bool isDisabled, onCoolDown;
+    private float coolDown = 2f;
+    private float currentTimer;
+
+    public override void ModLoaded()
     {
-        public static void Init()
-        {
-            new GameObject("No Gravity", typeof(NoGravity));
-        }
+        base.ModLoaded();
+
+        Settings setting = new Settings(thisMod);
+        setting.CreateBoolSetting("Bool Setting", new Action<bool>[] { Test});
+        setting.CreateFloatSetting("Float Setting", null);
+        setting.CreateIntSetting("Int Setting", null);
+        setting.CreateStringSetting("String Setting", null);
+
+        VTOLAPI.CreateSettingsMenu(setting);
+    }
+    public void Test(bool state)
+    {
+        Log("Test " + state);
     }
 
-    public class NoGravity : MonoBehaviour
+    private void Update()
     {
-        public static NoGravity _instance;
-        private bool isDisabled;
+        if (VRHandController.controllers.Count != 2)
+            return;
 
-        private void Awake()
+        if (onCoolDown)
         {
-            if (!_instance)
+            currentTimer += Time.deltaTime;
+            if (currentTimer >= coolDown)
             {
-                _instance = this;
-                DontDestroyOnLoad(this.gameObject);
-                Debug.Log("No Gravity Mod Loaded");
-            }
-            else
-            {
-                Destroy(this.gameObject);
-                return;
+                onCoolDown = false;
+                currentTimer = 0;
             }
         }
-        private void OnGUI()
+        else if (VRHandController.controllers[0].thumbButtonPressed &&
+            VRHandController.controllers[1].thumbButtonPressed)
         {
-            if (isDisabled)
-            {
-                if (GUI.Button(new Rect(10, 10, 150, 100), "Enable Gravity"))
-                {
-                    Physics.gravity = new Vector3(0, -9.3f, 0);
-                    Debug.Log("Gravity has been enabled");
-                    isDisabled = false;
-                }
-            }
-            else
-            {
-                if (GUI.Button(new Rect(10, 10, 150, 100), "Disable Gravity"))
-                {
-                    Physics.gravity = new Vector3(0, 0, 0);
-                    Debug.Log("Gravity has been disabled");
-                    isDisabled = true;
-                }
-            }
-
+            Physics.gravity = new Vector3(0, isDisabled ? 0f : -9.3f, 0);
+            isDisabled = !isDisabled;
+            Log("Set gravity to " + isDisabled);
+            onCoolDown = true;
         }
+        
     }
-
 }

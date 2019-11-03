@@ -1,0 +1,13 @@
+Add the following dll's to this folder:
+
+	- Assembly-CSharp.dll
+	- Assembly-CSharp-firstpass.dll
+	- netstandard.dll
+	- UnityEngine.dll
+	- UnityEngine.UI.dll
+	- UnityEngine.CoreModule.dll
+	- UnityEngine.AssetBundle.dll
+	- UnityEngine.CrashReportingModule.dll
+	- UnityEngine.UnityWebRequestWWWModule.dll
+	- UnityEngine.PhysicsModule.dll
+	- 0Harmony.dll
