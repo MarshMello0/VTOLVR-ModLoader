@@ -55,8 +55,14 @@ namespace Installer
                 @"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam",
                 @"InstallPath",
                 @"NULL");
-
-            string gameFolder = File.ReadAllText(regPath + @"\steamapps\libraryfolders.vdf").Split('"')[13];
+            string[] contents = File.ReadAllText(regPath + @"\steamapps\libraryfolders.vdf").Split('"');
+            string gameFolder = regPath;
+            if (contents.Length >= 13)
+            {
+                //Inside libraryfolders.vdf there is no paths (Issue  #12)
+                gameFolder = contents[13];
+            }
+            
             string[] split = gameFolder.Split('\\');
             string result = "";
             for (int i = 0; i < split.Length; i++)
