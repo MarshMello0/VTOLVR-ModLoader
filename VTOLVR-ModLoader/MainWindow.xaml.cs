@@ -43,7 +43,7 @@ namespace VTOLVR_ModLoader
 
         //Startup
         private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe" };
-        private string[] neededDLLFiles = new string[] { @"\Plugins\discord-rpc.dll" , @"\Managed\0Harmony.dll" };
+        private string[] neededDLLFiles = new string[] { @"\Plugins\discord-rpc.dll", @"\Managed\0Harmony.dll" };
 
 
         //Moving Window
@@ -72,8 +72,8 @@ namespace VTOLVR_ModLoader
 
             List<Update> updates = newData.updateFeed.ToList();
             List<FileUpdate> fileUpdates = newData.fileUpdates.ToList();
-            updates.Insert(0,newUpdate);
-            fileUpdates.Insert(0,newFileUpdate);
+            updates.Insert(0, newUpdate);
+            fileUpdates.Insert(0, newFileUpdate);
             newData.updateFeed = updates.ToArray();
             newData.fileUpdates = fileUpdates.ToArray();
 
@@ -291,7 +291,7 @@ namespace VTOLVR_ModLoader
         }
         private void DLLDone(object sender, AsyncCompletedEventArgs e)
         {
-            
+
             if (e.Cancelled && e.Error != null)
             {
                 SetProgress(100, "Failed downloading \"ModLoader.dll\"");
@@ -321,7 +321,7 @@ namespace VTOLVR_ModLoader
             using (FileStream stream = File.Create(root + versionsFile))
             {
                 XmlSerializer xml = new XmlSerializer(typeof(Versions));
-                xml.Serialize(stream, new Versions(currentDLLVersion,currentEXEVersion));
+                xml.Serialize(stream, new Versions(currentDLLVersion, currentEXEVersion));
             }
         }
 
@@ -412,20 +412,20 @@ namespace VTOLVR_ModLoader
             if (files.Length == 0)
             {
                 SetPlayButton(false);
-                SetProgress(100, "No new mods where found");
+                SetProgress(100, "No new mods were found");
                 MoveDependencies();
                 return;
             }
             float zipAmount = 100 / files.Length;
             string currentFolder;
-            
+
             int modsExtracted = 0;
             for (int i = 0; i < files.Length; i++)
             {
                 SetProgress((int)Math.Ceiling(zipAmount * i), "Extracting mods... [" + files[i].Name + "]");
                 //This should remove the .zip at the end for the folder path
                 currentFolder = files[i].FullName.Split('.')[0];
-                
+
                 //We don't want to overide any mod folder incase of user data
                 //So mod users have to update by hand
                 if (Directory.Exists(currentFolder))
@@ -440,21 +440,21 @@ namespace VTOLVR_ModLoader
             }
 
             SetPlayButton(false);
-            SetProgress(100, modsExtracted == 0? "No mods where extracted": "Extracted " + modsExtracted + 
-                (modsExtracted == 1? " mod": " mods"));
+            SetProgress(100, modsExtracted == 0 ? "No mods were extracted" : "Extracted " + modsExtracted +
+                (modsExtracted == 1 ? " mod" : " mods"));
             MoveDependencies();
 
         }
         private void ExtractSkins()
         {
             SetPlayButton(true);
-            SetProgress(0, "Extracting  skins...");
+            SetProgress(0, "Extracting skins...");
             DirectoryInfo folder = new DirectoryInfo(root + skinsFolder);
             FileInfo[] files = folder.GetFiles("*.zip");
             if (files.Length == 0)
             {
                 SetPlayButton(false);
-                SetProgress(100, "No new skins where found");
+                SetProgress(100, "No new skins were found");
                 return;
             }
             float zipAmount = 100 / files.Length;
@@ -478,7 +478,7 @@ namespace VTOLVR_ModLoader
             }
 
             SetPlayButton(false);
-            SetProgress(100, skinsExtracted == 0 ? "No new skins where found" : "Extracted " + skinsExtracted +
+            SetProgress(100, skinsExtracted == 0 ? "No new skins were found" : "Extracted " + skinsExtracted +
                 (skinsExtracted == 1 ? " skin" : " skins"));
         }
 
@@ -509,7 +509,7 @@ namespace VTOLVR_ModLoader
                             File.Copy(depFiles[k], Directory.GetParent(Directory.GetCurrentDirectory()).FullName +
                                         @"\VTOLVR_Data\Managed\" + fileName,
                                         true);
-                            
+
                             depsMoved++;
                         }
                         break;
@@ -518,8 +518,8 @@ namespace VTOLVR_ModLoader
             }
 
             SetPlayButton(false);
-            SetProgress(100, depsMoved == 0? "Checked Dependencies" : "Moved " + depsMoved 
-                + (depsMoved == 1? " dependency" : " dependencies"));
+            SetProgress(100, depsMoved == 0 ? "Checked Dependencies" : "Moved " + depsMoved
+                + (depsMoved == 1 ? " dependency" : " dependencies"));
 
             ExtractSkins();
         }
