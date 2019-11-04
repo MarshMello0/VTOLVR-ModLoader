@@ -2,7 +2,7 @@
 
 ## [Website](https://vtolvr-mods.com/ "VTOL VR Mod Loader Website")
 
-#![Mod Loader Program](https://vtolvr-mods.com/files/modloader2.gif)
+![Mod Loader Program](https://vtolvr-mods.com/files/modloader2.gif#)
 
 VTOLVR Modding aims to add more user-created content into the game as mods. With the mod loader, players can add custom code into the game to add extra features that they wanted.
 Anyone can create mods with a bit of knowledge of Unity and C# using the Wiki, also the mod loader is open source, so anyone can help out improving the mod loader it's self.
