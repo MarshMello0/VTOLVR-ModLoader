@@ -89,7 +89,11 @@
                         <Button Grid.Column="2" FontFamily="/Installer;component/#Squares Bold"
                             Content="Browse..." FontSize="10" Foreground="White" Background="#FF3D3D3D" 
                         BorderBrush="{x:Null}" x:Name="browseButton" Click="BrowseButton_Click" BorderThickness="1"/>
+
                     </Grid>
+                    <TextBlock x:Name="Error" Text='Unable to find VTOL VR folder' 
+                               Grid.Column="0" Foreground="#FFD50000" FontFamily="/Installer;component/#Squares Bold" 
+                               TextWrapping="Wrap" FontSize="13" Padding="0,5,0,0" Visibility="Hidden"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" Grid.Column="1" x:Name="confirmPage" Visibility="Hidden">
