@@ -11,3 +11,4 @@ Add the following dll's to this folder:
 	- UnityEngine.UnityWebRequestWWWModule.dll
 	- UnityEngine.PhysicsModule.dll
 	- 0Harmony.dll
+	- ModLoader.dll
