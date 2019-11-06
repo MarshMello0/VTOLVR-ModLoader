@@ -45,7 +45,7 @@
                 <RowDefinition Height="0.01*"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            
+
             <!-- Middle Section -->
             <Grid Grid.Column="1" Grid.Row="1" Background="#FF3D3D3D">
 
@@ -69,8 +69,8 @@
                                HorizontalAlignment="Center" Padding="0,10,0,0"/>
                 </StackPanel>
 
-                <StackPanel Grid.Row="1" Grid.Column="1" x:Name="folderPage" Visibility="Hidden">
-                    <TextBlock Text='Please select the folder containting the VTOLVR.exe file, otherwise the Mod Loader wont work' 
+                <StackPanel Grid.Row="1" Grid.Column="1" x:Name="folderPage">
+                    <TextBlock Text='Please select the folder containing the VTOLVR.exe file, otherwise the Mod Loader wont work' 
                                Grid.Column="0" Foreground="White" FontFamily="/Installer;component/#Squares Bold" 
                                TextWrapping="Wrap" FontSize="13" VerticalAlignment="Center" 
                                HorizontalAlignment="Center" Padding="0,0,0,0"/>
@@ -126,7 +126,7 @@
                                TextWrapping="Wrap" FontSize="13" Padding="0,0,0,0"/>
                 </StackPanel>
 
-                <StackPanel Grid.Row="1" Grid.Column="1" x:Name="errorPage" Visibility="Visible">
+                <StackPanel Grid.Row="1" Grid.Column="1" x:Name="errorPage" Visibility="Hidden">
                     <TextBlock Text='There was an error!' 
                                Grid.Column="0" Foreground="White" FontFamily="/Installer;component/#Squares Bold" 
                                TextWrapping="Wrap" FontSize="13" Padding="0,0,0,0"/>
