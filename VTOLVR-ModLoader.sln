@@ -13,8 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModLoader", "ModLoader\ModL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Installer", "Installer\Installer.csproj", "{1EE40772-7545-473D-A2C9-DBE790F36BF3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "F-35ConversionMod", "F-35ConversionMod\F-35ConversionMod.csproj", "{C3AC973A-F92B-4B9E-914E-C74FC7B4E17D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,10 +35,6 @@ Global
 		{1EE40772-7545-473D-A2C9-DBE790F36BF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1EE40772-7545-473D-A2C9-DBE790F36BF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1EE40772-7545-473D-A2C9-DBE790F36BF3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C3AC973A-F92B-4B9E-914E-C74FC7B4E17D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C3AC973A-F92B-4B9E-914E-C74FC7B4E17D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C3AC973A-F92B-4B9E-914E-C74FC7B4E17D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C3AC973A-F92B-4B9E-914E-C74FC7B4E17D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
