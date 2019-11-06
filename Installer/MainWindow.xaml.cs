@@ -33,7 +33,7 @@ namespace Installer
         private Point lm = new Point();
 
         //Pages
-        public enum Page{ About, SelectFolder, Confirm, Extracting,Finished,Error}
+        public enum Page { About, SelectFolder, Confirm, Extracting, Finished, Error }
         private Page currentPage;
 
         //
@@ -43,10 +43,10 @@ namespace Installer
             InitializeComponent();
             SwitchPage();
         }
-        
+
         private void Window_Initialized(object sender, EventArgs e)
         {
-            
+
         }
 
         private string FindVTOL()
@@ -57,12 +57,19 @@ namespace Installer
                 @"NULL");
             string[] contents = File.ReadAllText(regPath + @"\steamapps\libraryfolders.vdf").Split('"');
             string gameFolder = regPath;
-            if (contents.Length >= 13)
+
+            for (int i = 13; !Directory.Exists(gameFolder + "\\steamapps\\common\\VTOL VR\\") && i < contents.Length; i += 4) //Loops through all steamlibrary folders to check if the game is installed there
             {
-                //Inside libraryfolders.vdf there is no paths (Issue  #12)
-                gameFolder = contents[13];
+                gameFolder = contents[i];
             }
-            
+
+            if (!Directory.Exists(gameFolder + "\\steamapps\\common\\VTOL VR\\")) //Throws an error if the game can't be found
+            {
+                Error.Visibility = Visibility.Visible;
+
+                return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            }
+
             string[] split = gameFolder.Split('\\');
             string result = "";
             for (int i = 0; i < split.Length; i++)
@@ -72,7 +79,7 @@ namespace Installer
             }
             result += @"steamapps\common\VTOL VR\";
             return result;
-            
+
         }
         private void InstallFiles()
         {
@@ -87,7 +94,7 @@ namespace Installer
                 return;
             }
             SetProgress(0);
-            
+
             try
             {
                 if (File.Exists(vtFolder + @"ModLoader.zip"))
@@ -283,6 +290,6 @@ namespace Installer
 
         #endregion
 
-        
+
     }
 }
