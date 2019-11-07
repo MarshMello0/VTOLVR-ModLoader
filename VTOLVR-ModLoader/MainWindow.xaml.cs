@@ -21,6 +21,7 @@ using System.Net;
 using System.Xml.Serialization;
 using System.ComponentModel;
 using Caliburn.Micro;
+using Microsoft.Win32;
 
 namespace VTOLVR_ModLoader
 {
@@ -44,7 +45,7 @@ namespace VTOLVR_ModLoader
         //Startup
         private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe" };
         private string[] neededDLLFiles = new string[] { @"\Plugins\discord-rpc.dll", @"\Managed\0Harmony.dll" };
-
+        private string[] args;
 
         //Moving Window
         private bool holdingDown;
@@ -93,6 +94,7 @@ namespace VTOLVR_ModLoader
         private void Start(object sender, EventArgs e)
         {
             root = Directory.GetCurrentDirectory();
+            args = Environment.GetCommandLineArgs();
             CheckBaseFolder();
             LoadVersions();
             GetData();
@@ -337,7 +339,25 @@ namespace VTOLVR_ModLoader
             GifState(gifStates.Play);
 
             //Launching the game
-            Process.Start("steam://run/667970");
+            if (args.Length > 1)
+            {
+                string regPath = (string)Registry.GetValue(
+    @"HKEY_CURRENT_USER\SOFTWARE\Valve\Steam",
+    @"SteamPath",
+    @"NULL");
+                StringBuilder customArgs = new StringBuilder();
+                for (int i = 1; i < args.Length - 1; i++)
+                {
+                    customArgs.Append(" " + args[i]);
+                }
+                Process process = new Process();
+                process.StartInfo.FileName = regPath + @"\steam.exe";
+                process.StartInfo.Arguments = @"-applaunch 667970" + customArgs.ToString();
+                process.Start();
+            }
+                
+            else
+                Process.Start("steam://run/667970");
 
             //Searching For Process
             WaitForProcess();
