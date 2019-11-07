@@ -84,6 +84,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dev Console\ConsoleInput.cs" />
+    <Compile Include="Dev Console\ConsoleWindow.cs" />
     <Compile Include="CSharp.cs" />
     <Compile Include="DiscordController.cs" />
     <Compile Include="DiscordRpc.cs" />

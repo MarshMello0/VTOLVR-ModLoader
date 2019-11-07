@@ -66,7 +66,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
 
 
         public AssetBundle assets;
-
+        private VTOLAPI api;
         public string rootPath;
         private string assetsPath = @"\modloader.assets";
 
@@ -74,6 +74,11 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
         private DiscordController discord;
         public string discordDetail, discordState;
         public int loadedModsCount;
+
+        //Console
+        private Windows.ConsoleWindow console = new Windows.ConsoleWindow();
+        private Windows.ConsoleInput input = new Windows.ConsoleInput();
+        private bool runConsole;
 
         private void Awake()
         {
@@ -84,6 +89,16 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             DontDestroyOnLoad(this.gameObject);
             Debug.Log("This is the first mod loader manager");
 
+            if (Environment.GetCommandLineArgs().Contains("dev"))
+            {
+                Debug.Log("Creating Console");
+                console.Initialize();
+                console.SetTitle("VTOL VR Console");
+                input.OnInputText += ConsoleInput;
+                Application.logMessageReceived += LogCallBack;
+                runConsole = true;
+                Debug.Log("Created Console");
+            }
             CreateAPI();
 
 
@@ -100,10 +115,52 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
 
             //gameObject.AddComponent<CSharp>();
 
+            api.CreateCommand("quit", delegate { Application.Quit(); });
+            api.CreateCommand("print", PrintMessage);
+            api.CreateCommand("help", api.ShowHelp);
+
         }
+
+
+
+        private void ConsoleInput(string obj)
+        {
+            api.CheckConsoleCommand(obj);
+        }
+
+        private void LogCallBack(string message, string stackTrace, LogType type)
+        {
+            if (type == LogType.Warning)
+                System.Console.ForegroundColor = ConsoleColor.Yellow;
+            else if (type == LogType.Error)
+                System.Console.ForegroundColor = ConsoleColor.Red;
+            else
+                System.Console.ForegroundColor = ConsoleColor.White;
+
+            // We're half way through typing something, so clear this line ..
+            if (Console.CursorLeft != 0)
+                input.ClearLine();
+
+            System.Console.WriteLine(message);
+
+            // If we were typing something re-add it.
+            input.RedrawInputLine();
+        }
+
+        private void Update()
+        {
+            if (runConsole)
+                input.Update();
+        }
+        private void OnDestroy()
+        {
+            if (runConsole)
+                console.Shutdown();
+        }
+
         private void CreateAPI()
         {
-            gameObject.AddComponent<VTOLAPI>();
+            api = gameObject.AddComponent<VTOLAPI>();
         }
         private void SetPaths()
         {
@@ -176,6 +233,12 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             Debug.Log("Creating new gameobject");
             GameObject modloader = new GameObject("Mod Loader", typeof(ModLoader));
             DontDestroyOnLoad(modloader);
+        }
+
+        public void PrintMessage(string obj)
+        {
+            obj.Remove(0, 5);
+            Debug.Log(obj);
         }
     }
 }

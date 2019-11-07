@@ -346,7 +346,7 @@ namespace VTOLVR_ModLoader
     @"SteamPath",
     @"NULL");
                 StringBuilder customArgs = new StringBuilder();
-                for (int i = 1; i < args.Length - 1; i++)
+                for (int i = 1; i < args.Length; i++)
                 {
                     customArgs.Append(" " + args[i]);
                 }

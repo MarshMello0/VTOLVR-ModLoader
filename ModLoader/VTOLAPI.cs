@@ -13,6 +13,7 @@ public class VTOLAPI : MonoBehaviour
     public static VTOLAPI instance { get; private set; }
     private string gamePath;
     private string modsPath = @"\VTOLVR_ModLoader\mods";
+    private Dictionary<string, Action<string>> commands = new Dictionary<string, Action<string>>();
 
     private void Awake()
     {
@@ -85,6 +86,37 @@ public class VTOLAPI : MonoBehaviour
     public static void CreateSettingsMenu(Settings newSettings)
     {
         ModLoader.ModLoader.instance.CreateSettingsMenu(newSettings);
+    }
+
+    public void CheckConsoleCommand(string command)
+    {
+        if (commands.ContainsKey(command.ToLower()))
+        {
+            commands[command.ToLower()].Invoke(command.ToLower());
+        }
+    }
+
+    public void CreateCommand(string command, Action<string> callBack)
+    {
+        commands.Add(command.ToLower(), callBack);
+        Debug.Log("ML API: Created command: " + command.ToLower());
+    }
+
+    public void RemoveCommand(string command)
+    {
+        commands.Remove(command.ToLower());
+        Debug.LogWarning("ML API: Removed command: " + command.ToLower());
+    }
+
+    public void ShowHelp(string input)
+    {
+        StringBuilder stringBuilder = new StringBuilder("ML API Console Commands\n");
+        List<string> list = commands.Keys.ToList();
+        for (int i = 0; i < list.Count; i++)
+        {
+            stringBuilder.AppendLine("Command: " + list[i]);
+        }
+        Debug.Log(stringBuilder.ToString());
     }
 }
 
