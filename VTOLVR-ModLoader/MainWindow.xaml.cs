@@ -37,6 +37,7 @@ namespace VTOLVR_ModLoader
         private static string dataURL = @"/files/data.xml";
         private static string url = @"http://vtolvr-mods.com/";
         private static string versionsFile = @"\versions.xml";
+        private static string uriPath = @"HKEY_CLASSES_ROOT\VTOLVRML";
         private string root;
 
         private static int currentDLLVersion = 200;
@@ -95,9 +96,40 @@ namespace VTOLVR_ModLoader
         {
             root = Directory.GetCurrentDirectory();
             args = Environment.GetCommandLineArgs();
+            CreateURI();
             CheckBaseFolder();
             LoadVersions();
             GetData();
+        }
+        private void CreateURI()
+        {
+            string value = (string)Registry.GetValue(
+                uriPath,
+                @"",
+                @"");
+            if (value == null)
+            {
+                //Setting Default
+                Registry.SetValue(
+                uriPath,
+                @"",
+                @"URL:VTOLVRML");
+                //Setting URL Protocol
+                Registry.SetValue(
+                uriPath,
+                @"URL Protocol",
+                @"");
+                //Setting Default Icon
+                Registry.SetValue(
+                    uriPath + @"\DefaultIcon",
+                    @"",
+                    Directory.GetCurrentDirectory() + @"\VTOLVR-ModLoader.exe,1");
+                //Setting Command
+                Registry.SetValue(
+                    uriPath + @"\shell\open\command",
+                    @"",
+                    "\"" + Directory.GetCurrentDirectory() + @"\VTOLVR-ModLoader.exe" + "\" \"" + @"%1" + "\"");
+            }
         }
         private void CheckBaseFolder()
         {
