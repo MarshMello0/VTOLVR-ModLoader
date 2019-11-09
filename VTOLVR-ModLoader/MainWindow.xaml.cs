@@ -56,6 +56,11 @@ namespace VTOLVR_ModLoader
         private bool hasVersions;
         private int newDLLVersion;
         WebClient client;
+        //URI
+        private bool uriSet = false;
+        private string uriDownload;
+        private string uriFileName;
+
         #region Releasing Update
         private void CreateUpdatedFeed()
         {
@@ -86,6 +91,7 @@ namespace VTOLVR_ModLoader
             }
         }
         #endregion
+
         #region Startup
         public MainWindow()
         {
@@ -96,10 +102,38 @@ namespace VTOLVR_ModLoader
         {
             root = Directory.GetCurrentDirectory();
             args = Environment.GetCommandLineArgs();
-            CreateURI();
+            
+            URICheck();
+            if (!uriSet)
+                CreateURI();
+
             CheckBaseFolder();
             LoadVersions();
             GetData();
+        }
+        private void URICheck()
+        {
+            if (args.Length == 2 && root.Contains("System32"))
+            {
+                root = args[0];
+                //This is removing the "\VTOLVR-ModLoader.exe" at the end, it will always be a fixed 21 characters
+                root = root.Remove(root.Length - 21, 21);
+                if (args[1].Contains("file="))
+                {
+                    string argument = args[1].Remove(0, 11);
+                    if (argument.Contains("file="))
+                    {
+                        string splitFile = argument.Remove(0,5);
+                        if (!string.IsNullOrEmpty(splitFile))
+                        {
+                            uriDownload = splitFile;
+                            uriSet = true;
+                        }
+                        else
+                            MessageBox.Show(argument, "URI Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
         }
         private void CreateURI()
         {
@@ -123,12 +157,12 @@ namespace VTOLVR_ModLoader
                 Registry.SetValue(
                     uriPath + @"\DefaultIcon",
                     @"",
-                    Directory.GetCurrentDirectory() + @"\VTOLVR-ModLoader.exe,1");
+                    root + @"\VTOLVR-ModLoader.exe,1");
                 //Setting Command
                 Registry.SetValue(
                     uriPath + @"\shell\open\command",
                     @"",
-                    "\"" + Directory.GetCurrentDirectory() + @"\VTOLVR-ModLoader.exe" + "\" \"" + @"%1" + "\"");
+                    "\"" + root + @"\VTOLVR-ModLoader.exe" + "\" \"" + @"%1" + "\"");
             }
         }
         private void CheckBaseFolder()
@@ -175,7 +209,7 @@ namespace VTOLVR_ModLoader
             //Checking the Managed Folder
             foreach (string file in neededDLLFiles)
             {
-                if (!File.Exists(Directory.GetParent(Directory.GetCurrentDirectory()).FullName + @"\VTOLVR_Data" + file))
+                if (!File.Exists(Directory.GetParent(root).FullName + @"\VTOLVR_Data" + file))
                 {
                     MissingManagedFile(file);
                 }
@@ -267,7 +301,6 @@ namespace VTOLVR_ModLoader
                 if (currentEXEVersion < deserialized.fileUpdates[0].exeVersion)
                 {
                     UpdateExe();
-                    ExtractMods();
                 }
                 else if (currentDLLVersion < deserialized.fileUpdates[0].dllVersion)
                 {
@@ -455,8 +488,14 @@ namespace VTOLVR_ModLoader
         }
         #endregion
 
+        #region Handeling Mods
         private void ExtractMods()
         {
+            if (uriSet)
+            {
+                DownloadFile();
+                return;
+            }
             SetPlayButton(true);
             SetProgress(0, "Extracting  mods...");
             DirectoryInfo folder = new DirectoryInfo(root + modsFolder);
@@ -556,9 +595,9 @@ namespace VTOLVR_ModLoader
                         {
                             split = depFiles[k].Split('\\');
                             fileName = split[split.Length - 1];
-                            Console.WriteLine("Moved file \n" + Directory.GetParent(Directory.GetCurrentDirectory()).FullName +
+                            Console.WriteLine("Moved file \n" + Directory.GetParent(root).FullName +
                                         @"\VTOLVR_Data\Managed\" + fileName);
-                            File.Copy(depFiles[k], Directory.GetParent(Directory.GetCurrentDirectory()).FullName +
+                            File.Copy(depFiles[k], Directory.GetParent(root).FullName +
                                         @"\VTOLVR_Data\Managed\" + fileName,
                                         true);
 
@@ -575,6 +614,43 @@ namespace VTOLVR_ModLoader
 
             ExtractSkins();
         }
+
+        private void DownloadFile()
+        {
+            if (uriDownload.Equals(string.Empty) || uriDownload.Split('/').Length < 4)
+                return;
+            
+            uriFileName = uriDownload.Split('/')[4];
+            bool isMod = uriDownload.Contains("mods");
+            client = new WebClient();
+            client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(FileProgress);
+            client.DownloadFileCompleted += new AsyncCompletedEventHandler(FileDone);
+            client.DownloadFileAsync(new Uri(url + uriDownload.Remove(0,1)), root + (isMod? modsFolder : skinsFolder) + @"\" + uriFileName);
+        }
+
+        private void FileDone(object sender, AsyncCompletedEventArgs e)
+        {
+            if (!e.Cancelled && e.Error == null)
+            {
+                //Create Toast UI Popup
+            }
+            else
+            {
+                MessageBox.Show("Failed Downloading " + uriFileName + "\n" + e.Error.ToString(),
+                    "Failed Downloading File", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            uriSet = false;
+            //ExtractMods();
+        }
+
+        private void FileProgress(object sender, DownloadProgressChangedEventArgs e)
+        {
+            SetProgress(e.ProgressPercentage / 100, "Downloading " + uriFileName + "...");
+        }
+
+        #endregion
+
         private void SetProgress(int barValue, string text)
         {
             progressText.Text = text;
@@ -624,6 +700,8 @@ namespace VTOLVR_ModLoader
         {
             Quit();
         }
+
+        
 
         #region Moving Window
         private void TopBarDown(object sender, MouseButtonEventArgs e)
