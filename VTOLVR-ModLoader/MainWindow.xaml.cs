@@ -649,6 +649,12 @@ namespace VTOLVR_ModLoader
             if (!e.Cancelled && e.Error == null)
             {
                 ShowNotification("Downloaded " + uriFileName);
+                //Checking if they already had the mod extracted incase they wanted to update it
+                bool isMod = uriDownload.Contains("mods");
+                if (Directory.Exists(root + (isMod ? modsFolder : skinsFolder) + @"\" + uriFileName.Split('.')[0]))
+                {
+                    Directory.Delete(root + (isMod ? modsFolder : skinsFolder) + @"\" + uriFileName.Split('.')[0],true);
+                }
             }
             else
             {
