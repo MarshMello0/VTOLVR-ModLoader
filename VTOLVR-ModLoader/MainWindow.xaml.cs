@@ -60,6 +60,8 @@ namespace VTOLVR_ModLoader
         private bool uriSet = false;
         private string uriDownload;
         private string uriFileName;
+        //Notifications
+        private NotificationWindow notification;
 
         #region Releasing Update
         private void CreateUpdatedFeed()
@@ -102,7 +104,13 @@ namespace VTOLVR_ModLoader
         {
             root = Directory.GetCurrentDirectory();
             args = Environment.GetCommandLineArgs();
-            
+            WaitAsync();
+        }
+
+        private async void WaitAsync()
+        {
+            await Task.Delay(500);
+
             URICheck();
             if (!uriSet)
                 CreateURI();
@@ -632,7 +640,7 @@ namespace VTOLVR_ModLoader
         {
             if (!e.Cancelled && e.Error == null)
             {
-                //Create Toast UI Popup
+                ShowNotification("Downloaded " + uriFileName);
             }
             else
             {
@@ -641,7 +649,9 @@ namespace VTOLVR_ModLoader
             }
 
             uriSet = false;
-            //ExtractMods();
+            SetProgress(100, "Downloaded " + uriFileName);
+            SetPlayButton(false);
+            ExtractMods();
         }
 
         private void FileProgress(object sender, DownloadProgressChangedEventArgs e)
@@ -651,6 +661,16 @@ namespace VTOLVR_ModLoader
 
         #endregion
 
+        private void ShowNotification(string text)
+        {
+            if (notification != null)
+            {
+                notification.Close();
+            }
+            notification = new NotificationWindow(text, this,5);
+            notification.Owner = this;
+            notification.Show();
+        }
         private void SetProgress(int barValue, string text)
         {
             progressText.Text = text;
