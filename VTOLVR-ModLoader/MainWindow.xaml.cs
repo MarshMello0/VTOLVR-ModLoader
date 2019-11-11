@@ -62,6 +62,10 @@ namespace VTOLVR_ModLoader
         private string uriFileName;
         //Notifications
         private NotificationWindow notification;
+        //Storing completed tasks
+        private int extractedMods = 0;
+        private int extractedSkins = 0;
+        private int movedDep = 0;
 
         #region Releasing Update
         private void CreateUpdatedFeed()
@@ -518,7 +522,6 @@ namespace VTOLVR_ModLoader
             float zipAmount = 100 / files.Length;
             string currentFolder;
 
-            int modsExtracted = 0;
             for (int i = 0; i < files.Length; i++)
             {
                 SetProgress((int)Math.Ceiling(zipAmount * i), "Extracting mods... [" + files[i].Name + "]");
@@ -532,15 +535,15 @@ namespace VTOLVR_ModLoader
 
                 Directory.CreateDirectory(currentFolder);
                 ZipFile.ExtractToDirectory(files[i].FullName, currentFolder);
-                modsExtracted++;
+                extractedMods++;
 
                 //Deleting the zip
                 //File.Delete(files[i].FullName);
             }
 
             SetPlayButton(false);
-            SetProgress(100, modsExtracted == 0 ? "No mods were extracted" : "Extracted " + modsExtracted +
-                (modsExtracted == 1 ? " mod" : " mods"));
+            SetProgress(100, extractedMods == 0 ? "No mods were extracted" : "Extracted " + extractedMods +
+                (extractedMods == 1 ? " mod" : " mods"));
             MoveDependencies();
 
         }
@@ -559,7 +562,6 @@ namespace VTOLVR_ModLoader
             float zipAmount = 100 / files.Length;
             string currentFolder;
 
-            int skinsExtracted = 0;
             for (int i = 0; i < files.Length; i++)
             {
                 SetProgress((int)Math.Ceiling(zipAmount * i), "Extracting skins... [" + files[i].Name + "]");
@@ -573,19 +575,25 @@ namespace VTOLVR_ModLoader
 
                 Directory.CreateDirectory(currentFolder);
                 ZipFile.ExtractToDirectory(files[i].FullName, currentFolder);
-                skinsExtracted++;
+                extractedSkins++;
             }
 
             SetPlayButton(false);
-            SetProgress(100, skinsExtracted == 0 ? "No new skins were found" : "Extracted " + skinsExtracted +
-                (skinsExtracted == 1 ? " skin" : " skins"));
+            //This is the final text displayed in the progress text
+            SetProgress(100, 
+                (extractedMods == 0? "0 Mods" : (extractedMods == 1? "1 Mod" : extractedMods + " Mods")) + 
+                " and " +
+                (extractedSkins == 0 ? "0 Skins" : (extractedSkins == 1 ? "1 Skin" : extractedSkins + " Skins")) + 
+                " extracted" + 
+                " and " +
+                (movedDep == 0 ? "0 Dependencies" : (movedDep == 1 ? "1 Dependencies" : movedDep + " Dependencies")) +
+                " moved");
         }
 
         private void MoveDependencies()
         {
             SetPlayButton(true);
             string[] modFolders = Directory.GetDirectories(root + modsFolder);
-            int depsMoved = 0;
 
             string fileName;
             string[] split;
@@ -609,7 +617,7 @@ namespace VTOLVR_ModLoader
                                         @"\VTOLVR_Data\Managed\" + fileName,
                                         true);
 
-                            depsMoved++;
+                            movedDep++;
                         }
                         break;
                     }
@@ -617,8 +625,8 @@ namespace VTOLVR_ModLoader
             }
 
             SetPlayButton(false);
-            SetProgress(100, depsMoved == 0 ? "Checked Dependencies" : "Moved " + depsMoved
-                + (depsMoved == 1 ? " dependency" : " dependencies"));
+            SetProgress(100, movedDep == 0 ? "Checked Dependencies" : "Moved " + movedDep
+                + (movedDep == 1 ? " dependency" : " dependencies"));
 
             ExtractSkins();
         }
