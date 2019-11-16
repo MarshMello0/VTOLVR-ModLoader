@@ -81,35 +81,43 @@ namespace Installer
             return result;
 
         }
+        /// <summary>
+        /// If the file exists it will delete it other wise,
+        /// it doesn't throw an error
+        /// </summary>
+        /// <param name="path"></param>
+        private void TryDelete(string path)
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
         private void InstallFiles()
         {
             //If they change the folder path by typing it in by hand
             vtFolder = folderBox.Text;
             if (Directory.Exists(vtFolder + @"VTOLVR_ModLoader"))
             {
-                //It must be already installed
-                SetProgress(100);
-                currentPage++;
-                SwitchPage();
-                return;
+                //Delete the files we are going to place in there
+                TryDelete(vtFolder + @"VTOLVR_ModLoader\injector.exe");
+                TryDelete(vtFolder + @"VTOLVR_ModLoader\ModLoader.dll");
+                TryDelete(vtFolder + @"VTOLVR_ModLoader\SharpMonoInjector.dll");
+                TryDelete(vtFolder + @"VTOLVR_ModLoader\VTOLVR-ModLoader.exe");
+                TryDelete(vtFolder + @"VTOLVR_ModLoader\WpfAnimatedGif.dll");
+                TryDelete(vtFolder + @"VTOLVR_ModLoader\data.xml");
+                TryDelete(vtFolder + @"VTOLVR_ModLoader\versions.xml");
             }
             SetProgress(0);
-
+            TryDelete(vtFolder + @"ModLoader.zip");
             try
             {
-                if (File.Exists(vtFolder + @"ModLoader.zip"))
-                    File.Delete(vtFolder + @"ModLoader.zip");
 
                 //Extracting the zip from resources to files
                 File.WriteAllBytes(vtFolder + "ModLoader.zip", Properties.Resources.ModLoader);
 
                 //Stopping a possible error
-                if (File.Exists(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll"))
-                    File.Delete(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll");
-                if (File.Exists(vtFolder + @"VTOLVR_Data\Managed\0Harmony.dll"))
-                    File.Delete(vtFolder + @"VTOLVR_Data\Managed\0Harmony.dll");
-                if (File.Exists(vtFolder + @"VTOLVR_Data\Managed\mscorlib.dll"))
-                    File.Delete(vtFolder + @"VTOLVR_Data\Managed\mscorlib.dll");
+                TryDelete(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll");
+                TryDelete(vtFolder + @"VTOLVR_Data\Managed\0Harmony.dll");
+                TryDelete(vtFolder + @"VTOLVR_Data\Managed\mscorlib.dll");
 
 
                 ZipFile.ExtractToDirectory(vtFolder + @"ModLoader.zip", vtFolder);

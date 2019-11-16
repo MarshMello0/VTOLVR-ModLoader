@@ -20,7 +20,6 @@ using WpfAnimatedGif;
 using System.Net;
 using System.Xml.Serialization;
 using System.ComponentModel;
-using Caliburn.Micro;
 using Microsoft.Win32;
 using System.Security.Cryptography;
 
@@ -36,12 +35,12 @@ namespace VTOLVR_ModLoader
         private static string dataFile = @"\data.xml";
         private static string dataFileTemp = @"\data_TEMP.xml";
         private static string dataURL = @"/files/data.xml";
-        private static string url = @"http://localhost:81/";
+        private static string url = @"https://vtolvr-mods.com";
         private static string versionsFile = @"\versions.xml";
         private static string uriPath = @"HKEY_CLASSES_ROOT\VTOLVRML";
         private string root;
 
-        private static int currentEXEVersion = 200;
+        private static int currentEXEVersion = 210;
 
         //Startup
         private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe" };
@@ -80,15 +79,15 @@ namespace VTOLVR_ModLoader
                 }
             }
 
-            //Update newUpdate = new Update("Title", "20/10/2019", "Description");
+            Update newUpdate = new Update("Improved Updating", "16/11/2019", "There have been some improvements to the auto-updating so hopefully, I can release smaller and more frequent updates without the annoyance of having to keep going to the website to get the new update.");
             string newHash = CalculateMD5(root + @"\ModLoader.dll");
             FileUpdate newFileUpdate = new FileUpdate(210, new ModLoaderDLL(210,newHash));
 
-            //List<Update> updates = newData.updateFeed.ToList();
+            List<Update> updates = newData.updateFeed.ToList();
             List<FileUpdate> fileUpdates = newData.fileUpdates.ToList();
-            //updates.Insert(0, newUpdate);
+            updates.Insert(0, newUpdate);
             fileUpdates.Insert(0, newFileUpdate);
-            //newData.updateFeed = updates.ToArray();
+            newData.updateFeed = updates.ToArray();
             newData.fileUpdates = fileUpdates.ToArray();
 
             using (FileStream stream = new FileStream(root + @"\Data.xml", FileMode.Create))
