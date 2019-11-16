@@ -22,6 +22,7 @@ using System.Xml.Serialization;
 using System.ComponentModel;
 using Caliburn.Micro;
 using Microsoft.Win32;
+using System.Security.Cryptography;
 
 namespace VTOLVR_ModLoader
 {
@@ -40,8 +41,7 @@ namespace VTOLVR_ModLoader
         private static string uriPath = @"HKEY_CLASSES_ROOT\VTOLVRML";
         private string root;
 
-        private static int currentDLLVersion = 200;
-        private static int currentEXEVersion = 200;
+        private static int currentEXEVersion = 100;
 
         //Startup
         private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe" };
@@ -53,8 +53,8 @@ namespace VTOLVR_ModLoader
         private Point lm = new Point();
         private bool isBusy;
         //Updates
-        private bool hasVersions;
-        private int newDLLVersion;
+        private bool hasVersions, updateExe;
+        private int newExeVersion;
         WebClient client;
         //URI
         private bool uriSet = false;
@@ -245,7 +245,6 @@ namespace VTOLVR_ModLoader
                 {
                     XmlSerializer xml = new XmlSerializer(typeof(Versions));
                     Versions deserialized = (Versions)xml.Deserialize(stream);
-                    currentDLLVersion = deserialized.currentDLLVersion;
                     currentEXEVersion = deserialized.currentEXEVersion;
                     hasVersions = true;
                 }
@@ -312,9 +311,9 @@ namespace VTOLVR_ModLoader
                 //Checking versions
                 if (currentEXEVersion < deserialized.fileUpdates[0].exeVersion)
                 {
-                    UpdateExe();
+                    UpdateExe(deserialized.fileUpdates[0].exeVersion);
                 }
-                else if (currentDLLVersion < deserialized.fileUpdates[0].dllVersion)
+                else if (0 < deserialized.fileUpdates[0].dllVersion)
                 {
                     UpdateDLL(url + "/files/updates/dll/" + deserialized.fileUpdates[0].dllVersion + "/ModLoader.dll",
                         deserialized.fileUpdates[0].dllVersion);
@@ -359,7 +358,6 @@ namespace VTOLVR_ModLoader
                     client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DLLProgress);
                     client.DownloadFileCompleted += new AsyncCompletedEventHandler(DLLDone);
                     client.DownloadFileAsync(new Uri(url), @"ModLoader.dll");
-                    newDLLVersion = newVersion;
                 }
             }
             catch (Exception e)
@@ -379,7 +377,6 @@ namespace VTOLVR_ModLoader
             }
             else
             {
-                currentDLLVersion = newDLLVersion;
                 UpdateVersions();
                 SetProgress(100, "Finished downloading updates");
                 SetPlayButton(false);
@@ -391,16 +388,21 @@ namespace VTOLVR_ModLoader
             SetProgress(e.ProgressPercentage / 100, "Downloading \"ModLoader.dll\"...");
             Console.WriteLine("Downloading \"ModLoader.dll\"... [" + e.ProgressPercentage / 100 + "]");
         }
-        private void UpdateExe()
+        private void UpdateExe(int newVersion)
         {
-            MessageBox.Show("There is an update to the launcher\nPlease head over to " + url + " to download the latest version.", "Launcher Update!");
+            ShowNotification("The launcher will auto update next time you launch VTOL");
+            newExeVersion = newVersion;
+            updateExe = true;
+
+            if (!hasVersions)
+                UpdateVersions();
         }
         private void UpdateVersions()
         {
             using (FileStream stream = File.Create(root + versionsFile))
             {
                 XmlSerializer xml = new XmlSerializer(typeof(Versions));
-                xml.Serialize(stream, new Versions(currentDLLVersion, currentEXEVersion));
+                xml.Serialize(stream, new Versions(0, currentEXEVersion));
             }
         }
 
@@ -416,20 +418,16 @@ namespace VTOLVR_ModLoader
             GifState(gifStates.Play);
 
             //Launching the game
-            if (args.Length > 1)
+            if (updateExe)
             {
                 string regPath = (string)Registry.GetValue(
     @"HKEY_CURRENT_USER\SOFTWARE\Valve\Steam",
     @"SteamPath",
     @"NULL");
-                StringBuilder customArgs = new StringBuilder();
-                for (int i = 1; i < args.Length; i++)
-                {
-                    customArgs.Append(" " + args[i]);
-                }
+
                 Process process = new Process();
                 process.StartInfo.FileName = regPath + @"\steam.exe";
-                process.StartInfo.Arguments = @"-applaunch 667970" + customArgs.ToString();
+                process.StartInfo.Arguments = @"-applaunch 667970" + " dev -updateLauncher " + newExeVersion;
                 process.Start();
             }
                 
