@@ -28,13 +28,25 @@ public class Update
 public class FileUpdate
 {
     public int exeVersion { get; set; }
-    public int dllVersion { get; set; }
+    public ModLoaderDLL dll {get;set;}
     public DateTime dateTime { get; set; }
     public FileUpdate() { }
-    public FileUpdate(int exeVersion, int dllVersion)
+    public FileUpdate(int exeVersion, ModLoaderDLL dll)
     {
         this.exeVersion = exeVersion;
-        this.dllVersion = dllVersion;
+        this.dll = dll;
         dateTime = DateTime.Now;
+    }
+}
+
+public class ModLoaderDLL
+{
+    public int version { get; set; }
+    public string hash { get; set; }
+    public ModLoaderDLL() { }
+    public ModLoaderDLL(int version, string hash)
+    {
+        this.version = version;
+        this.hash = hash;
     }
 }

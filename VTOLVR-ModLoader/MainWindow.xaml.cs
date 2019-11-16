@@ -36,12 +36,12 @@ namespace VTOLVR_ModLoader
         private static string dataFile = @"\data.xml";
         private static string dataFileTemp = @"\data_TEMP.xml";
         private static string dataURL = @"/files/data.xml";
-        private static string url = @"http://vtolvr-mods.com/";
+        private static string url = @"http://localhost:81/";
         private static string versionsFile = @"\versions.xml";
         private static string uriPath = @"HKEY_CLASSES_ROOT\VTOLVRML";
         private string root;
 
-        private static int currentEXEVersion = 100;
+        private static int currentEXEVersion = 200;
 
         //Startup
         private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe" };
@@ -80,20 +80,33 @@ namespace VTOLVR_ModLoader
                 }
             }
 
-            Update newUpdate = new Update("Title", "20/10/2019", "Description");
-            FileUpdate newFileUpdate = new FileUpdate(200, 200);
+            //Update newUpdate = new Update("Title", "20/10/2019", "Description");
+            string newHash = CalculateMD5(root + @"\ModLoader.dll");
+            FileUpdate newFileUpdate = new FileUpdate(210, new ModLoaderDLL(210,newHash));
 
-            List<Update> updates = newData.updateFeed.ToList();
+            //List<Update> updates = newData.updateFeed.ToList();
             List<FileUpdate> fileUpdates = newData.fileUpdates.ToList();
-            updates.Insert(0, newUpdate);
+            //updates.Insert(0, newUpdate);
             fileUpdates.Insert(0, newFileUpdate);
-            newData.updateFeed = updates.ToArray();
+            //newData.updateFeed = updates.ToArray();
             newData.fileUpdates = fileUpdates.ToArray();
 
             using (FileStream stream = new FileStream(root + @"\Data.xml", FileMode.Create))
             {
                 XmlSerializer xml = new XmlSerializer(typeof(Data));
                 xml.Serialize(stream, newData);
+            }
+        }
+
+        static string CalculateMD5(string filename)
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(filename))
+                {
+                    var hash = md5.ComputeHash(stream);
+                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                }
             }
         }
         #endregion
@@ -313,10 +326,9 @@ namespace VTOLVR_ModLoader
                 {
                     UpdateExe(deserialized.fileUpdates[0].exeVersion);
                 }
-                else if (0 < deserialized.fileUpdates[0].dllVersion)
+                else if (CalculateMD5(root + @"\ModLoader.dll") != deserialized.fileUpdates[0].dll.hash)
                 {
-                    UpdateDLL(url + "/files/updates/dll/" + deserialized.fileUpdates[0].dllVersion + "/ModLoader.dll",
-                        deserialized.fileUpdates[0].dllVersion);
+                    UpdateDLL(url + "/files/updates/dll/" + deserialized.fileUpdates[0].dll.version + "/ModLoader.dll");
                 }
                 else if (!hasVersions)
                 {
@@ -346,7 +358,7 @@ namespace VTOLVR_ModLoader
                 return false;
             }
         }
-        private void UpdateDLL(string url, int newVersion)
+        private void UpdateDLL(string url)
         {
             try
             {
@@ -427,7 +439,7 @@ namespace VTOLVR_ModLoader
 
                 Process process = new Process();
                 process.StartInfo.FileName = regPath + @"\steam.exe";
-                process.StartInfo.Arguments = @"-applaunch 667970" + " dev -updateLauncher " + newExeVersion;
+                process.StartInfo.Arguments = @"-applaunch 667970" + " -updateLauncher " + newExeVersion;
                 process.Start();
             }
                 
