@@ -27,8 +27,8 @@ namespace Windows
 			if ( Console.CursorLeft > 0 )
 				ClearLine();
 
-			System.Console.ForegroundColor = ConsoleColor.Green;
-			System.Console.Write( inputString );
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.Write( inputString );
 		}
 
 		internal void OnBackspace()
@@ -48,17 +48,14 @@ namespace Windows
 		internal void OnEnter()
 		{
 			ClearLine();
-			System.Console.ForegroundColor = ConsoleColor.Green;
-			System.Console.WriteLine( "> " + inputString );
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine( "> " + inputString );
 
 			var strtext = inputString;
 			inputString = "";
 
-			if ( OnInputText != null )
-			{
-				OnInputText( strtext );
-			}
-		}
+            OnInputText?.Invoke(strtext);
+        }
 
 		public void Update()
 		{
