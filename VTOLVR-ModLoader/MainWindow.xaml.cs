@@ -20,7 +20,8 @@ using WpfAnimatedGif;
 using System.Net;
 using System.Xml.Serialization;
 using System.ComponentModel;
-using Caliburn.Micro;
+using Microsoft.Win32;
+using System.Security.Cryptography;
 
 namespace VTOLVR_ModLoader
 {
@@ -34,26 +35,37 @@ namespace VTOLVR_ModLoader
         private static string dataFile = @"\data.xml";
         private static string dataFileTemp = @"\data_TEMP.xml";
         private static string dataURL = @"/files/data.xml";
-        private static string url = @"http://vtolvr-mods.com/";
+        private static string url = @"https://vtolvr-mods.com";
         private static string versionsFile = @"\versions.xml";
+        private static string uriPath = @"HKEY_CLASSES_ROOT\VTOLVRML";
         private string root;
 
-        private static int currentDLLVersion = 200;
-        private static int currentEXEVersion = 200;
+        private static int currentEXEVersion = 210;
 
         //Startup
         private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe" };
-        private string[] neededDLLFiles = new string[] { @"\Plugins\discord-rpc.dll" , @"\Managed\0Harmony.dll" };
-
+        private string[] neededDLLFiles = new string[] { @"\Plugins\discord-rpc.dll", @"\Managed\0Harmony.dll" };
+        private string[] args;
 
         //Moving Window
         private bool holdingDown;
         private Point lm = new Point();
         private bool isBusy;
         //Updates
-        private bool hasVersions;
-        private int newDLLVersion;
+        private bool hasVersions, updateExe;
+        private int newExeVersion;
         WebClient client;
+        //URI
+        private bool uriSet = false;
+        private string uriDownload;
+        private string uriFileName;
+        //Notifications
+        private NotificationWindow notification;
+        //Storing completed tasks
+        private int extractedMods = 0;
+        private int extractedSkins = 0;
+        private int movedDep = 0;
+
         #region Releasing Update
         private void CreateUpdatedFeed()
         {
@@ -67,13 +79,14 @@ namespace VTOLVR_ModLoader
                 }
             }
 
-            Update newUpdate = new Update("Title", "20/10/2019", "Description");
-            FileUpdate newFileUpdate = new FileUpdate(200, 200);
+            Update newUpdate = new Update("Improved Updating", "16/11/2019", "There have been some improvements to the auto-updating so hopefully, I can release smaller and more frequent updates without the annoyance of having to keep going to the website to get the new update.");
+            string newHash = CalculateMD5(root + @"\ModLoader.dll");
+            FileUpdate newFileUpdate = new FileUpdate(210, new ModLoaderDLL(210,newHash));
 
             List<Update> updates = newData.updateFeed.ToList();
             List<FileUpdate> fileUpdates = newData.fileUpdates.ToList();
-            updates.Insert(0,newUpdate);
-            fileUpdates.Insert(0,newFileUpdate);
+            updates.Insert(0, newUpdate);
+            fileUpdates.Insert(0, newFileUpdate);
             newData.updateFeed = updates.ToArray();
             newData.fileUpdates = fileUpdates.ToArray();
 
@@ -83,7 +96,20 @@ namespace VTOLVR_ModLoader
                 xml.Serialize(stream, newData);
             }
         }
+
+        static string CalculateMD5(string filename)
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(filename))
+                {
+                    var hash = md5.ComputeHash(stream);
+                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                }
+            }
+        }
         #endregion
+
         #region Startup
         public MainWindow()
         {
@@ -93,9 +119,75 @@ namespace VTOLVR_ModLoader
         private void Start(object sender, EventArgs e)
         {
             root = Directory.GetCurrentDirectory();
+            args = Environment.GetCommandLineArgs();
+            WaitAsync();
+        }
+
+        private async void WaitAsync()
+        {
+            await Task.Delay(500);
+
+            URICheck();
+            if (!uriSet)
+                CreateURI();
+
             CheckBaseFolder();
             LoadVersions();
             GetData();
+        }
+        private void URICheck()
+        {
+            if (args.Length == 2 && root.Contains("System32"))
+            {
+                root = args[0];
+                //This is removing the "\VTOLVR-ModLoader.exe" at the end, it will always be a fixed 21 characters
+                root = root.Remove(root.Length - 21, 21);
+                if (args[1].Contains("file="))
+                {
+                    string argument = args[1].Remove(0, 11);
+                    if (argument.Contains("file="))
+                    {
+                        string splitFile = argument.Remove(0,5);
+                        if (!string.IsNullOrEmpty(splitFile))
+                        {
+                            uriDownload = splitFile;
+                            uriSet = true;
+                        }
+                        else
+                            MessageBox.Show(argument, "URI Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
+        private void CreateURI()
+        {
+            string value = (string)Registry.GetValue(
+                uriPath,
+                @"",
+                @"");
+            if (value == null)
+            {
+                //Setting Default
+                Registry.SetValue(
+                uriPath,
+                @"",
+                @"URL:VTOLVRML");
+                //Setting URL Protocol
+                Registry.SetValue(
+                uriPath,
+                @"URL Protocol",
+                @"");
+                //Setting Default Icon
+                Registry.SetValue(
+                    uriPath + @"\DefaultIcon",
+                    @"",
+                    root + @"\VTOLVR-ModLoader.exe,1");
+                //Setting Command
+                Registry.SetValue(
+                    uriPath + @"\shell\open\command",
+                    @"",
+                    "\"" + root + @"\VTOLVR-ModLoader.exe" + "\" \"" + @"%1" + "\"");
+            }
         }
         private void CheckBaseFolder()
         {
@@ -141,7 +233,7 @@ namespace VTOLVR_ModLoader
             //Checking the Managed Folder
             foreach (string file in neededDLLFiles)
             {
-                if (!File.Exists(Directory.GetParent(Directory.GetCurrentDirectory()).FullName + @"\VTOLVR_Data" + file))
+                if (!File.Exists(Directory.GetParent(root).FullName + @"\VTOLVR_Data" + file))
                 {
                     MissingManagedFile(file);
                 }
@@ -165,7 +257,6 @@ namespace VTOLVR_ModLoader
                 {
                     XmlSerializer xml = new XmlSerializer(typeof(Versions));
                     Versions deserialized = (Versions)xml.Deserialize(stream);
-                    currentDLLVersion = deserialized.currentDLLVersion;
                     currentEXEVersion = deserialized.currentEXEVersion;
                     hasVersions = true;
                 }
@@ -232,13 +323,11 @@ namespace VTOLVR_ModLoader
                 //Checking versions
                 if (currentEXEVersion < deserialized.fileUpdates[0].exeVersion)
                 {
-                    UpdateExe();
-                    ExtractMods();
+                    UpdateExe(deserialized.fileUpdates[0].exeVersion);
                 }
-                else if (currentDLLVersion < deserialized.fileUpdates[0].dllVersion)
+                else if (CalculateMD5(root + @"\ModLoader.dll") != deserialized.fileUpdates[0].dll.hash)
                 {
-                    UpdateDLL(url + "/files/updates/dll/" + deserialized.fileUpdates[0].dllVersion + "/ModLoader.dll",
-                        deserialized.fileUpdates[0].dllVersion);
+                    UpdateDLL(url + "/files/updates/dll/" + deserialized.fileUpdates[0].dll.version + "/ModLoader.dll");
                 }
                 else if (!hasVersions)
                 {
@@ -268,7 +357,7 @@ namespace VTOLVR_ModLoader
                 return false;
             }
         }
-        private void UpdateDLL(string url, int newVersion)
+        private void UpdateDLL(string url)
         {
             try
             {
@@ -280,7 +369,6 @@ namespace VTOLVR_ModLoader
                     client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DLLProgress);
                     client.DownloadFileCompleted += new AsyncCompletedEventHandler(DLLDone);
                     client.DownloadFileAsync(new Uri(url), @"ModLoader.dll");
-                    newDLLVersion = newVersion;
                 }
             }
             catch (Exception e)
@@ -291,7 +379,7 @@ namespace VTOLVR_ModLoader
         }
         private void DLLDone(object sender, AsyncCompletedEventArgs e)
         {
-            
+
             if (e.Cancelled && e.Error != null)
             {
                 SetProgress(100, "Failed downloading \"ModLoader.dll\"");
@@ -300,7 +388,6 @@ namespace VTOLVR_ModLoader
             }
             else
             {
-                currentDLLVersion = newDLLVersion;
                 UpdateVersions();
                 SetProgress(100, "Finished downloading updates");
                 SetPlayButton(false);
@@ -312,16 +399,21 @@ namespace VTOLVR_ModLoader
             SetProgress(e.ProgressPercentage / 100, "Downloading \"ModLoader.dll\"...");
             Console.WriteLine("Downloading \"ModLoader.dll\"... [" + e.ProgressPercentage / 100 + "]");
         }
-        private void UpdateExe()
+        private void UpdateExe(int newVersion)
         {
-            MessageBox.Show("There is an update to the launcher\nPlease head over to " + url + " to download the latest version.", "Launcher Update!");
+            ShowNotification("The launcher will auto update next time you launch VTOL");
+            newExeVersion = newVersion;
+            updateExe = true;
+
+            if (!hasVersions)
+                UpdateVersions();
         }
         private void UpdateVersions()
         {
             using (FileStream stream = File.Create(root + versionsFile))
             {
                 XmlSerializer xml = new XmlSerializer(typeof(Versions));
-                xml.Serialize(stream, new Versions(currentDLLVersion,currentEXEVersion));
+                xml.Serialize(stream, new Versions(0, currentEXEVersion));
             }
         }
 
@@ -337,7 +429,21 @@ namespace VTOLVR_ModLoader
             GifState(gifStates.Play);
 
             //Launching the game
-            Process.Start("steam://run/667970");
+            if (updateExe)
+            {
+                string regPath = (string)Registry.GetValue(
+    @"HKEY_CURRENT_USER\SOFTWARE\Valve\Steam",
+    @"SteamPath",
+    @"NULL");
+
+                Process process = new Process();
+                process.StartInfo.FileName = regPath + @"\steam.exe";
+                process.StartInfo.Arguments = @"-applaunch 667970" + " -updateLauncher " + newExeVersion;
+                process.Start();
+            }
+                
+            else
+                Process.Start("steam://run/667970");
 
             //Searching For Process
             WaitForProcess();
@@ -403,8 +509,14 @@ namespace VTOLVR_ModLoader
         }
         #endregion
 
+        #region Handeling Mods
         private void ExtractMods()
         {
+            if (uriSet)
+            {
+                DownloadFile();
+                return;
+            }
             SetPlayButton(true);
             SetProgress(0, "Extracting  mods...");
             DirectoryInfo folder = new DirectoryInfo(root + modsFolder);
@@ -412,20 +524,19 @@ namespace VTOLVR_ModLoader
             if (files.Length == 0)
             {
                 SetPlayButton(false);
-                SetProgress(100, "No new mods where found");
+                SetProgress(100, "No new mods were found");
                 MoveDependencies();
                 return;
             }
             float zipAmount = 100 / files.Length;
             string currentFolder;
-            
-            int modsExtracted = 0;
+
             for (int i = 0; i < files.Length; i++)
             {
                 SetProgress((int)Math.Ceiling(zipAmount * i), "Extracting mods... [" + files[i].Name + "]");
                 //This should remove the .zip at the end for the folder path
                 currentFolder = files[i].FullName.Split('.')[0];
-                
+
                 //We don't want to overide any mod folder incase of user data
                 //So mod users have to update by hand
                 if (Directory.Exists(currentFolder))
@@ -433,34 +544,33 @@ namespace VTOLVR_ModLoader
 
                 Directory.CreateDirectory(currentFolder);
                 ZipFile.ExtractToDirectory(files[i].FullName, currentFolder);
-                modsExtracted++;
+                extractedMods++;
 
                 //Deleting the zip
                 //File.Delete(files[i].FullName);
             }
 
             SetPlayButton(false);
-            SetProgress(100, modsExtracted == 0? "No mods where extracted": "Extracted " + modsExtracted + 
-                (modsExtracted == 1? " mod": " mods"));
+            SetProgress(100, extractedMods == 0 ? "No mods were extracted" : "Extracted " + extractedMods +
+                (extractedMods == 1 ? " mod" : " mods"));
             MoveDependencies();
 
         }
         private void ExtractSkins()
         {
             SetPlayButton(true);
-            SetProgress(0, "Extracting  skins...");
+            SetProgress(0, "Extracting skins...");
             DirectoryInfo folder = new DirectoryInfo(root + skinsFolder);
             FileInfo[] files = folder.GetFiles("*.zip");
             if (files.Length == 0)
             {
                 SetPlayButton(false);
-                SetProgress(100, "No new skins where found");
+                SetProgress(100, "No new skins were found");
                 return;
             }
             float zipAmount = 100 / files.Length;
             string currentFolder;
 
-            int skinsExtracted = 0;
             for (int i = 0; i < files.Length; i++)
             {
                 SetProgress((int)Math.Ceiling(zipAmount * i), "Extracting skins... [" + files[i].Name + "]");
@@ -474,19 +584,25 @@ namespace VTOLVR_ModLoader
 
                 Directory.CreateDirectory(currentFolder);
                 ZipFile.ExtractToDirectory(files[i].FullName, currentFolder);
-                skinsExtracted++;
+                extractedSkins++;
             }
 
             SetPlayButton(false);
-            SetProgress(100, skinsExtracted == 0 ? "No new skins where found" : "Extracted " + skinsExtracted +
-                (skinsExtracted == 1 ? " skin" : " skins"));
+            //This is the final text displayed in the progress text
+            SetProgress(100, 
+                (extractedMods == 0? "0 Mods" : (extractedMods == 1? "1 Mod" : extractedMods + " Mods")) + 
+                " and " +
+                (extractedSkins == 0 ? "0 Skins" : (extractedSkins == 1 ? "1 Skin" : extractedSkins + " Skins")) + 
+                " extracted" + 
+                " and " +
+                (movedDep == 0 ? "0 Dependencies" : (movedDep == 1 ? "1 Dependencies" : movedDep + " Dependencies")) +
+                " moved");
         }
 
         private void MoveDependencies()
         {
             SetPlayButton(true);
             string[] modFolders = Directory.GetDirectories(root + modsFolder);
-            int depsMoved = 0;
 
             string fileName;
             string[] split;
@@ -504,13 +620,13 @@ namespace VTOLVR_ModLoader
                         {
                             split = depFiles[k].Split('\\');
                             fileName = split[split.Length - 1];
-                            Console.WriteLine("Moved file \n" + Directory.GetParent(Directory.GetCurrentDirectory()).FullName +
+                            Console.WriteLine("Moved file \n" + Directory.GetParent(root).FullName +
                                         @"\VTOLVR_Data\Managed\" + fileName);
-                            File.Copy(depFiles[k], Directory.GetParent(Directory.GetCurrentDirectory()).FullName +
+                            File.Copy(depFiles[k], Directory.GetParent(root).FullName +
                                         @"\VTOLVR_Data\Managed\" + fileName,
                                         true);
-                            
-                            depsMoved++;
+
+                            movedDep++;
                         }
                         break;
                     }
@@ -518,10 +634,65 @@ namespace VTOLVR_ModLoader
             }
 
             SetPlayButton(false);
-            SetProgress(100, depsMoved == 0? "Checked Dependencies" : "Moved " + depsMoved 
-                + (depsMoved == 1? " dependency" : " dependencies"));
+            SetProgress(100, movedDep == 0 ? "Checked Dependencies" : "Moved " + movedDep
+                + (movedDep == 1 ? " dependency" : " dependencies"));
 
             ExtractSkins();
+        }
+
+        private void DownloadFile()
+        {
+            if (uriDownload.Equals(string.Empty) || uriDownload.Split('/').Length < 4)
+                return;
+            
+            uriFileName = uriDownload.Split('/')[4];
+            bool isMod = uriDownload.Contains("mods");
+            client = new WebClient();
+            client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(FileProgress);
+            client.DownloadFileCompleted += new AsyncCompletedEventHandler(FileDone);
+            client.DownloadFileAsync(new Uri(url + uriDownload.Remove(0,1)), root + (isMod? modsFolder : skinsFolder) + @"\" + uriFileName);
+        }
+
+        private void FileDone(object sender, AsyncCompletedEventArgs e)
+        {
+            if (!e.Cancelled && e.Error == null)
+            {
+                ShowNotification("Downloaded " + uriFileName);
+                //Checking if they already had the mod extracted incase they wanted to update it
+                bool isMod = uriDownload.Contains("mods");
+                if (Directory.Exists(root + (isMod ? modsFolder : skinsFolder) + @"\" + uriFileName.Split('.')[0]))
+                {
+                    Directory.Delete(root + (isMod ? modsFolder : skinsFolder) + @"\" + uriFileName.Split('.')[0],true);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Failed Downloading " + uriFileName + "\n" + e.Error.ToString(),
+                    "Failed Downloading File", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            uriSet = false;
+            SetProgress(100, "Downloaded " + uriFileName);
+            SetPlayButton(false);
+            ExtractMods();
+        }
+
+        private void FileProgress(object sender, DownloadProgressChangedEventArgs e)
+        {
+            SetProgress(e.ProgressPercentage / 100, "Downloading " + uriFileName + "...");
+        }
+
+        #endregion
+
+        private void ShowNotification(string text)
+        {
+            if (notification != null)
+            {
+                notification.Close();
+            }
+            notification = new NotificationWindow(text, this,5);
+            notification.Owner = this;
+            notification.Show();
         }
         private void SetProgress(int barValue, string text)
         {
@@ -572,6 +743,8 @@ namespace VTOLVR_ModLoader
         {
             Quit();
         }
+
+        
 
         #region Moving Window
         private void TopBarDown(object sender, MouseButtonEventArgs e)

@@ -33,7 +33,7 @@ namespace Installer
         private Point lm = new Point();
 
         //Pages
-        public enum Page{ About, SelectFolder, Confirm, Extracting,Finished,Error}
+        public enum Page { About, SelectFolder, Confirm, Extracting, Finished, Error }
         private Page currentPage;
 
         //
@@ -43,10 +43,10 @@ namespace Installer
             InitializeComponent();
             SwitchPage();
         }
-        
+
         private void Window_Initialized(object sender, EventArgs e)
         {
-            
+
         }
 
         private string FindVTOL()
@@ -57,12 +57,19 @@ namespace Installer
                 @"NULL");
             string[] contents = File.ReadAllText(regPath + @"\steamapps\libraryfolders.vdf").Split('"');
             string gameFolder = regPath;
-            if (contents.Length >= 13)
+
+            for (int i = 13; !Directory.Exists(gameFolder + "\\steamapps\\common\\VTOL VR\\") && i < contents.Length; i += 4) //Loops through all steamlibrary folders to check if the game is installed there
             {
-                //Inside libraryfolders.vdf there is no paths (Issue  #12)
-                gameFolder = contents[13];
+                gameFolder = contents[i];
             }
-            
+
+            if (!Directory.Exists(gameFolder + "\\steamapps\\common\\VTOL VR\\")) //Throws an error if the game can't be found
+            {
+                Error.Visibility = Visibility.Visible;
+
+                return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            }
+
             string[] split = gameFolder.Split('\\');
             string result = "";
             for (int i = 0; i < split.Length; i++)
@@ -72,7 +79,17 @@ namespace Installer
             }
             result += @"steamapps\common\VTOL VR\";
             return result;
-            
+
+        }
+        /// <summary>
+        /// If the file exists it will delete it other wise,
+        /// it doesn't throw an error
+        /// </summary>
+        /// <param name="path"></param>
+        private void TryDelete(string path)
+        {
+            if (File.Exists(path))
+                File.Delete(path);
         }
         private void InstallFiles()
         {
@@ -80,29 +97,27 @@ namespace Installer
             vtFolder = folderBox.Text;
             if (Directory.Exists(vtFolder + @"VTOLVR_ModLoader"))
             {
-                //It must be already installed
-                SetProgress(100);
-                currentPage++;
-                SwitchPage();
-                return;
+                //Delete the files we are going to place in there
+                TryDelete(vtFolder + @"VTOLVR_ModLoader\injector.exe");
+                TryDelete(vtFolder + @"VTOLVR_ModLoader\ModLoader.dll");
+                TryDelete(vtFolder + @"VTOLVR_ModLoader\SharpMonoInjector.dll");
+                TryDelete(vtFolder + @"VTOLVR_ModLoader\VTOLVR-ModLoader.exe");
+                TryDelete(vtFolder + @"VTOLVR_ModLoader\WpfAnimatedGif.dll");
+                TryDelete(vtFolder + @"VTOLVR_ModLoader\data.xml");
+                TryDelete(vtFolder + @"VTOLVR_ModLoader\versions.xml");
             }
             SetProgress(0);
-            
+            TryDelete(vtFolder + @"ModLoader.zip");
             try
             {
-                if (File.Exists(vtFolder + @"ModLoader.zip"))
-                    File.Delete(vtFolder + @"ModLoader.zip");
 
                 //Extracting the zip from resources to files
                 File.WriteAllBytes(vtFolder + "ModLoader.zip", Properties.Resources.ModLoader);
 
                 //Stopping a possible error
-                if (File.Exists(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll"))
-                    File.Delete(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll");
-                if (File.Exists(vtFolder + @"VTOLVR_Data\Managed\0Harmony.dll"))
-                    File.Delete(vtFolder + @"VTOLVR_Data\Managed\0Harmony.dll");
-                if (File.Exists(vtFolder + @"VTOLVR_Data\Managed\mscorlib.dll"))
-                    File.Delete(vtFolder + @"VTOLVR_Data\Managed\mscorlib.dll");
+                TryDelete(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll");
+                TryDelete(vtFolder + @"VTOLVR_Data\Managed\0Harmony.dll");
+                TryDelete(vtFolder + @"VTOLVR_Data\Managed\mscorlib.dll");
 
 
                 ZipFile.ExtractToDirectory(vtFolder + @"ModLoader.zip", vtFolder);
@@ -283,6 +298,6 @@ namespace Installer
 
         #endregion
 
-        
+
     }
 }

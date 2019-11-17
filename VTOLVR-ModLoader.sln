@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModLoader", "ModLoader\ModL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Installer", "Installer\Installer.csproj", "{1EE40772-7545-473D-A2C9-DBE790F36BF3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Multiplayer", "MultiplayerMod\Multiplayer.csproj", "{7712F053-174C-41E0-9848-A76BE702E861}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{1EE40772-7545-473D-A2C9-DBE790F36BF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1EE40772-7545-473D-A2C9-DBE790F36BF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1EE40772-7545-473D-A2C9-DBE790F36BF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7712F053-174C-41E0-9848-A76BE702E861}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7712F053-174C-41E0-9848-A76BE702E861}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7712F053-174C-41E0-9848-A76BE702E861}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7712F053-174C-41E0-9848-A76BE702E861}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

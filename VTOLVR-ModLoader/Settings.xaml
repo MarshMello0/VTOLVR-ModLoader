@@ -1,0 +1,34 @@
+﻿<Window x:Class="VTOLVR_ModLoader.Settings"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VTOLVR_ModLoader"
+        mc:Ignorable="d"
+        Title="Settings" Height="500" Width="400" ResizeMode="NoResize" Icon="Logo.ico" WindowStyle="None" 
+        Background="#FF4B4B4B">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.05*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Background="#FF2E2E2E">
+            <!-- Top Bar -->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.15*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text=" Settings" Grid.Column="0" Foreground="White" 
+                       FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"
+                       FontSize="20" VerticalAlignment="Center" 
+                       MouseDown="TopBarDown" MouseUp="TopBarUp" MouseMove="TopBarMove" MouseLeave="TopBarLeave"/>
+            <Button Grid.Column="1" Foreground="White"
+                       FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"
+                       FontSize="20" Background="#FF3D3D3D" BorderBrush="{x:Null}" Click="Quit"
+                    Content="x">
+            </Button>
+        </Grid>
+    </Grid>
+</Window>

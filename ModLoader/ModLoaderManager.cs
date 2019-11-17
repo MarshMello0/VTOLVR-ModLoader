@@ -10,6 +10,8 @@ using System.Collections;
 using System.IO;
 using System.Reflection;
 using UnityEngine.UI;
+using System.Net;
+using System.ComponentModel;
 
 namespace ModLoader
 {
@@ -66,14 +68,21 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
 
 
         public AssetBundle assets;
-
+        private VTOLAPI api;
         public string rootPath;
         private string assetsPath = @"\modloader.assets";
+        private string[] args;
+        private WebClient client;
 
         //Discord
         private DiscordController discord;
         public string discordDetail, discordState;
         public int loadedModsCount;
+
+        //Console
+        private Windows.ConsoleWindow console = new Windows.ConsoleWindow();
+        private Windows.ConsoleInput input = new Windows.ConsoleInput();
+        private bool runConsole;
 
         private void Awake()
         {
@@ -82,7 +91,22 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
 
             instance = this;
             DontDestroyOnLoad(this.gameObject);
+            SetPaths();
             Debug.Log("This is the first mod loader manager");
+            args = Environment.GetCommandLineArgs();
+            if (args.Contains("dev"))
+            {
+                Debug.Log("Creating Console");
+                console.Initialize();
+                console.SetTitle("VTOL VR Console");
+                input.OnInputText += ConsoleInput;
+                Application.logMessageReceived += LogCallBack;
+                runConsole = true;
+                Debug.Log("Created Console");
+            }
+
+            if (args.Contains("-updateLauncher"))
+                UpdateLauncher();
 
             CreateAPI();
 
@@ -95,15 +119,99 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             SteamAPI.Init();
 
             SceneManager.sceneLoaded += SceneLoaded;
-            SetPaths();
+            
             CreateAssetBundle();
 
             //gameObject.AddComponent<CSharp>();
 
+            api.CreateCommand("quit", delegate { Application.Quit(); });
+            api.CreateCommand("print", PrintMessage);
+            api.CreateCommand("help", api.ShowHelp);
+
         }
+
+        private void UpdateLauncher()
+        {
+            int newVersion = 200;
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i].Equals("-updateLauncher"))
+                {
+                    if (int.TryParse(args[i + 1],out newVersion))
+                    {
+                        using (client = new WebClient())
+                        {
+                            Debug.Log("Downloading Launcher Update from : " + "https://vtolvr-mods.com/files/updates/exe/" + newVersion.ToString() + "/VTOLVR-ModLoader.exe");
+                            if (File.Exists(rootPath + @"\VTOLVR-ModLoader_TEMP.exe"))
+                                File.Delete(rootPath + @"\VTOLVR-ModLoader_TEMP.exe");
+                            client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(LauncherProgress);
+                            client.DownloadFileCompleted += new AsyncCompletedEventHandler(LauncherDone);
+                            client.DownloadFileAsync(new Uri(@"https://vtolvr-mods.com/files/updates/exe/" + newVersion.ToString() + "/VTOLVR-ModLoader.exe"), rootPath + @"\VTOLVR-ModLoader_TEMP.exe");
+                        }
+                    }
+                }
+            }
+
+        }
+
+        private void LauncherDone(object sender, AsyncCompletedEventArgs e)
+        {
+            if (!e.Cancelled && e.Error == null)
+            {
+                if (File.Exists(rootPath + @"\VTOLVR-ModLoader.exe"))
+                    File.Delete(rootPath + @"\VTOLVR-ModLoader.exe");
+                File.Move(rootPath + @"\VTOLVR-ModLoader_TEMP.exe", rootPath + @"\VTOLVR-ModLoader.exe");
+                Debug.Log("Updated Launcher");
+            }
+            else if (e.Error != null)
+            {
+                Debug.Log("Error happened when updating the launcher\n" + e.Error.ToString());
+            }
+        }
+
+        private void LauncherProgress(object sender, DownloadProgressChangedEventArgs e)
+        {
+            Debug.Log("New Launcher Progress = " + e.ProgressPercentage / 100);
+        }
+
+        private void ConsoleInput(string obj)
+        {
+            api.CheckConsoleCommand(obj);
+        }
+
+        private void LogCallBack(string message, string stackTrace, LogType type)
+        {
+            if (type == LogType.Warning)
+                System.Console.ForegroundColor = ConsoleColor.Yellow;
+            else if (type == LogType.Error)
+                System.Console.ForegroundColor = ConsoleColor.Red;
+            else
+                System.Console.ForegroundColor = ConsoleColor.White;
+
+            // We're half way through typing something, so clear this line ..
+            if (Console.CursorLeft != 0)
+                input.ClearLine();
+
+            System.Console.WriteLine(message);
+
+            // If we were typing something re-add it.
+            input.RedrawInputLine();
+        }
+
+        private void Update()
+        {
+            if (runConsole)
+                input.Update();
+        }
+        private void OnDestroy()
+        {
+            if (runConsole)
+                console.Shutdown();
+        }
+
         private void CreateAPI()
         {
-            gameObject.AddComponent<VTOLAPI>();
+            api = gameObject.AddComponent<VTOLAPI>();
         }
         private void SetPaths()
         {
@@ -176,6 +284,12 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             Debug.Log("Creating new gameobject");
             GameObject modloader = new GameObject("Mod Loader", typeof(ModLoader));
             DontDestroyOnLoad(modloader);
+        }
+
+        public void PrintMessage(string obj)
+        {
+            obj.Remove(0, 5);
+            Debug.Log(obj);
         }
     }
 }
