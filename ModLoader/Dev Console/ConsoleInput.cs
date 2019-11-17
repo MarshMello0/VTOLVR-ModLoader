@@ -9,7 +9,7 @@ namespace Windows
 	public class ConsoleInput
 	{
 		//public delegate void InputText( string strInput );
-		public event System.Action<string> OnInputText;
+		public event Action<string> OnInputText;
 		public string inputString;
 
 		public void ClearLine()
@@ -64,31 +64,26 @@ namespace Windows
 		{
 			if ( !Console.KeyAvailable ) return;
 			var key = Console.ReadKey();
-
-			if ( key.Key == ConsoleKey.Enter )
-			{
-				OnEnter();
-				return;
-			}
-
-			if ( key.Key == ConsoleKey.Backspace )
-			{
-				OnBackspace();
-				return;
-			}
-
-			if ( key.Key == ConsoleKey.Escape )
-			{
-				OnEscape();
-				return;
-			}
-
-			if ( key.KeyChar != '\u0000' )
-			{
-				inputString += key.KeyChar;
-				RedrawInputLine();
-				return;
-			}
+            switch (key.Key)
+            {
+                case ConsoleKey.Enter:
+                    OnEnter();
+                    return;
+                case ConsoleKey.Backspace:
+                    OnBackspace();
+                    return;
+                case ConsoleKey.Escape:
+                    OnEscape();
+                    return;
+                default:
+                    if (key.KeyChar != '\u0000')
+                    {
+                        inputString += key.KeyChar;
+                        RedrawInputLine();
+                        return;
+                    }
+                    return;
+            }
 		}
 	}
 }
