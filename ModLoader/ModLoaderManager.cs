@@ -141,7 +141,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                     {
                         using (client = new WebClient())
                         {
-                            Debug.Log("Downloading Launcher Update from : " + "http://localhost:81/files/updates/exe/" + newVersion.ToString() + "/VTOLVR-ModLoader.exe");
+                            Debug.Log("Downloading Launcher Update from : " + "https://vtolvr-mods.com/files/updates/exe/" + newVersion.ToString() + "/VTOLVR-ModLoader.exe");
                             if (File.Exists(rootPath + @"\VTOLVR-ModLoader_TEMP.exe"))
                                 File.Delete(rootPath + @"\VTOLVR-ModLoader_TEMP.exe");
                             client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(LauncherProgress);
