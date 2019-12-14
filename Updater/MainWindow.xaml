@@ -1,0 +1,68 @@
+﻿<Window x:Class="Updater.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Updater" mc:Ignorable="d"
+        Title="VTOL ML Updater" Height="150" Width="350" ResizeMode="NoResize" WindowStyle="None"
+        Background="#FF4B4B4B" WindowStartupLocation="CenterScreen" Icon="Logo.ico">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="0.1*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="VTOl VR Mod Loader Updater" Grid.Row="0" Foreground="White" 
+                       FontFamily="/Updater;component/#Squares Bold"
+                       FontSize="15" VerticalAlignment="Center" 
+                       HorizontalAlignment="Center"/>
+
+        <Grid Grid.Row="1"> <!-- Progress Bar -->
+            <Grid.RowDefinitions>
+                <RowDefinition Height="0.3*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="0.3*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.01*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.01*"/>
+            </Grid.ColumnDefinitions>
+
+            <ProgressBar Grid.Row="1" Grid.Column="1" Padding="100" x:Name="progress"/>
+        </Grid>
+
+
+        <Grid Grid.Row="2"> <!-- Bottom -->
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.3*"/>
+                <ColumnDefinition Width="0.01*"/>
+            </Grid.ColumnDefinitions>
+            
+            <TextBlock Text="Progress Text" Grid.Column="0" Foreground="White" 
+                       FontFamily="/Updater;component/#Squares Bold"
+                       FontSize="15" VerticalAlignment="Center" x:Name="progressText"/>
+
+            <Grid Grid.Column="1"> <!-- Log Button -->
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="0.3*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="0.3*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.1*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="0.1*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="1" Grid.Row="1" FontFamily="/Updater;component/#Squares Bold"
+                            Content="log" FontSize="15" Foreground="White" Background="#FF3D3D3D" 
+                        BorderBrush="{x:Null}" Click="OpenLog" BorderThickness="1"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
