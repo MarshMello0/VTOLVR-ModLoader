@@ -7,6 +7,9 @@ using System.Windows;
 using System.IO;
 using System.Diagnostics;
 using System.Xml.Serialization;
+using System.Net;
+using System.ComponentModel;
+using System.Xml;
 
 namespace Updater
 {
@@ -20,6 +23,7 @@ namespace Updater
 
         private string path;
         private UpdateData updateData;
+        private WebClient client;
         public MainWindow()
         {
             path = Directory.GetCurrentDirectory();
@@ -31,6 +35,8 @@ namespace Updater
 
             InitializeComponent();
             Log("Updater has been launched");
+
+            FetchUpdatesData();
         }
 
         private void GenerateUpdatesXML()
@@ -50,6 +56,83 @@ namespace Updater
                 xml.Serialize(stream, updateData);
             }
             
+        }
+
+        private void FetchUpdatesData()
+        {
+            if (CheckForInternet())
+            {
+                SetText("Fetching Update Data");
+                client = new WebClient();
+                client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(UpdateDataProgress);
+                client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(UpdateDataDone);
+                client.DownloadStringAsync(new Uri(url));
+            }
+        }
+
+        private void UpdateDataProgress(object sender, DownloadProgressChangedEventArgs e)
+        {
+            SetProgress(e.ProgressPercentage);
+            Log("UpdateData Progress = " + e.ProgressPercentage);
+        }
+
+        private void UpdateDataDone(object sender, DownloadStringCompletedEventArgs e)
+        {
+            Log("Done Downloading Update Data");
+            if (e.Error != null)
+            {
+                Log("Erroed \n" + e.Error.Message);
+            }
+            else if (e.Cancelled)
+            {
+                Log("User Cancelled the download");
+            }
+            else
+            {
+                Log("Download Complete");
+                updateData = (UpdateData)new XmlSerializer(typeof(UpdateData))
+                    .Deserialize(new XmlTextReader(new StringReader(e.Result)));
+                UpdateFiles();
+            }
+        }
+
+        private void UpdateFiles()
+        {
+            Log("Updating Files");
+            SetText("Updating Files");
+
+        }
+        private bool CheckForInternet()
+        {
+            try
+            {
+                using (var client = new WebClient())
+                {
+                    using (client.OpenRead("http://clients3.google.com/generate_204"))
+                    {
+                        return true;
+                    }
+                }
+
+            }
+            catch
+            {
+                //There is a second try incase they have blocked googles domain
+                try
+                {
+                    using (var client = new WebClient())
+                    {
+                        using (client.OpenRead("https://vtolvr-mods.com/"))
+                        {
+                            return true;
+                        }
+                    }
+                }
+                catch 
+                {
+                    return false;
+                }   
+            }
         }
 
         private void OpenLog(object sender, RoutedEventArgs e)
