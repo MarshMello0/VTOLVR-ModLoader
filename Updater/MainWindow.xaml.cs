@@ -19,8 +19,8 @@ namespace Updater
     public partial class MainWindow : Window
     {
         private readonly string LogPath = @"\updater_log.txt";
-        private readonly string url = "https://gist.githubusercontent.com/MarshMello0/54954613ae52199a5f3004265862571d/raw/8219a3a174a9fcdca268059fa405123487398634/updates.xml";
-
+        private readonly string url = "https://vtolvr-mods.com";
+        private readonly string updatesURl = "/files/updates.xml";
         private string path;
         private string vtolFolder;
         private UpdateData updateData;
@@ -33,10 +33,12 @@ namespace Updater
             Log("Updater has been launched");
 
             path = Directory.GetCurrentDirectory();
-            vtolFolder = path.Replace(@"\VTOLVR_ModLoader", "");
-            Log($"Path = {path}\nvtolFolder = {vtolFolder}");
+            vtolFolder = path.Replace(@"\VTOLVR_ModLoader", "/");
+            Log($"Path = {path}\nvtolFolder = {vtolFolder}", false);
 #if DEBUG
-            GenerateUpdatesXML();
+            //GenerateUpdatesXML();
+            url = "http://localhost";
+            Log("In Debug Mode");
 #endif
 
             InitializeComponent();
@@ -49,9 +51,16 @@ namespace Updater
             updateData = new UpdateData();
             updateData.Updates = new Update[]
             {
-                new Update("-Item one\n-Item Two", new Item[]
+                new Update("Test Update", new Item[]
                 {
-                    new Item("downloadURL", "File Location", "File hash", "File Name")
+                    new Item("/files/updates/210/WpfAnimatedGif.dll", "VTOLVR_ModLoader/WpfAnimatedGif.dll", "89974C6A9574F7EC7335648EC050E808", "WpfAnimatedGif"),
+                    new Item("/files/updates/210/VTOLVR-ModLoader.exe", "VTOLVR_ModLoader/VTOLVR-ModLoader.exe", "C67B67AE753CBBA879328759B88311EF", "VTOLVR-ModLoader"),
+                    new Item("/files/updates/210/SharpMonoInjector.dll","VTOLVR_ModLoader/SharpMonoInjector.dll","D5F8EF2CDC4323DDD7845C9B90E4C6FD","SharpMonoInjector"),
+                    new Item("/files/updates/210/ModLoader.dll", "VTOLVR_ModLoader/ModLoader.dll", "C064F7DCA4AA3A37B5E1B59FD8261554", "ModLoader"),
+                    new Item("/files/updates/210/injector.exe", "VTOLVR_ModLoader/injector.exe", "C0A17812234AAE6CD4365C67EC39A842", "injector"),
+                    new Item("/files/updates/210/discord-rpc.dll","VTOLVR_Data/Plugins/discord-rpc.dll", "5882C37B79BAE47A0D090006564EDB22", "discord-rpc"),
+                    new Item("/files/updates/210/0Harmony.dll","VTOLVR_Data/Managed/0Harmony.dll","E11A2FA00D46A40C485B41126CD7D1C8","0Harmony"),
+                    new Item("/files/updates/210/mscorlib.dll","VTOLVR_Data/Managed/mscorlib.dll","25411134436CD0724346F889ABED7E8A","mscorlib")
                 })
             };
 
@@ -71,7 +80,7 @@ namespace Updater
                 client = new WebClient();
                 client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(UpdateDataProgress);
                 client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(UpdateDataDone);
-                client.DownloadStringAsync(new Uri(url));
+                client.DownloadStringAsync(new Uri(url + updatesURl));
             }
         }
 
@@ -135,7 +144,7 @@ namespace Updater
                 }
                 catch (Exception e)
                 {
-                    Log("Error when finished\n" + e.Message);
+                    Log("Error when finished\n" + e.ToString());
                 }
                 return;
             }
@@ -143,18 +152,22 @@ namespace Updater
             currentDownload = items.Dequeue();
 
             string currentHash = "";
-            if (File.Exists(path + currentDownload.FileLocation))
+            if (File.Exists(vtolFolder + currentDownload.FileLocation))
             {
-                currentHash = CalculateMD5(path + currentDownload.FileLocation);
+                currentHash = CalculateMD5(vtolFolder + currentDownload.FileLocation);
             }
 
-            if (currentHash != currentDownload.FileHash)
+            if (currentHash != currentDownload.FileHash.ToLower())
             {
-                Log($"Starting download for {currentDownload.FileName}");
-                client.DownloadFileAsync(new Uri(currentDownload.URLDownload), path + currentDownload.FileLocation + "_TEMP");
+                Log($"Starting download for {currentDownload.FileName} from {url + currentDownload.URLDownload}");
+                client.DownloadFileAsync(new Uri(url + currentDownload.URLDownload), vtolFolder + currentDownload.FileLocation + "_TEMP");
             }
             else
+            {
                 Log($"{currentDownload.FileName} was already upto date");
+                DownloadFiles();
+                return;
+            }
 
 
             SetText($"Downloading {currentDownload.FileName}");
@@ -164,20 +177,20 @@ namespace Updater
         {
             if (e.Error != null)
             {
-                Log("Error\n" + e.Error.Message);
+                Log("Error\n" + e.Error.ToString());
             }
             else if (e.Cancelled)
             {
-                Log("User Cancled File ");
+                Log("User Cancelled File");
             }
             else
             {
                 Log($"{currentDownload.FileName} has been downloaded");
 
-                if (File.Exists(path + currentDownload.FileLocation))
-                    File.Delete(path + currentDownload.FileLocation);
+                if (File.Exists(vtolFolder + currentDownload.FileLocation))
+                    File.Delete(vtolFolder + currentDownload.FileLocation);
 
-                File.Move(path + currentDownload.FileLocation + "_TEMP", path + currentDownload.FileLocation);
+                File.Move(vtolFolder + currentDownload.FileLocation + "_TEMP", vtolFolder + currentDownload.FileLocation);
                 Log("We have replaced the old file");
             }
             DownloadFiles();
