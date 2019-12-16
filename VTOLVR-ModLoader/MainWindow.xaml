@@ -144,11 +144,7 @@
                                            Foreground="White" FontSize="20" TextWrapping="Wrap"
                                                Background="#FF3D3D3D"/>
 
-                                    <TextBlock Text="{Binding Date}" 
-                                           FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"
-                                           Foreground="White" FontSize="8" TextWrapping="Wrap"
-                                               Background="#FF3D3D3D"/>
-                                    <TextBlock  Text="{Binding Description}" 
+                                    <TextBlock  Text="{Binding ChangeLog}" 
                                            FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"
                                            Foreground="White" FontSize="10" TextWrapping="Wrap"
                                                 Background="#FF3D3D3D"/>

@@ -56,7 +56,7 @@ namespace Updater
             updateData = new UpdateData();
             updateData.Updates = new Update[]
             {
-                new Update("Test Update", new Item[]
+                new Update("2.1.0 Auto Updater","The auto updater has been improved", new Item[]
                 {
                     new Item("/files/updates/210/WpfAnimatedGif.dll", "VTOLVR_ModLoader/WpfAnimatedGif.dll", "89974C6A9574F7EC7335648EC050E808", "WpfAnimatedGif"),
                     new Item("/files/updates/210/VTOLVR-ModLoader.exe", "VTOLVR_ModLoader/VTOLVR-ModLoader.exe", "C67B67AE753CBBA879328759B88311EF", "VTOLVR-ModLoader"),

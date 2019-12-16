@@ -32,18 +32,18 @@ namespace VTOLVR_ModLoader
         private static string modsFolder = @"\mods";
         private static string skinsFolder = @"\skins";
         private static string injector = @"\injector.exe";
-        private static string dataFile = @"\data.xml";
-        private static string dataFileTemp = @"\data_TEMP.xml";
-        private static string dataURL = @"/files/data.xml";
-        private static string url = @"https://vtolvr-mods.com";
-        private static string versionsFile = @"\versions.xml";
+        private static string updatesFile = @"\updates.xml";
+        private static string updatesFileTemp = @"\updates_TEMP.xml";
+        private static string updatesURL = @"/files/updates.xml";
+        private string url = @"https://vtolvr-mods.com";
         private static string uriPath = @"HKEY_CLASSES_ROOT\VTOLVRML";
         private string root;
+        private string vtolFolder;
 
         private static int currentEXEVersion = 210;
 
         //Startup
-        private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe" };
+        private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe", "Updater.exe" };
         private string[] neededDLLFiles = new string[] { @"\Plugins\discord-rpc.dll", @"\Managed\0Harmony.dll" };
         private string[] args;
 
@@ -66,38 +66,7 @@ namespace VTOLVR_ModLoader
         private int extractedSkins = 0;
         private int movedDep = 0;
 
-        #region Releasing Update
-        private void CreateUpdatedFeed()
-        {
-            Data newData = new Data();
-            if (File.Exists(root + @"\Data.xml"))
-            {
-                using (FileStream stream = new FileStream(root + @"\Data.xml", FileMode.Open))
-                {
-                    XmlSerializer xml = new XmlSerializer(typeof(Data));
-                    newData = (Data)xml.Deserialize(stream);
-                }
-            }
-
-            Update newUpdate = new Update("Improved Updating", "16/11/2019", "There have been some improvements to the auto-updating so hopefully, I can release smaller and more frequent updates without the annoyance of having to keep going to the website to get the new update.");
-            string newHash = CalculateMD5(root + @"\ModLoader.dll");
-            FileUpdate newFileUpdate = new FileUpdate(210, new ModLoaderDLL(210,newHash));
-
-            List<Update> updates = newData.updateFeed.ToList();
-            List<FileUpdate> fileUpdates = newData.fileUpdates.ToList();
-            updates.Insert(0, newUpdate);
-            fileUpdates.Insert(0, newFileUpdate);
-            newData.updateFeed = updates.ToArray();
-            newData.fileUpdates = fileUpdates.ToArray();
-
-            using (FileStream stream = new FileStream(root + @"\Data.xml", FileMode.Create))
-            {
-                XmlSerializer xml = new XmlSerializer(typeof(Data));
-                xml.Serialize(stream, newData);
-            }
-        }
-
-        static string CalculateMD5(string filename)
+        private static string CalculateMD5(string filename)
         {
             using (var md5 = MD5.Create())
             {
@@ -108,17 +77,20 @@ namespace VTOLVR_ModLoader
                 }
             }
         }
-        #endregion
 
         #region Startup
         public MainWindow()
         {
+#if DEBUG
+            url = "http://localhost";
+#endif
             InitializeComponent();
         }
 
         private void Start(object sender, EventArgs e)
         {
             root = Directory.GetCurrentDirectory();
+            vtolFolder = root.Replace("VTOLVR_ModLoader", "");
             args = Environment.GetCommandLineArgs();
             WaitAsync();
         }
@@ -132,7 +104,6 @@ namespace VTOLVR_ModLoader
                 CreateURI();
 
             CheckBaseFolder();
-            LoadVersions();
             GetData();
         }
         private void URICheck()
@@ -249,36 +220,19 @@ namespace VTOLVR_ModLoader
             MessageBox.Show("I can't seem to find " + file + " in VTOL VR > VTOLVR_Data, please make sure this file is here otherwise the mod loader won't work", "Missing File");
             Quit();
         }
-        private void LoadVersions()
-        {
-            if (File.Exists(root + versionsFile))
-            {
-                using (FileStream stream = new FileStream(root + versionsFile, FileMode.Open))
-                {
-                    XmlSerializer xml = new XmlSerializer(typeof(Versions));
-                    Versions deserialized = (Versions)xml.Deserialize(stream);
-                    currentEXEVersion = deserialized.currentEXEVersion;
-                    hasVersions = true;
-                }
-            }
-            else
-            {
-                hasVersions = false;
-            }
-        }
         #endregion
 
         #region Auto Updater
         private void GetData()
         {
-            SetProgress(0, "Getting Data Feed...");
+            SetProgress(0, "Getting Changelog...");
             SetPlayButton(true);
             if (CheckForInternet())
             {
                 client = new WebClient();
-                client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DataProgress);
-                client.DownloadFileCompleted += new AsyncCompletedEventHandler(DataDone);
-                client.DownloadFileAsync(new Uri(url + dataURL), root + dataFileTemp);
+                client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(UpdatesProgress);
+                client.DownloadFileCompleted += new AsyncCompletedEventHandler(UpdatesDone);
+                client.DownloadFileAsync(new Uri(url + updatesURL), root + updatesFileTemp);
             }
             else
             {
@@ -286,58 +240,60 @@ namespace VTOLVR_ModLoader
                 SetPlayButton(false);
             }
         }
-        private void DataProgress(object sender, DownloadProgressChangedEventArgs e)
+        private void UpdatesProgress(object sender, DownloadProgressChangedEventArgs e)
         {
             SetProgress(e.ProgressPercentage / 100, "Downloading data...");
         }
-        private void DataDone(object sender, AsyncCompletedEventArgs e)
+        private void UpdatesDone(object sender, AsyncCompletedEventArgs e)
         {
             if (!e.Cancelled && e.Error == null)
             {
-                if (File.Exists(root + dataFile))
-                    File.Delete(root + dataFile);
-                File.Move(root + dataFileTemp, root + dataFile);
-                SetProgress(100, "Downloaded Data.xml");
-                LoadData();
+                if (File.Exists(root + updatesFile))
+                    File.Delete(root + updatesFile);
+                File.Move(root + updatesFileTemp, root + updatesFile);
+                SetProgress(100, "Downloaded updates.xml");
             }
             else
             {
                 SetProgress(100, "Failed to connect to server.");
                 Console.WriteLine("Failed getting feed \n" + e.Error.ToString());
-                if (File.Exists(root + dataFileTemp))
-                    File.Delete(root + dataFileTemp);
+                if (File.Exists(root + updatesFileTemp))
+                    File.Delete(root + updatesFileTemp);
                 SetPlayButton(true);
-                LoadData();
             }
+            LoadData();
             client.Dispose();
         }
         private void LoadData()
         {
-            using (FileStream stream = new FileStream(root + dataFile, FileMode.Open))
+            using (FileStream stream = new FileStream(root + updatesFile, FileMode.Open))
             {
-                XmlSerializer xml = new XmlSerializer(typeof(Data));
-                Data deserialized = (Data)xml.Deserialize(stream);
+                XmlSerializer xml = new XmlSerializer(typeof(UpdateData));
+                UpdateData deserialized = (UpdateData)xml.Deserialize(stream);
                 //Updating Feed from file
-                updateFeed.ItemsSource = deserialized.updateFeed;
+                updateFeed.ItemsSource = deserialized.Updates;
 
                 //Checking versions
-                if (currentEXEVersion < deserialized.fileUpdates[0].exeVersion)
+                Update lastUpdate = deserialized.Updates[0];
+
+                for (int i = 0; i < lastUpdate.Files.Length; i++)
                 {
-                    UpdateExe(deserialized.fileUpdates[0].exeVersion);
+                    if (!File.Exists(vtolFolder + lastUpdate.Files[i].FileLocation) ||
+                        CalculateMD5(vtolFolder + lastUpdate.Files[i].FileLocation) != lastUpdate.Files[i].FileHash.ToLower())
+                    {
+                        if (File.Exists(root + "/Updater.exe"))
+                        {
+                            Process.Start(root + "/Updater.exe");
+                            Quit();
+                            return;
+                        }                        
+                    }
                 }
-                else if (CalculateMD5(root + @"\ModLoader.dll") != deserialized.fileUpdates[0].dll.hash)
-                {
-                    UpdateDLL(url + "/files/updates/dll/" + deserialized.fileUpdates[0].dll.version + "/ModLoader.dll");
-                }
-                else if (!hasVersions)
-                {
-                    UpdateVersions();
-                }
+  
             }
 
             SetPlayButton(false);
             ExtractMods();
-
         }
         private bool CheckForInternet()
         {
@@ -357,65 +313,7 @@ namespace VTOLVR_ModLoader
                 return false;
             }
         }
-        private void UpdateDLL(string url)
-        {
-            try
-            {
-                if (File.Exists(root + @"\ModLoader.dll"))
-                    File.Delete(root + @"\ModLoader.dll");
-
-                using (client = new WebClient())
-                {
-                    client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DLLProgress);
-                    client.DownloadFileCompleted += new AsyncCompletedEventHandler(DLLDone);
-                    client.DownloadFileAsync(new Uri(url), @"ModLoader.dll");
-                }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Failed downloading the .dll file, please print screen this and send to @. Marsh.Mello .#3194 on discord\n" + e.ToString());
-            }
-
-        }
-        private void DLLDone(object sender, AsyncCompletedEventArgs e)
-        {
-
-            if (e.Cancelled && e.Error != null)
-            {
-                SetProgress(100, "Failed downloading \"ModLoader.dll\"");
-                MessageBox.Show("There was a strange error, please download the mod loader again from the website." +
-                    "\n" + e.Error.Message);
-            }
-            else
-            {
-                UpdateVersions();
-                SetProgress(100, "Finished downloading updates");
-                SetPlayButton(false);
-                ExtractMods();
-            }
-        }
-        private void DLLProgress(object sender, DownloadProgressChangedEventArgs e)
-        {
-            SetProgress(e.ProgressPercentage / 100, "Downloading \"ModLoader.dll\"...");
-            Console.WriteLine("Downloading \"ModLoader.dll\"... [" + e.ProgressPercentage / 100 + "]");
-        }
-        private void UpdateExe(int newVersion)
-        {
-            ShowNotification("The launcher will auto update next time you launch VTOL");
-            newExeVersion = newVersion;
-            updateExe = true;
-
-            if (!hasVersions)
-                UpdateVersions();
-        }
-        private void UpdateVersions()
-        {
-            using (FileStream stream = File.Create(root + versionsFile))
-            {
-                XmlSerializer xml = new XmlSerializer(typeof(Versions));
-                xml.Serialize(stream, new Versions(0, currentEXEVersion));
-            }
-        }
+       
 
         #endregion
 
