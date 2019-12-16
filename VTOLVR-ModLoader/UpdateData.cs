@@ -11,8 +11,8 @@
 
 public class Update
 {
-    public string Title;
-    public string ChangeLog;
+    public string Title { set; get; }
+    public string ChangeLog { set; get; }
     public Item[] Files;
     public Update() { }
 

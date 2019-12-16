@@ -40,7 +40,6 @@ namespace VTOLVR_ModLoader
         private string root;
         private string vtolFolder;
 
-        private static int currentEXEVersion = 210;
 
         //Startup
         private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe", "Updater.exe" };
@@ -52,8 +51,6 @@ namespace VTOLVR_ModLoader
         private Point lm = new Point();
         private bool isBusy;
         //Updates
-        private bool hasVersions, updateExe;
-        private int newExeVersion;
         WebClient client;
         //URI
         private bool uriSet = false;
@@ -236,6 +233,8 @@ namespace VTOLVR_ModLoader
             }
             else
             {
+                if (File.Exists(root + updatesFile))
+                    LoadData();
                 SetProgress(100, "Failed to connect to the internet");
                 SetPlayButton(false);
             }
@@ -274,22 +273,24 @@ namespace VTOLVR_ModLoader
                 updateFeed.ItemsSource = deserialized.Updates;
 
                 //Checking versions
-                Update lastUpdate = deserialized.Updates[0];
-
-                for (int i = 0; i < lastUpdate.Files.Length; i++)
+                if (CheckForInternet())
                 {
-                    if (!File.Exists(vtolFolder + lastUpdate.Files[i].FileLocation) ||
-                        CalculateMD5(vtolFolder + lastUpdate.Files[i].FileLocation) != lastUpdate.Files[i].FileHash.ToLower())
+                    Update lastUpdate = deserialized.Updates[0];
+
+                    for (int i = 0; i < lastUpdate.Files.Length; i++)
                     {
-                        if (File.Exists(root + "/Updater.exe"))
+                        if (!File.Exists(vtolFolder + lastUpdate.Files[i].FileLocation) ||
+                            CalculateMD5(vtolFolder + lastUpdate.Files[i].FileLocation) != lastUpdate.Files[i].FileHash.ToLower())
                         {
-                            Process.Start(root + "/Updater.exe");
-                            Quit();
-                            return;
-                        }                        
+                            if (File.Exists(root + "/Updater.exe"))
+                            {
+                                Process.Start(root + "/Updater.exe");
+                                Quit();
+                                return;
+                            }
+                        }
                     }
                 }
-  
             }
 
             SetPlayButton(false);
@@ -327,6 +328,7 @@ namespace VTOLVR_ModLoader
             GifState(gifStates.Play);
 
             //Launching the game
+            /*
             if (updateExe)
             {
                 string regPath = (string)Registry.GetValue(
@@ -341,6 +343,7 @@ namespace VTOLVR_ModLoader
             }
                 
             else
+            */
                 Process.Start("steam://run/667970");
 
             //Searching For Process
