@@ -102,7 +102,6 @@ namespace VTOLVR_ModLoader
             root = Directory.GetCurrentDirectory();
             vtolFolder = root.Replace("VTOLVR_ModLoader", "");
             args = Environment.GetCommandLineArgs();
-            return;
             WaitAsync();
         }
 
