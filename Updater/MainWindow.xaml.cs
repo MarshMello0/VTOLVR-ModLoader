@@ -10,7 +10,7 @@ using System.Xml.Serialization;
 using System.Net;
 using System.ComponentModel;
 using System.Xml;
-
+using System.Security.Cryptography;
 namespace Updater
 {
     /// <summary>
@@ -141,7 +141,22 @@ namespace Updater
             }
 
             currentDownload = items.Dequeue();
-            client.DownloadFileAsync(new Uri(currentDownload.URLDownload),path + currentDownload.FileLocation + "_TEMP");
+
+            string currentHash = "";
+            if (File.Exists(path + currentDownload.FileLocation))
+            {
+                currentHash = CalculateMD5(path + currentDownload.FileLocation);
+            }
+
+            if (currentHash != currentDownload.FileHash)
+            {
+                Log($"Starting download for {currentDownload.FileName}");
+                client.DownloadFileAsync(new Uri(currentDownload.URLDownload), path + currentDownload.FileLocation + "_TEMP");
+            }
+            else
+                Log($"{currentDownload.FileName} was already upto date");
+
+
             SetText($"Downloading {currentDownload.FileName}");
         }
 
@@ -231,6 +246,18 @@ namespace Updater
             File.AppendAllText(path + LogPath,
                 (includeDate ? $"[{Now.Day}/{Now.Month}/{Now.Year} {Now.Hour}:{Now.Minute}:{Now.Second}] " : "") + 
                 message + "\n");
+        }
+
+        private static string CalculateMD5(string filename)
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(filename))
+                {
+                    var hash = md5.ComputeHash(stream);
+                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                }
+            }
         }
     }
 }
