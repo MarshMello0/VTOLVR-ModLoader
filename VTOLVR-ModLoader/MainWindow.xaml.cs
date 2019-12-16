@@ -78,10 +78,23 @@ namespace VTOLVR_ModLoader
         #region Startup
         public MainWindow()
         {
+            SearchForProcess();
 #if DEBUG
             url = "http://localhost";
 #endif
             InitializeComponent();
+        }
+        private void SearchForProcess()
+        {
+            //Stopping their being more than one open (Yes this could close the other one half way through a download)
+            Process[] p = Process.GetProcessesByName("VTOLVR-ModLoader");
+            for (int i = 0; i < p.Length; i++)
+            {
+                if (p[i].Id != Process.GetCurrentProcess().Id)
+                {
+                    p[i].Kill();
+                }
+            }
         }
 
         private void Start(object sender, EventArgs e)
@@ -89,6 +102,7 @@ namespace VTOLVR_ModLoader
             root = Directory.GetCurrentDirectory();
             vtolFolder = root.Replace("VTOLVR_ModLoader", "");
             args = Environment.GetCommandLineArgs();
+            return;
             WaitAsync();
         }
 
