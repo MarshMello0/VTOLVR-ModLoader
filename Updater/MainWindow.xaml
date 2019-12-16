@@ -31,7 +31,7 @@
                 <ColumnDefinition Width="0.01*"/>
             </Grid.ColumnDefinitions>
 
-            <ProgressBar Grid.Row="1" Grid.Column="1" Padding="100" x:Name="progress"/>
+            <ProgressBar Grid.Row="1" Grid.Column="1" Background="#FF2E2E2E" Padding="100" x:Name="progress" BorderBrush="#00BCBCBC"/>
         </Grid>
 
 

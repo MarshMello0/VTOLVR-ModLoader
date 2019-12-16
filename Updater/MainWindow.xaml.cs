@@ -19,22 +19,27 @@ namespace Updater
     public partial class MainWindow : Window
     {
         private readonly string LogPath = @"\updater_log.txt";
-        private readonly string url = "https://vtolvr-mods.com/files/updates.xml";
+        private readonly string url = "https://gist.githubusercontent.com/MarshMello0/54954613ae52199a5f3004265862571d/raw/8219a3a174a9fcdca268059fa405123487398634/updates.xml";
 
         private string path;
+        private string vtolFolder;
         private UpdateData updateData;
         private WebClient client;
+        private Queue<Item> items;
+        private Item currentDownload;
+
         public MainWindow()
         {
+            Log("Updater has been launched");
+
             path = Directory.GetCurrentDirectory();
+            vtolFolder = path.Replace(@"\VTOLVR_ModLoader", "");
+            Log($"Path = {path}\nvtolFolder = {vtolFolder}");
 #if DEBUG
-            url = "http://localhost/files/updates.xml";
-            Log("Using Localhost as URL");
             GenerateUpdatesXML();
 #endif
 
             InitializeComponent();
-            Log("Updater has been launched");
 
             FetchUpdatesData();
         }
@@ -46,7 +51,7 @@ namespace Updater
             {
                 new Update("-Item one\n-Item Two", new Item[]
                 {
-                    new Item("downloadURL", "File Location", "File hash")
+                    new Item("downloadURL", "File Location", "File hash", "File Name")
                 })
             };
 
@@ -92,16 +97,83 @@ namespace Updater
                 Log("Download Complete");
                 updateData = (UpdateData)new XmlSerializer(typeof(UpdateData))
                     .Deserialize(new XmlTextReader(new StringReader(e.Result)));
-                UpdateFiles();
+                AddFiles();
             }
         }
 
-        private void UpdateFiles()
+        private void AddFiles()
         {
             Log("Updating Files");
             SetText("Updating Files");
 
+            //Creating the Async Queue
+            //We are always going to get the latest one in the list
+
+            client = new WebClient();
+            client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(FileProgress);
+            client.DownloadFileCompleted += new AsyncCompletedEventHandler(FileDone);
+
+            items = new Queue<Item>(updateData.Updates[0].Files.Length);
+            for (int i = 0; i < updateData.Updates[0].Files.Length; i++)
+            {
+                items.Enqueue(updateData.Updates[0].Files[i]);
+            }
+
+            DownloadFiles();
         }
+
+        private void DownloadFiles()
+        {
+            if (items.Count <= 0)
+            {
+                SetText("Finished Downloading Update");
+                Log("Finished Downloading Update");
+                try
+                {
+                    Process.Start(path + @"\VTOLVR-ModLoader.exe");
+                    Process.GetCurrentProcess().Kill();
+                }
+                catch (Exception e)
+                {
+                    Log("Error when finished\n" + e.Message);
+                }
+                return;
+            }
+
+            currentDownload = items.Dequeue();
+            client.DownloadFileAsync(new Uri(currentDownload.URLDownload),path + currentDownload.FileLocation + "_TEMP");
+            SetText($"Downloading {currentDownload.FileName}");
+        }
+
+        private void FileDone(object sender, AsyncCompletedEventArgs e)
+        {
+            if (e.Error != null)
+            {
+                Log("Error\n" + e.Error.Message);
+            }
+            else if (e.Cancelled)
+            {
+                Log("User Cancled File ");
+            }
+            else
+            {
+                Log($"{currentDownload.FileName} has been downloaded");
+
+                if (File.Exists(path + currentDownload.FileLocation))
+                    File.Delete(path + currentDownload.FileLocation);
+
+                File.Move(path + currentDownload.FileLocation + "_TEMP", path + currentDownload.FileLocation);
+                Log("We have replaced the old file");
+            }
+            DownloadFiles();
+        }
+
+        private void FileProgress(object sender, DownloadProgressChangedEventArgs e)
+        {
+            SetProgress(e.ProgressPercentage);
+            Log($"{e.ProgressPercentage}% of {currentDownload.FileName} downloaded");
+        }
+
         private bool CheckForInternet()
         {
             try
@@ -122,7 +194,7 @@ namespace Updater
                 {
                     using (var client = new WebClient())
                     {
-                        using (client.OpenRead("https://vtolvr-mods.com/"))
+                        using (client.OpenRead(url))
                         {
                             return true;
                         }

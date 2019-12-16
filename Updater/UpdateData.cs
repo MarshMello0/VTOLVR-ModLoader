@@ -26,12 +26,14 @@ public class Item
     public string URLDownload;
     public string FileLocation;
     public string FileHash;
+    public string FileName;
     public Item() { }
 
-    public Item(string uRLDownload, string fileLocation, string fileHash)
+    public Item(string uRLDownload, string fileLocation, string fileHash, string fileName)
     {
         URLDownload = uRLDownload;
         FileLocation = fileLocation;
         FileHash = fileHash;
+        FileName = fileName;
     }
 }
