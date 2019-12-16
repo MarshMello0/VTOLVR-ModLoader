@@ -30,10 +30,15 @@ namespace Updater
 
         public MainWindow()
         {
-            Log("Updater has been launched");
-
             path = Directory.GetCurrentDirectory();
             vtolFolder = path.Replace(@"\VTOLVR_ModLoader", "/");
+
+            if (File.Exists(path + LogPath))
+                File.Delete(path + LogPath);
+
+            Log("Updater has been launched");
+
+            
             Log($"Path = {path}\nvtolFolder = {vtolFolder}", false);
 #if DEBUG
             //GenerateUpdatesXML();
