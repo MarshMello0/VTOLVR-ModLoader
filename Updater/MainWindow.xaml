@@ -8,16 +8,32 @@
         Background="#FF4B4B4B" WindowStartupLocation="CenterScreen" Icon="Logo.ico">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="0.5*"/>
+            <RowDefinition Height="0.2*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="0.5*"/>
             <RowDefinition Height="0.1*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="VTOl VR Mod Loader Updater" Grid.Row="0" Foreground="White" 
+        <Grid Grid.Row="0" Background="#FF2E2E2E">
+            <!-- Top Bar -->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.1*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text=" VTOl VR Mod Loader Updater" Grid.Column="0" Foreground="White" 
                        FontFamily="/Updater;component/#Squares Bold"
                        FontSize="15" VerticalAlignment="Center" 
-                       HorizontalAlignment="Center"/>
+                       MouseDown="TopBarDown" MouseUp="TopBarUp" MouseMove="TopBarMove" MouseLeave="TopBarLeave"/>
+            
+            <Button Grid.Column="1" Foreground="White"
+                       FontFamily="/Updater;component/#Squares Bold"
+                       FontSize="12" Background="#FF3D3D3D" BorderBrush="{x:Null}" Click="Quit"
+                    Content="x">
+            </Button>
+        </Grid>
+        
+        
 
         <Grid Grid.Row="1"> <!-- Progress Bar -->
             <Grid.RowDefinitions>
