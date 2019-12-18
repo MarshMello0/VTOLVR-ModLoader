@@ -36,7 +36,6 @@ namespace VTOLVR_ModLoader
         private static string updatesFileTemp = @"\updates_TEMP.xml";
         private static string updatesURL = @"/files/updates.xml";
         private string url = @"https://vtolvr-mods.com";
-        private static string uriPath = @"HKEY_CLASSES_ROOT\VTOLVRML";
         private string root;
         private string vtolFolder;
 
@@ -110,8 +109,6 @@ namespace VTOLVR_ModLoader
             await Task.Delay(500);
 
             URICheck();
-            if (!uriSet)
-                CreateURI();
 
             CheckBaseFolder();
             GetData();
@@ -140,36 +137,7 @@ namespace VTOLVR_ModLoader
                 }
             }
         }
-        private void CreateURI()
-        {
-            string value = (string)Registry.GetValue(
-                uriPath,
-                @"",
-                @"");
-            if (value == null)
-            {
-                //Setting Default
-                Registry.SetValue(
-                uriPath,
-                @"",
-                @"URL:VTOLVRML");
-                //Setting URL Protocol
-                Registry.SetValue(
-                uriPath,
-                @"URL Protocol",
-                @"");
-                //Setting Default Icon
-                Registry.SetValue(
-                    uriPath + @"\DefaultIcon",
-                    @"",
-                    root + @"\VTOLVR-ModLoader.exe,1");
-                //Setting Command
-                Registry.SetValue(
-                    uriPath + @"\shell\open\command",
-                    @"",
-                    "\"" + root + @"\VTOLVR-ModLoader.exe" + "\" \"" + @"%1" + "\"");
-            }
-        }
+        
         private void CheckBaseFolder()
         {
             //Checking the folder which this is in
