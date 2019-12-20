@@ -20,6 +20,7 @@ using System.IO.Compression;
 using Path = System.IO.Path;
 using IWshRuntimeLibrary;
 using File = System.IO.File;
+using System.Security.Principal;
 
 namespace Installer
 {
@@ -38,10 +39,34 @@ namespace Installer
 
         //
         private string vtFolder;
+        private static string uriPath = @"HKEY_CLASSES_ROOT\VTOLVRML";
+        private bool inAdmin;
         public MainWindow()
         {
             InitializeComponent();
             SwitchPage();
+            CheckForAdmin();
+        }
+
+        private void CheckForAdmin()
+        {
+            if (!(new WindowsPrincipal(WindowsIdentity.GetCurrent()))
+             .IsInRole(WindowsBuiltInRole.Administrator))
+            {
+                MessageBoxResult result = MessageBox.Show("Please run the installer as administrator.\nIf you run without administrator you will not be able to use one click install on the website.", "Missing Permissions",
+                    MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                switch (result)
+                {
+                    case MessageBoxResult.OK:
+                        Quit();
+                        break;
+                    case MessageBoxResult.Cancel:
+                        inAdmin = false;
+                        break;
+                }
+            }
+            else
+                inAdmin = true;
         }
 
         private void Window_Initialized(object sender, EventArgs e)
@@ -133,6 +158,9 @@ namespace Installer
                     CreateShortcut(
                         Environment.GetFolderPath(Environment.SpecialFolder.StartMenu) + @"\VTOL VR Mod Loader.lnk",
                         vtFolder + @"VTOLVR_ModLoader\VTOLVR-ModLoader.exe");
+
+                if (inAdmin)
+                    CreateURI(vtFolder + @"VTOLVR_ModLoader");
             }
             catch (Exception e)
             {
@@ -148,6 +176,36 @@ namespace Installer
             currentPage++;
             SwitchPage();
 
+        }
+        private void CreateURI(string root)
+        {
+            string value = (string)Registry.GetValue(
+                uriPath,
+                @"",
+                @"");
+            if (value == null)
+            {
+                //Setting Default
+                Registry.SetValue(
+                uriPath,
+                @"",
+                @"URL:VTOLVRML");
+                //Setting URL Protocol
+                Registry.SetValue(
+                uriPath,
+                @"URL Protocol",
+                @"");
+                //Setting Default Icon
+                Registry.SetValue(
+                    uriPath + @"\DefaultIcon",
+                    @"",
+                    root + @"\VTOLVR-ModLoader.exe,1");
+                //Setting Command
+                Registry.SetValue(
+                    uriPath + @"\shell\open\command",
+                    @"",
+                    "\"" + root + @"\VTOLVR-ModLoader.exe" + "\" \"" + @"%1" + "\"");
+            }
         }
         private void CreateShortcut(string shortcutPath, string targetPath)
         {

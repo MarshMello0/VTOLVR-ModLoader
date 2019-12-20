@@ -22,7 +22,7 @@
                 <ColumnDefinition Width="0.1*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text=" VTOL VR Mod Loader 2.0" Grid.Column="0" Foreground="White" 
+            <TextBlock Text=" VTOL VR Mod Loader 2.1.0" Grid.Column="0" Foreground="White" 
                        FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"
                        FontSize="20" VerticalAlignment="Center" 
                        MouseDown="TopBarDown" MouseUp="TopBarUp" MouseMove="TopBarMove" MouseLeave="TopBarLeave"/>
@@ -144,11 +144,7 @@
                                            Foreground="White" FontSize="20" TextWrapping="Wrap"
                                                Background="#FF3D3D3D"/>
 
-                                    <TextBlock Text="{Binding Date}" 
-                                           FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"
-                                           Foreground="White" FontSize="8" TextWrapping="Wrap"
-                                               Background="#FF3D3D3D"/>
-                                    <TextBlock  Text="{Binding Description}" 
+                                    <TextBlock  Text="{Binding ChangeLog}" 
                                            FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"
                                            Foreground="White" FontSize="10" TextWrapping="Wrap"
                                                 Background="#FF3D3D3D"/>
