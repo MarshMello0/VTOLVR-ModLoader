@@ -265,9 +265,12 @@ namespace VTOLVR_ModLoader
                         {
                             if (File.Exists(root + "/Updater.exe"))
                             {
-                                Process.Start(root + "/Updater.exe");
-                                Quit();
-                                return;
+                                if (MessageBox.Show("Would you like to download the update?", "Update Available!",MessageBoxButton.YesNo,MessageBoxImage.Question) == MessageBoxResult.Yes)
+                                {
+                                    Process.Start(root + "/Updater.exe");
+                                    Quit();
+                                    return;
+                                }
                             }
                         }
                     }
