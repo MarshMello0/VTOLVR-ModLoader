@@ -6,7 +6,7 @@ pool:
 
 jobs:
 - job: prepare
-  displayName: 'Preparing the machine to build'
+  displayName: 'Preparing the machine to build 🚚'
   timeoutInMinutes: 5
   steps:
   - task: DownloadSecureFile@1
@@ -18,8 +18,15 @@ jobs:
       destinationFolder: 'dll'
       cleanDestinationFolder: true
 
+  - task: DownloadSecureFile@1
+    inputs:
+      secureFile: 'WpfAnimatedGif.dll'
+
+  - bash: mkdir packages/WpfAnimatedGif.1.4.18/lib/net -p
+  - bash: mv d:\a\_temp\WpfAnimatedGif.dll packages/WpfAnimatedGif.1.4.18/lib/net
+
 - job: build
-  displayName: 'Building the mod loader'
+  displayName: 'Building the mod loader 👷'
   timeoutInMinutes: 5
   dependsOn: prepare
   steps:
@@ -53,7 +60,7 @@ jobs:
   - bash: echo "Testing should go here"
 
 - job: package
-  displayName: 'Packaging up the installer'
+  displayName: 'Packaging up the installer 📦'
   timeoutInMinutes: 5
   dependsOn: test
   steps:
@@ -95,7 +102,7 @@ jobs:
       replaceExistingArchive: true
 
 - job: installer
-  displayName: 'Building the installer'
+  displayName: 'Building the installer 👷'
   timeoutInMinutes: 5
   dependsOn: package
   steps:
@@ -108,7 +115,7 @@ jobs:
 
 #Currently empty because this is still in testing
 - job: release
-  displayName: 'Releasing the update to GitHub'
+  displayName: 'Releasing the update to GitHub 🚀'
   timeoutInMinutes: 5
   dependsOn: installer
   steps:
