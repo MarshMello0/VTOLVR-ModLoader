@@ -23,21 +23,21 @@ jobs:
   timeoutInMinutes: 5
   dependsOn: prepare
   steps:
-  - task: MSBuild@1
+  - task: VSBuild@1
     displayName: 'Building VTOLVR-ModLoader'
     inputs:
       solution: 'VTOLVR-ModLoader/VTOLVR-ModLoader.csproj'
       platform: 'any cpu'
       configuration: 'Release'
 
-  - task: MSBuild@1
+  - task: VSBuild@1
     displayName: 'Building ModLoader'
     inputs:
       solution: 'ModLoader/ModLoader.csproj'
       platform: 'any cpu'
       configuration: 'Release'
 
-  - task: MSBuild@1
+  - task: VSBuild@1
     displayName: 'Building Updater'
     inputs:
       solution: 'Updater/Updater.csproj'
@@ -99,7 +99,7 @@ jobs:
   timeoutInMinutes: 5
   dependsOn: package
   steps:
-  - task: MSBuild@1
+  - task: VSBuild@1
     displayName: 'Building Installer'
     inputs:
       solution: 'Installer/Installer.csproj'
