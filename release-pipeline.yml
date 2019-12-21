@@ -23,7 +23,7 @@ jobs:
       secureFile: 'WpfAnimatedGif.dll'
 
   - bash: mkdir packages/WpfAnimatedGif.1.4.18/lib/net -p
-  - bash: mv d:\a\_temp\WpfAnimatedGif.dll packages/WpfAnimatedGif.1.4.18/lib/net
+  - bash: mv d:/a/_temp/WpfAnimatedGif.dll packages/WpfAnimatedGif.1.4.18/lib/net
 
 - job: build
   displayName: 'Building the mod loader 👷'
