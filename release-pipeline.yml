@@ -44,21 +44,21 @@ jobs:
   - task: VSBuild@1
     displayName: 'Building VTOLVR-ModLoader'
     inputs:
-      solution: 'VTOLVR-ModLoader/VTOLVR-ModLoader.csproj'
+      solution: 'InstallerBuild/VTOLVR-ModLoader/VTOLVR-ModLoader.csproj'
       platform: 'AnyCPU'
       configuration: 'Release'
 
   - task: VSBuild@1
     displayName: 'Building ModLoader'
     inputs:
-      solution: 'ModLoader/ModLoader.csproj'
+      solution: 'InstallerBuild/ModLoader/ModLoader.csproj'
       platform: 'AnyCPU'
       configuration: 'Release'
 
   - task: VSBuild@1
     displayName: 'Building Updater'
     inputs:
-      solution: 'Updater/Updater.csproj'
+      solution: 'InstallerBuild/Updater/Updater.csproj'
       platform: 'AnyCPU'
       configuration: 'Release'
 
@@ -99,10 +99,10 @@ jobs:
       artifactName: InstallerBuild
       downloadPath: $(System.DefaultWorkingDirectory)
 
-  - bash: mkdir installerFiles/VTOLVR_Data/Plugins -p
-  - bash: mkdir installerFiles/VTOLVR_Data/Managed -p
-  - bash: mkdir installerFiles/VTOLVR_ModLoader/skins -p
-  - bash: mkdir installerFiles/VTOLVR_ModLoader/mods -p
+  - bash: mkdir InstallerBuild/installerFiles/VTOLVR_Data/Plugins -p
+  - bash: mkdir InstallerBuild/installerFiles/VTOLVR_Data/Managed -p
+  - bash: mkdir InstallerBuild/installerFiles/VTOLVR_ModLoader/skins -p
+  - bash: mkdir InstallerBuild/installerFiles/VTOLVR_ModLoader/mods -p
   
   - task: DownloadSecureFile@1
     inputs:
@@ -117,16 +117,16 @@ jobs:
     inputs:
       secureFile: 'SharpMonoInjector.dll'
 
-  - bash: mv d:\a\_temp\discord-rpc.dll installerFiles/VTOLVR_Data/Plugins
-  - bash: mv d:\a\_temp\mscorlib.dll installerFiles/VTOLVR_Data/Managed
-  - bash: mv ModLoader/bin/Release/0Harmony.dll installerFiles/VTOLVR_Data/Managed
-  - bash: mv d:\a\_temp\injector.exe installerFiles/VTOLVR_ModLoader
-  - bash: mv d:\a\_temp\SharpMonoInjector.dll installerFiles/VTOLVR_ModLoader
-  - bash: mv ModLoader/bin/Release/ModLoader.dll installerFiles/VTOLVR_ModLoader
-  - bash: mv Updater/bin/Release/Updater.exe installerFiles/VTOLVR_ModLoader
-  - bash: mv ModLoader/bin/Release/ModLoader.dll installerFiles/VTOLVR_ModLoader
-  - bash: mv VTOLVR-ModLoader/bin/Release/VTOLVR-ModLoader.exe installerFiles/VTOLVR_ModLoader
-  - bash: mv VTOLVR-ModLoader/bin/Release/WpfAnimatedGif.dll installerFiles/VTOLVR_ModLoader
+  - bash: mv d:\a\_temp\discord-rpc.dll InstallerBuild/installerFiles/VTOLVR_Data/Plugins
+  - bash: mv d:\a\_temp\mscorlib.dll InstallerBuild/installerFiles/VTOLVR_Data/Managed
+  - bash: mv ModLoader/bin/Release/0Harmony.dll InstallerBuild/installerFiles/VTOLVR_Data/Managed
+  - bash: mv d:\a\_temp\injector.exe InstallerBuild/installerFiles/VTOLVR_ModLoader
+  - bash: mv d:\a\_temp\SharpMonoInjector.dll InstallerBuild/installerFiles/VTOLVR_ModLoader
+  - bash: mv ModLoader/bin/Release/ModLoader.dll InstallerBuild/installerFiles/VTOLVR_ModLoader
+  - bash: mv Updater/bin/Release/Updater.exe InstallerBuild/installerFiles/VTOLVR_ModLoader
+  - bash: mv ModLoader/bin/Release/ModLoader.dll InstallerBuild/installerFiles/VTOLVR_ModLoader
+  - bash: mv VTOLVR-ModLoader/bin/Release/VTOLVR-ModLoader.exe InstallerBuild/installerFiles/VTOLVR_ModLoader
+  - bash: mv VTOLVR-ModLoader/bin/Release/WpfAnimatedGif.dll InstallerBuild/installerFiles/VTOLVR_ModLoader
 
   - task: ArchiveFiles@2
     inputs:
@@ -156,7 +156,7 @@ jobs:
   - task: VSBuild@1
     displayName: 'Building Installer'
     inputs:
-      solution: 'Installer/Installer.csproj'
+      solution: 'InstallerBuild/Installer/Installer.csproj'
       platform: 'AnyCPU'
       configuration: 'Release'
 
