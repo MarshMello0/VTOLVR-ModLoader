@@ -40,7 +40,7 @@ jobs:
     inputs:
       artifactName: InstallerBuild
       downloadPath: $(System.DefaultWorkingDirectory)
-  - bash: mv InstallerBuild/* ..
+  - bash: mv -v InstallerBuild/* ../
 
   - task: VSBuild@1
     displayName: 'Building VTOLVR-ModLoader'
