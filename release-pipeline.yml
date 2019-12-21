@@ -27,21 +27,21 @@ jobs:
     displayName: 'Building VTOLVR-ModLoader'
     inputs:
       solution: 'VTOLVR-ModLoader/VTOLVR-ModLoader.csproj'
-      platform: 'any cpu'
+      platform: 'AnyCPU'
       configuration: 'Release'
 
   - task: VSBuild@1
     displayName: 'Building ModLoader'
     inputs:
       solution: 'ModLoader/ModLoader.csproj'
-      platform: 'any cpu'
+      platform: 'AnyCPU'
       configuration: 'Release'
 
   - task: VSBuild@1
     displayName: 'Building Updater'
     inputs:
       solution: 'Updater/Updater.csproj'
-      platform: 'any cpu'
+      platform: 'AnyCPU'
       configuration: 'Release'
 
 #Currently empty as there aren't any unit tests yet
@@ -103,7 +103,7 @@ jobs:
     displayName: 'Building Installer'
     inputs:
       solution: 'Installer/Installer.csproj'
-      platform: 'any cpu'
+      platform: 'AnyCPU'
       configuration: 'Release'
 
 #Currently empty because this is still in testing
