@@ -108,33 +108,25 @@ namespace VTOLVR_ModLoader
         {
             await Task.Delay(500);
 
-            CheckBaseFolder();
-
-            URICheck();
+            if (args.Length == 2 && root.Contains("System32"))
+                URICheck();
+            else
+                CheckBaseFolder();
         }
         private void URICheck()
         {
-            if (args.Length == 2 && root.Contains("System32"))
+            root = args[0];
+            //This is removing the "\VTOLVR-ModLoader.exe" at the end, it will always be a fixed 21 characters
+            root = root.Remove(root.Length - 21, 21);
+
+            string argument = args[1].Remove(0, 11);
+            if (argument.Contains("files"))
             {
-                root = args[0];
-                //This is removing the "\VTOLVR-ModLoader.exe" at the end, it will always be a fixed 21 characters
-                root = root.Remove(root.Length - 21, 21);
-                if (args[1].Contains("file="))
-                {
-                    string argument = args[1].Remove(0, 11);
-                    if (argument.Contains("file="))
-                    {
-                        string splitFile = argument.Remove(0,5);
-                        if (!string.IsNullOrEmpty(splitFile))
-                        {
-                            uriDownload = splitFile;
-                            uriSet = true;
-                        }
-                        else
-                            MessageBox.Show(argument, "URI Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
+                uriDownload = argument;
+                uriSet = true;                
             }
+            else
+                MessageBox.Show(argument, "URI Error", MessageBoxButton.OK, MessageBoxImage.Error);
 
             GetData();
         }
@@ -533,13 +525,13 @@ namespace VTOLVR_ModLoader
         {
             if (uriDownload.Equals(string.Empty) || uriDownload.Split('/').Length < 4)
                 return;
-            
-            uriFileName = uriDownload.Split('/')[4];
+
+            uriFileName = uriDownload.Split('/')[3];
             bool isMod = uriDownload.Contains("mods");
             client = new WebClient();
             client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(FileProgress);
             client.DownloadFileCompleted += new AsyncCompletedEventHandler(FileDone);
-            client.DownloadFileAsync(new Uri(url + uriDownload.Remove(0,1)), root + (isMod? modsFolder : skinsFolder) + @"\" + uriFileName);
+            client.DownloadFileAsync(new Uri(url + "/" + uriDownload), root + (isMod ? modsFolder : skinsFolder) + @"\" + uriFileName);
         }
 
         private void FileDone(object sender, AsyncCompletedEventArgs e)
