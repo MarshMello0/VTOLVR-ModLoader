@@ -1,0 +1,94 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'windows-latest'
+
+jobs:
+- job: prepare
+  displayName: 'Preparing the machine to build'
+  timeoutInMinutes: 5
+  steps:
+  - task: DownloadSecureFile@1
+    inputs:
+      secureFile: 'dll.zip'
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: 'dll.zip'
+      destinationFolder: 'dll'
+      cleanDestinationFolder: true
+
+- job: build
+  displayName: 'Building the mod loader'
+  timeoutInMinutes: 5
+  steps:
+  - script: dotnet build "./VTOLVR-ModLoader/VTOLVR-ModLoader.csproj" -c Release
+    displayName: 'Building the launcher'
+
+  - script: dotnet build "./ModLoader/ModLoader.csproj" -c Release
+    displayName: 'Building ModLoader.dll'
+
+  - script: dotnet build "./Updater/Updater.csproj" -c Release
+    displayName: 'Building the updater'
+
+#Currently empty as there aren't any unit tests yet
+- job: test
+  displayName: 'Testing the mod loader ✅'
+  timeoutInMinutes: 5
+  steps:
+  - bash: echo "Testing should go here"
+
+- job: package
+  displayName: 'Packaging up the installer'
+  timeoutInMinutes: 5
+  steps:
+  - bash: mkdir installerFiles/VTOLVR_Data/Plugins -p
+  - bash: mkdir installerFiles/VTOLVR_Data/Managed -p
+  - bash: mkdir installerFiles/VTOLVR_ModLoader/skins -p
+  - bash: mkdir installerFiles/VTOLVR_ModLoader/mods -p
+  
+  - task: DownloadSecureFile@1
+    inputs:
+      secureFile: 'discord-rpc.dll'
+  - task: DownloadSecureFile@1
+    inputs:
+      secureFile: 'injector.exe'
+  - task: DownloadSecureFile@1
+    inputs:
+      secureFile: 'mscorlib.dll'
+  - task: DownloadSecureFile@1
+    inputs:
+      secureFile: 'SharpMonoInjector.dll'
+
+  - bash: mv discord-rpc.dll installerFiles/VTOLVR_Data/Plugins
+  - bash: mv mscorlib.dll installerFiles/VTOLVR_Data/Managed
+  - bash: mv ModLoader/bin/Release/0Harmony.dll installerFiles/VTOLVR_Data/Managed
+  - bash: mv injector.exe installerFiles/VTOLVR_ModLoader
+  - bash: mv SharpMonoInjector.dll installerFiles/VTOLVR_ModLoader
+  - bash: mv ModLoader/bin/Release/ModLoader.dll installerFiles/VTOLVR_ModLoader
+  - bash: mv Updater/bin/Release/Updater.exe installerFiles/VTOLVR_ModLoader
+  - bash: mv ModLoader/bin/Release/ModLoader.dll installerFiles/VTOLVR_ModLoader
+  - bash: mv VTOLVR-ModLoader/bin/Release/VTOLVR-ModLoader.exe installerFiles/VTOLVR_ModLoader
+  - bash: mv VTOLVR-ModLoader/bin/Release/WpfAnimatedGif.dll installerFiles/VTOLVR_ModLoader
+
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: 'installerFiles'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: 'Installer/Resources/ModLoader.zip'
+      replaceExistingArchive: true
+
+- job: installer
+  displayName: 'Building the installer'
+  timeoutInMinutes: 5
+  steps:
+  - script: dotnet build "./Installer/Installer.csproj" -c Release
+    displayName: 'Building the installer'
+
+#Currently empty because this is still in testing
+- job: release
+  displayName: 'Releasing the update to GitHub'
+  timeoutInMinutes: 5
+  steps:
+  - bash: echo "Release should go here"
