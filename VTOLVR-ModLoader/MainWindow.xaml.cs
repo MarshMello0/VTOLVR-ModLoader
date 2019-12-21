@@ -108,10 +108,9 @@ namespace VTOLVR_ModLoader
         {
             await Task.Delay(500);
 
-            URICheck();
-
             CheckBaseFolder();
-            GetData();
+
+            URICheck();
         }
         private void URICheck()
         {
@@ -136,6 +135,8 @@ namespace VTOLVR_ModLoader
                     }
                 }
             }
+
+            GetData();
         }
         
         private void CheckBaseFolder()
@@ -256,6 +257,7 @@ namespace VTOLVR_ModLoader
                 //Checking versions
                 if (CheckForInternet())
                 {
+                    bool needsUpdate = false;
                     Update lastUpdate = deserialized.Updates[0];
 
                     for (int i = 0; i < lastUpdate.Files.Length; i++)
@@ -263,15 +265,17 @@ namespace VTOLVR_ModLoader
                         if (!File.Exists(vtolFolder + lastUpdate.Files[i].FileLocation) ||
                             CalculateMD5(vtolFolder + lastUpdate.Files[i].FileLocation) != lastUpdate.Files[i].FileHash.ToLower())
                         {
-                            if (File.Exists(root + "/Updater.exe"))
-                            {
-                                if (MessageBox.Show("Would you like to download the update?", "Update Available!",MessageBoxButton.YesNo,MessageBoxImage.Question) == MessageBoxResult.Yes)
-                                {
-                                    Process.Start(root + "/Updater.exe");
-                                    Quit();
-                                    return;
-                                }
-                            }
+                            needsUpdate = true;
+                        }
+                    }
+
+                    if (needsUpdate && File.Exists(root + "/Updater.exe"))
+                    {
+                        if (MessageBox.Show("Would you like to download the update?", "Update Available!", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                        {
+                            Process.Start(root + "/Updater.exe");
+                            Quit();
+                            return;
                         }
                     }
                 }
