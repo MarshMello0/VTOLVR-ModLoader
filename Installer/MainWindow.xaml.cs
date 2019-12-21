@@ -130,6 +130,7 @@ namespace Installer
                 TryDelete(vtFolder + @"VTOLVR_ModLoader\WpfAnimatedGif.dll");
                 TryDelete(vtFolder + @"VTOLVR_ModLoader\data.xml");
                 TryDelete(vtFolder + @"VTOLVR_ModLoader\versions.xml");
+                TryDelete(vtFolder + @"VTOLVR_ModLoader\Updater.exe");
             }
             SetProgress(0);
             TryDelete(vtFolder + @"ModLoader.zip");
