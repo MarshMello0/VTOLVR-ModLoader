@@ -24,25 +24,25 @@ jobs:
   dependsOn: prepare
   steps:
   - task: MSBuild@1
+    displayName: 'Building VTOLVR-ModLoader'
     inputs:
       solution: 'VTOLVR-ModLoader/VTOLVR-ModLoader.csproj'
       platform: 'any cpu'
       configuration: 'Release'
-      restoreNugetPackages: true
 
   - task: MSBuild@1
+    displayName: 'Building ModLoader'
     inputs:
       solution: 'ModLoader/ModLoader.csproj'
       platform: 'any cpu'
       configuration: 'Release'
-      restoreNugetPackages: true
 
   - task: MSBuild@1
+    displayName: 'Building Updater'
     inputs:
       solution: 'Updater/Updater.csproj'
       platform: 'any cpu'
       configuration: 'Release'
-      restoreNugetPackages: true
 
 #Currently empty as there aren't any unit tests yet
 - job: test
@@ -100,11 +100,11 @@ jobs:
   dependsOn: package
   steps:
   - task: MSBuild@1
+    displayName: 'Building Installer'
     inputs:
       solution: 'Installer/Installer.csproj'
       platform: 'any cpu'
       configuration: 'Release'
-      restoreNugetPackages: true
 
 #Currently empty because this is still in testing
 - job: release
