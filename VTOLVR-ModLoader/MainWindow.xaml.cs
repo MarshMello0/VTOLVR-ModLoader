@@ -112,6 +112,8 @@ namespace VTOLVR_ModLoader
                 URICheck();
             else
                 CheckBaseFolder();
+
+            GetData();
         }
         private void URICheck()
         {
