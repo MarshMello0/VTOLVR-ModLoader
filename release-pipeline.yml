@@ -33,13 +33,14 @@ jobs:
   displayName: 'Building the mod loader 👷'
   timeoutInMinutes: 5
   dependsOn: prepare
-  - checkout: none
+  steps:
+   - checkout: none
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
     inputs:
       artifactName: InstallerBuild
       downloadPath: $(System.DefaultWorkingDirectory)
-  steps:
+
   - task: VSBuild@1
     displayName: 'Building VTOLVR-ModLoader'
     inputs:
@@ -71,13 +72,14 @@ jobs:
   displayName: 'Testing the mod loader ✅'
   timeoutInMinutes: 5
   dependsOn: build
-  - checkout: none
+  steps:
+   - checkout: none
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
     inputs:
       artifactName: InstallerBuild
       downloadPath: $(System.DefaultWorkingDirectory)
-  steps:
+
   - bash: echo "Testing should go here"
 
   - task: PublishBuildArtifacts@1
@@ -89,13 +91,14 @@ jobs:
   displayName: 'Packaging up the installer 📦'
   timeoutInMinutes: 5
   dependsOn: test
+  steps:
   - checkout: none
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
     inputs:
       artifactName: InstallerBuild
       downloadPath: $(System.DefaultWorkingDirectory)
-  steps:
+
   - bash: mkdir installerFiles/VTOLVR_Data/Plugins -p
   - bash: mkdir installerFiles/VTOLVR_Data/Managed -p
   - bash: mkdir installerFiles/VTOLVR_ModLoader/skins -p
@@ -142,13 +145,14 @@ jobs:
   displayName: 'Building the installer 👷'
   timeoutInMinutes: 5
   dependsOn: package
+  steps:
   - checkout: none
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
     inputs:
       artifactName: InstallerBuild
       downloadPath: $(System.DefaultWorkingDirectory)
-  steps:
+
   - task: VSBuild@1
     displayName: 'Building Installer'
     inputs:
@@ -166,13 +170,14 @@ jobs:
   displayName: 'Releasing the update to GitHub 🚀'
   timeoutInMinutes: 5
   dependsOn: installer
+  steps:
   - checkout: none
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
     inputs:
       artifactName: InstallerBuild
       downloadPath: $(System.DefaultWorkingDirectory)
-  steps:
+      
   - bash: echo "Release should go here"
 
   - task: PublishBuildArtifacts@1
