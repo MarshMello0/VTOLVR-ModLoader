@@ -21,26 +21,41 @@ jobs:
 - job: build
   displayName: 'Building the mod loader'
   timeoutInMinutes: 5
+  dependsOn: prepare
   steps:
-  - script: dotnet build "./VTOLVR-ModLoader/VTOLVR-ModLoader.csproj" -c Release
-    displayName: 'Building the launcher'
+  - task: MSBuild@1
+    inputs:
+      solution: 'VTOLVR-ModLoader/VTOLVR-ModLoader.csproj'
+      platform: 'any cpu'
+      configuration: 'Release'
+      restoreNugetPackages: true
 
-  - script: dotnet build "./ModLoader/ModLoader.csproj" -c Release
-    displayName: 'Building ModLoader.dll'
+  - task: MSBuild@1
+    inputs:
+      solution: 'ModLoader/ModLoader.csproj'
+      platform: 'any cpu'
+      configuration: 'Release'
+      restoreNugetPackages: true
 
-  - script: dotnet build "./Updater/Updater.csproj" -c Release
-    displayName: 'Building the updater'
+  - task: MSBuild@1
+    inputs:
+      solution: 'Updater/Updater.csproj'
+      platform: 'any cpu'
+      configuration: 'Release'
+      restoreNugetPackages: true
 
 #Currently empty as there aren't any unit tests yet
 - job: test
   displayName: 'Testing the mod loader ✅'
   timeoutInMinutes: 5
+  dependsOn: build
   steps:
   - bash: echo "Testing should go here"
 
 - job: package
   displayName: 'Packaging up the installer'
   timeoutInMinutes: 5
+  dependsOn: test
   steps:
   - bash: mkdir installerFiles/VTOLVR_Data/Plugins -p
   - bash: mkdir installerFiles/VTOLVR_Data/Managed -p
@@ -82,13 +97,19 @@ jobs:
 - job: installer
   displayName: 'Building the installer'
   timeoutInMinutes: 5
+  dependsOn: package
   steps:
-  - script: dotnet build "./Installer/Installer.csproj" -c Release
-    displayName: 'Building the installer'
+  - task: MSBuild@1
+    inputs:
+      solution: 'Installer/Installer.csproj'
+      platform: 'any cpu'
+      configuration: 'Release'
+      restoreNugetPackages: true
 
 #Currently empty because this is still in testing
 - job: release
   displayName: 'Releasing the update to GitHub'
   timeoutInMinutes: 5
+  dependsOn: installer
   steps:
   - bash: echo "Release should go here"
