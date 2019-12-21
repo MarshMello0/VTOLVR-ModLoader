@@ -23,12 +23,24 @@ jobs:
       secureFile: 'WpfAnimatedGif.dll'
 
   - bash: mkdir packages/WpfAnimatedGif.1.4.18/lib/net -p
-  - bash: mv d:/a/_temp/WpfAnimatedGif.dll packages/WpfAnimatedGif.1.4.18/lib/net
+  - bash: mv d:/a/_temp/WpfAnimatedGif.dll d:/a/1/s/packages/WpfAnimatedGif.1.4.18/lib/net/WpfAnimatedGif.dll
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(System.DefaultWorkingDirectory)'
+      artifactName: InstallerBuild
 
 - job: build
   displayName: 'Building the mod loader 👷'
   timeoutInMinutes: 5
   dependsOn: prepare
+
+  - checkout: none
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: InstallerBuild
+      downloadPath: $(System.DefaultWorkingDirectory)
+
   steps:
   - task: VSBuild@1
     displayName: 'Building VTOLVR-ModLoader'
@@ -51,18 +63,44 @@ jobs:
       platform: 'AnyCPU'
       configuration: 'Release'
 
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(System.DefaultWorkingDirectory)'
+      artifactName: InstallerBuild
+
 #Currently empty as there aren't any unit tests yet
 - job: test
   displayName: 'Testing the mod loader ✅'
   timeoutInMinutes: 5
   dependsOn: build
+
+  - checkout: none
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: InstallerBuild
+      downloadPath: $(System.DefaultWorkingDirectory)
+
   steps:
   - bash: echo "Testing should go here"
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(System.DefaultWorkingDirectory)'
+      artifactName: InstallerBuild
 
 - job: package
   displayName: 'Packaging up the installer 📦'
   timeoutInMinutes: 5
   dependsOn: test
+
+  - checkout: none
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: InstallerBuild
+      downloadPath: $(System.DefaultWorkingDirectory)
+
   steps:
   - bash: mkdir installerFiles/VTOLVR_Data/Plugins -p
   - bash: mkdir installerFiles/VTOLVR_Data/Managed -p
@@ -101,10 +139,23 @@ jobs:
       archiveFile: 'Installer/Resources/ModLoader.zip'
       replaceExistingArchive: true
 
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(System.DefaultWorkingDirectory)'
+      artifactName: InstallerBuild
+
 - job: installer
   displayName: 'Building the installer 👷'
   timeoutInMinutes: 5
   dependsOn: package
+
+  - checkout: none
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: InstallerBuild
+      downloadPath: $(System.DefaultWorkingDirectory)
+
   steps:
   - task: VSBuild@1
     displayName: 'Building Installer'
@@ -113,10 +164,28 @@ jobs:
       platform: 'AnyCPU'
       configuration: 'Release'
 
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(System.DefaultWorkingDirectory)'
+      artifactName: InstallerBuild
+
 #Currently empty because this is still in testing
 - job: release
   displayName: 'Releasing the update to GitHub 🚀'
   timeoutInMinutes: 5
   dependsOn: installer
+
+  - checkout: none
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: InstallerBuild
+      downloadPath: $(System.DefaultWorkingDirectory)
+
   steps:
   - bash: echo "Release should go here"
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(System.DefaultWorkingDirectory)'
+      artifactName: InstallerBuild
