@@ -40,7 +40,7 @@ jobs:
     inputs:
       artifactName: InstallerBuild
       downloadPath: $(System.DefaultWorkingDirectory)
-  - bash: mv -v InstallerBuild/* .
+  - bash: mv -v -r InstallerBuild/* InstallerBuild/.* .
 
   - task: VSBuild@1
     displayName: 'Building VTOLVR-ModLoader'
@@ -80,7 +80,7 @@ jobs:
     inputs:
       artifactName: InstallerBuild
       downloadPath: $(System.DefaultWorkingDirectory)
-  - bash: mv -v InstallerBuild/* .
+  - bash: mv -v -r InstallerBuild/* InstallerBuild/.* .
 
   - bash: echo "Testing should go here"
 
@@ -100,7 +100,7 @@ jobs:
     inputs:
       artifactName: InstallerBuild
       downloadPath: $(System.DefaultWorkingDirectory)
-  - bash: mv -v InstallerBuild/* .
+  - bash: mv -v -r InstallerBuild/* InstallerBuild/.* .
 
   - bash: mkdir installerFiles/VTOLVR_Data/Plugins -p
   - bash: mkdir installerFiles/VTOLVR_Data/Managed -p
@@ -155,7 +155,7 @@ jobs:
     inputs:
       artifactName: InstallerBuild
       downloadPath: $(System.DefaultWorkingDirectory)
-  - bash: mv -v InstallerBuild/* .
+  - bash: mv -v -r InstallerBuild/* InstallerBuild/.* .
 
   - task: VSBuild@1
     displayName: 'Building Installer'
@@ -181,7 +181,7 @@ jobs:
     inputs:
       artifactName: InstallerBuild
       downloadPath: $(System.DefaultWorkingDirectory)
-  - bash: mv -v InstallerBuild/* .
+  - bash: mv -v -r InstallerBuild/* InstallerBuild/.* .
 
   - bash: echo "Release should go here"
 
