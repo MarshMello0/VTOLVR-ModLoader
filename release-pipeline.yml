@@ -14,7 +14,7 @@ jobs:
       secureFile: 'dll.zip'
   - task: ExtractFiles@1
     inputs:
-      archiveFilePatterns: 'dll.zip'
+      archiveFilePatterns: 'd:\a\_temp\dll.zip'
       destinationFolder: 'dll'
       cleanDestinationFolder: true
 
@@ -60,11 +60,11 @@ jobs:
     inputs:
       secureFile: 'SharpMonoInjector.dll'
 
-  - bash: mv discord-rpc.dll installerFiles/VTOLVR_Data/Plugins
-  - bash: mv mscorlib.dll installerFiles/VTOLVR_Data/Managed
+  - bash: mv d:\a\_temp\discord-rpc.dll installerFiles/VTOLVR_Data/Plugins
+  - bash: mv d:\a\_temp\mscorlib.dll installerFiles/VTOLVR_Data/Managed
   - bash: mv ModLoader/bin/Release/0Harmony.dll installerFiles/VTOLVR_Data/Managed
-  - bash: mv injector.exe installerFiles/VTOLVR_ModLoader
-  - bash: mv SharpMonoInjector.dll installerFiles/VTOLVR_ModLoader
+  - bash: mv d:\a\_temp\injector.exe installerFiles/VTOLVR_ModLoader
+  - bash: mv d:\a\_temp\SharpMonoInjector.dll installerFiles/VTOLVR_ModLoader
   - bash: mv ModLoader/bin/Release/ModLoader.dll installerFiles/VTOLVR_ModLoader
   - bash: mv Updater/bin/Release/Updater.exe installerFiles/VTOLVR_ModLoader
   - bash: mv ModLoader/bin/Release/ModLoader.dll installerFiles/VTOLVR_ModLoader
