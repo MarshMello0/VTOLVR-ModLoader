@@ -1,0 +1,40 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "MarshMello0",
+      "name": "Ben Wilson",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/33008390?v=4",
+      "profile": "https://ben-w.com",
+      "contributions": [
+        "a11y",
+        "bug",
+        "code",
+        "content",
+        "doc",
+        "design",
+        "example",
+        "financial",
+        "ideas",
+        "maintenance",
+        "projectManagement",
+        "review",
+        "question",
+        "tool",
+        "test",
+        "tutorial",
+        "talk"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "VTOLVR-ModLoader",
+  "projectOwner": "MarshMello0",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
