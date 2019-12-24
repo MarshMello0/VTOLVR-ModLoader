@@ -46,6 +46,19 @@
         "tutorial",
         "a11y"
       ]
+    },
+    {
+      "login": "ketkev",
+      "name": "Kevin",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/7689239?v=4",
+      "profile": "http://kevinjoosten.nl",
+      "contributions": [
+        "design",
+        "content",
+        "maintenance",
+        "tool",
+        "security"
+      ]
     }
   ],
   "contributorsPerLine": 7,
