@@ -29,6 +29,23 @@
         "tutorial",
         "talk"
       ]
+    },
+    {
+      "login": "ketkev#3774",
+      "name": "Kevin",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/7689239?v=4",
+      "profile": "http://kevinjoosten.nl",
+      "contributions": [
+        "code",
+        "infra",
+        "bug",
+        "ideas",
+        "review",
+        "test",
+        "talk",
+        "tutorial",
+        "a11y"
+      ]
     }
   ],
   "contributorsPerLine": 7,
