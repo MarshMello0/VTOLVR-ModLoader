@@ -39,7 +39,6 @@ namespace VTOLVR_ModLoader
         private string root;
         private string vtolFolder;
 
-
         //Startup
         private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe", "Updater.exe" };
         private string[] neededDLLFiles = new string[] { @"\Plugins\discord-rpc.dll", @"\Managed\0Harmony.dll" };
@@ -108,12 +107,14 @@ namespace VTOLVR_ModLoader
         {
             await Task.Delay(500);
 
-            if (args.Length == 2 && root.Contains("System32"))
+            if (args.Length == 2 && root.ToLower().Contains("system32"))
                 URICheck();
             else
+            {
                 CheckBaseFolder();
+                GetData();
+            }
 
-            GetData();
         }
         private void URICheck()
         {
@@ -125,14 +126,14 @@ namespace VTOLVR_ModLoader
             if (argument.Contains("files"))
             {
                 uriDownload = argument;
-                uriSet = true;                
+                uriSet = true;
             }
             else
                 MessageBox.Show(argument, "URI Error", MessageBoxButton.OK, MessageBoxImage.Error);
 
             GetData();
         }
-        
+
         private void CheckBaseFolder()
         {
             //Checking the folder which this is in
@@ -296,7 +297,6 @@ namespace VTOLVR_ModLoader
                 return false;
             }
         }
-       
 
         #endregion
 
@@ -326,7 +326,7 @@ namespace VTOLVR_ModLoader
                 
             else
             */
-                Process.Start("steam://run/667970");
+            Process.Start("steam://run/667970");
 
             //Searching For Process
             WaitForProcess();
@@ -472,11 +472,11 @@ namespace VTOLVR_ModLoader
 
             SetPlayButton(false);
             //This is the final text displayed in the progress text
-            SetProgress(100, 
-                (extractedMods == 0? "0 Mods" : (extractedMods == 1? "1 Mod" : extractedMods + " Mods")) + 
+            SetProgress(100,
+                (extractedMods == 0 ? "0 Mods" : (extractedMods == 1 ? "1 Mod" : extractedMods + " Mods")) +
                 " and " +
-                (extractedSkins == 0 ? "0 Skins" : (extractedSkins == 1 ? "1 Skin" : extractedSkins + " Skins")) + 
-                " extracted" + 
+                (extractedSkins == 0 ? "0 Skins" : (extractedSkins == 1 ? "1 Skin" : extractedSkins + " Skins")) +
+                " extracted" +
                 " and " +
                 (movedDep == 0 ? "0 Dependencies" : (movedDep == 1 ? "1 Dependencies" : movedDep + " Dependencies")) +
                 " moved");
@@ -545,7 +545,7 @@ namespace VTOLVR_ModLoader
                 bool isMod = uriDownload.Contains("mods");
                 if (Directory.Exists(root + (isMod ? modsFolder : skinsFolder) + @"\" + uriFileName.Split('.')[0]))
                 {
-                    Directory.Delete(root + (isMod ? modsFolder : skinsFolder) + @"\" + uriFileName.Split('.')[0],true);
+                    Directory.Delete(root + (isMod ? modsFolder : skinsFolder) + @"\" + uriFileName.Split('.')[0], true);
                 }
             }
             else
@@ -573,7 +573,7 @@ namespace VTOLVR_ModLoader
             {
                 notification.Close();
             }
-            notification = new NotificationWindow(text, this,5);
+            notification = new NotificationWindow(text, this, 5);
             notification.Owner = this;
             notification.Show();
         }
@@ -626,8 +626,6 @@ namespace VTOLVR_ModLoader
         {
             Quit();
         }
-
-        
 
         #region Moving Window
         private void TopBarDown(object sender, MouseButtonEventArgs e)
