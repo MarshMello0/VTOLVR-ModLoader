@@ -1,0 +1,195 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'windows-latest'
+
+jobs:
+- job: prepare
+  displayName: 'Preparing the machine to build 🚚'
+  timeoutInMinutes: 5
+  steps:
+  - task: DownloadSecureFile@1
+    inputs:
+      secureFile: 'dll.zip'
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: 'd:\a\_temp\dll.zip'
+      destinationFolder: 'dll'
+      cleanDestinationFolder: true
+
+  - task: DownloadSecureFile@1
+    inputs:
+      secureFile: 'WpfAnimatedGif.dll'
+
+  - bash: mkdir packages/WpfAnimatedGif.1.4.18/lib/net -p
+  - bash: mv d:/a/_temp/WpfAnimatedGif.dll d:/a/1/s/packages/WpfAnimatedGif.1.4.18/lib/net/WpfAnimatedGif.dll
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(System.DefaultWorkingDirectory)'
+      artifactName: InstallerBuild
+
+- job: build
+  displayName: 'Building the mod loader 👷'
+  timeoutInMinutes: 5
+  dependsOn: prepare
+  steps:
+  - checkout: none
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: InstallerBuild
+      downloadPath: $(System.DefaultWorkingDirectory)
+  - bash: cp -v -r InstallerBuild/* .
+  - bash: rm -v -r InstallerBuild/
+
+  - task: VSBuild@1
+    displayName: 'Building VTOLVR-ModLoader'
+    inputs:
+      solution: 'VTOLVR-ModLoader/VTOLVR-ModLoader.csproj'
+      platform: 'AnyCPU'
+      configuration: 'Release'
+
+  - task: VSBuild@1
+    displayName: 'Building ModLoader'
+    inputs:
+      solution: 'ModLoader/ModLoader.csproj'
+      platform: 'AnyCPU'
+      configuration: 'Release'
+
+  - task: VSBuild@1
+    displayName: 'Building Updater'
+    inputs:
+      solution: 'Updater/Updater.csproj'
+      platform: 'AnyCPU'
+      configuration: 'Release'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(System.DefaultWorkingDirectory)'
+      artifactName: InstallerBuild
+
+#Currently empty as there aren't any unit tests yet
+- job: test
+  displayName: 'Testing the mod loader ✅'
+  timeoutInMinutes: 5
+  dependsOn: build
+  steps:
+  - checkout: none
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: InstallerBuild
+      downloadPath: $(System.DefaultWorkingDirectory)
+  - bash: cp -v -r InstallerBuild/* .
+  - bash: rm -v -r InstallerBuild/
+
+  - bash: echo "Testing should go here"
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(System.DefaultWorkingDirectory)'
+      artifactName: InstallerBuild
+
+- job: package
+  displayName: 'Packaging up the installer 📦'
+  timeoutInMinutes: 5
+  dependsOn: test
+  steps:
+  - checkout: none
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: InstallerBuild
+      downloadPath: $(System.DefaultWorkingDirectory)
+  - bash: cp -v -r InstallerBuild/* .
+  - bash: rm -v -r InstallerBuild/
+
+  - bash: mkdir installerFiles/VTOLVR_Data/Plugins -p
+  - bash: mkdir installerFiles/VTOLVR_Data/Managed -p
+  - bash: mkdir installerFiles/VTOLVR_ModLoader/skins -p
+  - bash: mkdir installerFiles/VTOLVR_ModLoader/mods -p
+  
+  - task: DownloadSecureFile@1
+    inputs:
+      secureFile: 'discord-rpc.dll'
+  - task: DownloadSecureFile@1
+    inputs:
+      secureFile: 'injector.exe'
+  - task: DownloadSecureFile@1
+    inputs:
+      secureFile: 'mscorlib.dll'
+  - task: DownloadSecureFile@1
+    inputs:
+      secureFile: 'SharpMonoInjector.dll'
+
+  - bash: mv d:/a/_temp/discord-rpc.dll installerFiles/VTOLVR_Data/Plugins
+  - bash: mv d:/a/_temp/mscorlib.dll installerFiles/VTOLVR_Data/Managed
+  - bash: mv ModLoader/bin/Release/0Harmony.dll installerFiles/VTOLVR_Data/Managed
+  - bash: mv d:/a/_temp/injector.exe installerFiles/VTOLVR_ModLoader
+  - bash: mv d:/a/_temp/SharpMonoInjector.dll installerFiles/VTOLVR_ModLoader
+  - bash: mv ModLoader/bin/Release/ModLoader.dll installerFiles/VTOLVR_ModLoader
+  - bash: mv Updater/bin/Release/Updater.exe installerFiles/VTOLVR_ModLoader
+  - bash: mv VTOLVR-ModLoader/bin/Release/VTOLVR-ModLoader.exe installerFiles/VTOLVR_ModLoader
+  - bash: mv VTOLVR-ModLoader/bin/Release/WpfAnimatedGif.dll installerFiles/VTOLVR_ModLoader
+
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: 'installerFiles'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: 'Installer/Resources/ModLoader.zip'
+      replaceExistingArchive: true
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(System.DefaultWorkingDirectory)'
+      artifactName: InstallerBuild
+
+- job: installer
+  displayName: 'Building the installer 👷'
+  timeoutInMinutes: 5
+  dependsOn: package
+  steps:
+  - checkout: none
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: InstallerBuild
+      downloadPath: $(System.DefaultWorkingDirectory)
+  - bash: cp -v -r InstallerBuild/* .
+  - bash: rm -v -r InstallerBuild/
+
+  - task: VSBuild@1
+    displayName: 'Building Installer'
+    inputs:
+      solution: 'Installer/Installer.csproj'
+      platform: 'AnyCPU'
+      configuration: 'Release'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(System.DefaultWorkingDirectory)'
+      artifactName: InstallerBuild
+
+#Currently empty because this is still in testing
+- job: release
+  displayName: 'Releasing the update to GitHub 🚀'
+  timeoutInMinutes: 5
+  dependsOn: installer
+  steps:
+  - checkout: none
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: InstallerBuild
+      downloadPath: $(System.DefaultWorkingDirectory)
+  - bash: cp -v -r InstallerBuild/* .
+  - bash: rm -v -r InstallerBuild/
+
+  - bash: echo "Release should go here"
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(System.DefaultWorkingDirectory)'
+      artifactName: InstallerBuild
