@@ -110,11 +110,9 @@ namespace VTOLVR_ModLoader
             if (args.Length == 2 && root.ToLower().Contains("system32"))
                 URICheck();
             else
-            {
                 CheckBaseFolder();
-                GetData();
-            }
 
+            GetData();
         }
         private void URICheck()
         {
@@ -130,8 +128,6 @@ namespace VTOLVR_ModLoader
             }
             else
                 MessageBox.Show(argument, "URI Error", MessageBoxButton.OK, MessageBoxImage.Error);
-
-            GetData();
         }
 
         private void CheckBaseFolder()
