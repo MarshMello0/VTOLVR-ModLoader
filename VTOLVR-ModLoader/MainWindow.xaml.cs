@@ -78,7 +78,7 @@ namespace VTOLVR_ModLoader
         {
             SearchForProcess();
 #if DEBUG
-            url = "http://localhost";
+            url = "http://localhost:8080";
 #endif
             InitializeComponent();
         }
@@ -107,7 +107,7 @@ namespace VTOLVR_ModLoader
         {
             await Task.Delay(500);
 
-            if (args.Length == 2 && root.ToLower().Contains("system32"))
+            if (args.Length == 2 && args[1].Contains("vtolvrml"))
                 URICheck();
             else
                 CheckBaseFolder();
@@ -119,6 +119,7 @@ namespace VTOLVR_ModLoader
             root = args[0];
             //This is removing the "\VTOLVR-ModLoader.exe" at the end, it will always be a fixed 21 characters
             root = root.Remove(root.Length - 21, 21);
+            vtolFolder = root.Replace("VTOLVR_ModLoader", "");
 
             string argument = args[1].Remove(0, 11);
             if (argument.Contains("files"))
