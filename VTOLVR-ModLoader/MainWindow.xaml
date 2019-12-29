@@ -9,20 +9,21 @@
         Title="VTOL VR Modloader" Height="400" Width="800" ResizeMode="NoResize" Icon="Logo.ico" 
         Background="#FF4B4B4B" WindowStartupLocation="CenterScreen" WindowStyle="None" Closing="WindowClosing" Initialized="Start">
     <Grid>
-        
+
         <Grid.RowDefinitions>
             <RowDefinition Height="0.1*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="0.3*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Background="#FF2E2E2E"> <!-- Top Bar -->
+        <Grid Grid.Row="0" Background="#FF2E2E2E">
+            <!-- Top Bar -->
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="0.1*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text=" VTOL VR Mod Loader 2.1.1" Grid.Column="0" Foreground="White" 
+            <TextBlock Text=" VTOL VR Mod Loader 2.1.3" Grid.Column="0" Foreground="White" 
                        FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"
                        FontSize="20" VerticalAlignment="Center" 
                        MouseDown="TopBarDown" MouseUp="TopBarUp" MouseMove="TopBarMove" MouseLeave="TopBarLeave"/>
@@ -48,7 +49,8 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0"> <!-- Logo -->
+                <Grid Grid.Row="0">
+                    <!-- Logo -->
                     <Grid.RowDefinitions>
                         <RowDefinition Height="0.08*"/>
                         <RowDefinition Height="*"/>
@@ -64,7 +66,8 @@
 
                 </Grid>
 
-                <Grid Grid.Row="1"> <!-- Mods Button -->
+                <Grid Grid.Row="1">
+                    <!-- Mods Button -->
                     <Grid.RowDefinitions>
                         <RowDefinition Height="0.3*"/>
                         <RowDefinition Height="*"/>
@@ -81,7 +84,8 @@
                             Click="WebsiteMods"/>
                 </Grid>
 
-                <Grid Grid.Row="2"> <!-- Skins Button -->
+                <Grid Grid.Row="2">
+                    <!-- Skins Button -->
                     <Grid.RowDefinitions>
                         <RowDefinition Height="0.3*"/>
                         <RowDefinition Height="*"/>
@@ -97,7 +101,8 @@
                             Content="Skins" Foreground="White" Background="#FF3D3D3D" BorderBrush="{x:Null}" Click="WebsiteSkins"/>
                 </Grid>
 
-                <Grid Grid.Row="3"> <!-- Discord Button -->
+                <Grid Grid.Row="3">
+                    <!-- Discord Button -->
                     <Grid.RowDefinitions>
                         <RowDefinition Height="0.3*"/>
                         <RowDefinition Height="*"/>
@@ -114,7 +119,8 @@
                             Click="Discord"/>
                 </Grid>
 
-                <Grid Grid.Row="4"> <!-- Github Button -->
+                <Grid Grid.Row="4">
+                    <!-- Github Button -->
                     <Grid.RowDefinitions>
                         <RowDefinition Height="0.3*"/>
                         <RowDefinition Height="*"/>
@@ -133,7 +139,8 @@
             </Grid>
 
 
-            <ScrollViewer Grid.Column="1" ScrollViewer.VerticalScrollBarVisibility="Hidden"> <!-- Updates Feed -->
+            <ScrollViewer Grid.Column="1" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                <!-- Updates Feed -->
                 <ItemsControl x:Name="updateFeed" >
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -154,7 +161,7 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
-            
+
 
         </Grid>
 
@@ -166,7 +173,8 @@
                 <ColumnDefinition Width="0.03*"/>
             </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="1"> <!-- Progress Bar & Progess Text -->
+            <Grid Grid.Column="1">
+                <!-- Progress Bar & Progess Text -->
                 <Grid.RowDefinitions>
                     <RowDefinition Height="0.1*"/>
                     <RowDefinition Height="*"/>
@@ -174,7 +182,8 @@
                     <RowDefinition Height="0.1*"/>
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="1" Grid.Column="1"> <!-- Progress Bar -->
+                <Grid Grid.Row="1" Grid.Column="1">
+                    <!-- Progress Bar -->
                     <Grid.RowDefinitions>
                         <RowDefinition Height="0.3*"/>
                         <RowDefinition Height="*"/>
@@ -194,7 +203,8 @@
                            VerticalAlignment="Center" x:Name="progressText"/>
             </Grid>
 
-            <Grid Grid.Column="2"> <!-- Play Button -->
+            <Grid Grid.Column="2">
+                <!-- Play Button -->
                 <Grid.RowDefinitions>
                     <RowDefinition Height="0.3*"/>
                     <RowDefinition Height="*"/>

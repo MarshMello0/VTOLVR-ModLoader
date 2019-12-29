@@ -20,14 +20,49 @@ namespace ModLoader
         private int currentSkin;
         private Text scenarioName;
         private RawImage skinPreview;
+
+        /// <summary>
+        /// All the materials in the game
+        /// </summary>
+        private List<Mat> materials;
+        /// <summary>
+        /// The default textures so we can revert back
+        /// </summary>
+        private Dictionary<string, Texture> defaultTextures;
+        private struct Mat
+        {
+            public string name;
+            public Material material;
+
+            public Mat(string name, Material material)
+            {
+                this.name = name;
+                this.material = material;
+            }
+        }
         private void Start()
         {
             Mod mod = new Mod();
             mod.name = "Skin Manger";
             SetModInfo(mod);
             SceneManager.sceneLoaded += SceneLoaded;
-            Directory.CreateDirectory(ModLoaderManager.instance.rootPath + @"\skins");
-            
+            Directory.CreateDirectory(ModLoaderManager.instance.rootPath + @"\skins");           
+        }
+
+        private void GetDefaultTextures()
+        {
+            Log("Getting Default Textures");
+            Material[] materials = Resources.FindObjectsOfTypeAll(typeof(Material)) as Material[];
+            defaultTextures = new Dictionary<string, Texture>(materials.Length);
+
+            for (int i = 0; i < materials.Length; i++)
+            {
+                if (!defaultTextures.ContainsKey(materials[i].name))
+                    defaultTextures.Add(materials[i].name, materials[i].GetTexture("_MainTex"));
+            }
+
+            Log($"Got {materials.Length} default textures stored");
+            FindMaterials(materials);
         }
 
         private void SceneLoaded(Scene arg0, LoadSceneMode arg1)
@@ -35,14 +70,12 @@ namespace ModLoader
             if (arg0.buildIndex == 3)
             {
                 //Vehicle Configuration Room
-                Debug.Log("Started Skins Vehicle Config room");
+                Log("Started Skins Vehicle Config room");
+                if (defaultTextures == null)
+                    GetDefaultTextures();
+                else
+                    RevertTextures();
                 StartCoroutine(VehicleConfigurationScene());
-            }
-            else if (arg0.buildIndex == 7 || arg0.buildIndex == 11)
-            {
-                //In Game World
-                Debug.Log("Setting Players Skin");
-                StartCoroutine(GameScene());
             }
         }
         private IEnumerator VehicleConfigurationScene()
@@ -90,7 +123,7 @@ namespace ModLoader
             VRInteractable launchMissionButton = selectMapPage.GetChild(4).GetComponent<VRInteractable>();
             ModLoader.SetDefaultInteractable(launchMissionButton, pb);
             launchMissionButton.interactableName = "Select Skin";
-            launchMissionButton.OnInteract.AddListener(delegate { SelectSkin();ApplySkin(); });
+            launchMissionButton.OnInteract.AddListener(delegate { SelectSkin();Apply(); });
 
             Transform EnvironmentSelectObject = selectMapPage.GetChild(6);
 
@@ -189,6 +222,59 @@ namespace ModLoader
             Debug.Log("Changed selected skin to " + currentSkin);
             selectedSkin = currentSkin;
         }
+
+        
+
+        private void FindMaterials(Material[] mats)
+        {
+            if (mats == null)
+                mats = Resources.FindObjectsOfTypeAll<Material>();
+            materials = new List<Mat>(mats.Length);
+
+            //We now add every texture into the dictionary which gives more things to change for the skin creators
+            for (int i = 0; i < mats.Length; i++)
+            {
+                materials.Add(new Mat(mats[i].name, mats[i]));
+            }
+        }
+        /*
+         * Current Issue, when reverting back text is broken.
+         */
+        private void RevertTextures()
+        {
+            Log("Reverting Textures");
+            for (int i = 0; i < materials.Count; i++)
+            {
+                if (defaultTextures.ContainsKey(materials[i].name))
+                    materials[i].material.SetTexture("_MainTex", defaultTextures[materials[i].name]);
+                else
+                    LogError($"Tried to get material {materials[i].name} but it wasn't in the default dictonary");
+            }
+        }
+        /*
+         * On my test skin everything seemed to be an odd red and it messed with the text as well.
+         */
+        private void Apply()
+        {
+            Log("Applying Skin Number " + selectedSkin);
+            if (selectedSkin < 0)
+            {
+                Debug.Log("Selected Skin was below 0");
+                return;
+            }
+
+            Skin selected = installedSkins[selectedSkin];
+
+            Log("\nSkin: " + selected.name + " \nPath: " + selected.folderPath + "\nHasAV42C: " + selected.hasAv42c);
+
+            for (int i = 0; i < materials.Count; i++)
+            {
+                StartCoroutine(UpdateTexture(selected.folderPath + @"\" + materials[i].name + ".png", materials[i].material));
+            }
+        }
+
+        #region Old Method
+        /*
         private void ApplySkin(GameObject vehicle = null)
         {
             Debug.Log("Applying Skin Number " + selectedSkin);
@@ -210,7 +296,7 @@ namespace ModLoader
                     ApplyFA26B((vehicle == null ? GameObject.Find("FA-26B(Clone)") : vehicle).transform, selected);
                     break;
                 case VTOLVehicles.F45A:
-                    /*
+                    
                     if (File.Exists(selected.folderPath + @"\sevtf_CanopyInt.png") && skins.ContainsKey("mat_sevtf_CanopyInt"))
                         StartCoroutine(UpdateTexture(selected.folderPath + @"\sevtf_CanopyInt.png", skins["mat_sevtf_CanopyInt"]));
                     if (File.Exists(selected.folderPath + @"\sevtf_engine.png") && skins.ContainsKey("mat_sevtf_engine"))
@@ -224,7 +310,7 @@ namespace ModLoader
                     if (File.Exists(selected.folderPath + @"\sevtf_lowPoly.png") && skins.ContainsKey("mat_sevtf_lowPoly"))
                         StartCoroutine(UpdateTexture(selected.folderPath + @"\sevtf_lowPoly.png", skins["mat_sevtf_lowPoly"]));
                     Debug.Log("Loaded F-45A Skins");
-                    */
+                    
                     break;
                 case VTOLVehicles.None:
                     Debug.LogError("API FAILED");
@@ -238,7 +324,7 @@ namespace ModLoader
              * we are manually going though them all instead of changing the material in memory
              * because then it will just only apply to that vehicle meaning different vehilces could
              * have different textures. EG one team blue other team red but all VTOL4's
-             */
+             
             Debug.Log("Applying Skin...");
             Transform VT4Body = vehicle.Find("VT4Body(new)");
             Transform Body = vehicle.Find("Body");
@@ -514,24 +600,22 @@ namespace ModLoader
             }
             Debug.Log("Loaded FA-26B Skins");
         }
+        */
+        #endregion
 
-        private IEnumerator UpdateTexture(string path, List<Material> material)
+        private IEnumerator UpdateTexture(string path, Material material)
         {
-            Debug.Log("Updating Texture from path: " + path);
+            Log("Updating Texture from path: " + path);
             if (material == null)
             {
-                Debug.LogError("Material was null, not updating texture");
+                LogError("Material was null, not updating texture");
             }
             else
             {
                 WWW www = new WWW("file:///" + path);
                 while (!www.isDone)
                     yield return null;
-                foreach (Material mat in material)
-                {
-                    yield return new WaitForEndOfFrame();
-                    mat.SetTexture("_MainTex", www.texture);
-                }
+                material.SetTexture("_MainTex", www.texture);
             }
         }
 
@@ -575,13 +659,6 @@ namespace ModLoader
                 yield return null;
             scenarioName.text = installedSkins[currentSkin].name;
             skinPreview.texture = www.texture;
-        }
-
-        private IEnumerator GameScene()
-        {
-            yield return new WaitForSeconds(3);
-            Debug.Log("In game scene, setting skins");
-            ApplySkin();
         }
         private void OnDestroy()
         {

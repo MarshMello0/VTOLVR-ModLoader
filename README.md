@@ -1,9 +1,8 @@
-# VTOL VR Mod Loader
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+# VTOL VR Mod Loader 
+
+[![Discord](https://img.shields.io/discord/597153468834119710?label=VTOL%20VR%20Modding&logo=discord&style=flat-square)](https://discord.gg/XZeeafp "Discord Invite") [![Current Downloads](https://img.shields.io/badge/dynamic/json?label=Current%20Downloads&query=assets.0.download_count&url=https%3A%2F%2Fapi.github.com%2Frepos%2FMarshMello0%2FVTOLVR-ModLoader%2Freleases%2Flatest&style=flat-square)](https://vtolvr-mods.com/ "Mod Loader's Website")<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
-
-## [Website](https://vtolvr-mods.com/ "VTOL VR Mod Loader Website")
 
 ![Mod Loader Program](https://vtolvr-mods.com/files/modloader2.gif#)
 
