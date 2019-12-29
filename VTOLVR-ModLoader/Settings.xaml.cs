@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Xml.Serialization;
 
 namespace VTOLVR_ModLoader
 {
@@ -38,13 +40,15 @@ namespace VTOLVR_ModLoader
         }
         private void Quit()
         {
-            Process.GetCurrentProcess().Kill();
+            Settings s = MainWindow.settings;
+            MainWindow.settings = null;
+            s.Close();
         }
         #region Moving Window
         private void TopBarDown(object sender, MouseButtonEventArgs e)
         {
             holdingDown = true;
-            lm = Mouse.GetPosition(Application.Current.MainWindow);
+            lm = Mouse.GetPosition(this);
         }
 
         private void TopBarUp(object sender, MouseButtonEventArgs e)
@@ -56,8 +60,8 @@ namespace VTOLVR_ModLoader
         {
             if (holdingDown)
             {
-                this.Left += Mouse.GetPosition(Application.Current.MainWindow).X - lm.X;
-                this.Top += Mouse.GetPosition(Application.Current.MainWindow).Y - lm.Y;
+                this.Left += Mouse.GetPosition(this).X - lm.X;
+                this.Top += Mouse.GetPosition(this).Y - lm.Y;
             }
         }
 
@@ -72,5 +76,28 @@ namespace VTOLVR_ModLoader
         }
 
         #endregion
+
+        private void DevConsole(object sender, RoutedEventArgs e)
+        {
+            if (devConsoleCheckbox.IsChecked == true)
+                MainWindow.devConsole = true;
+            else if (devConsoleCheckbox.IsChecked == false)
+                MainWindow.devConsole = false;
+        }
+
+        private void CreateInfo(object sender, RoutedEventArgs e)
+        {
+            Mod newMod = new Mod(modName.Text, modDescription.Text);
+
+            Directory.CreateDirectory(MainWindow.root + $"\\mods\\{modName.Text}");
+
+            using (FileStream stream = new FileStream(MainWindow.root + $"\\mods\\{modName.Text}\\info.xml", FileMode.Create))
+            {
+                XmlSerializer xml = new XmlSerializer(typeof(Mod));
+                xml.Serialize(stream, newMod);
+            }
+
+            MessageBox.Show("Created info.xml in \n\"" + MainWindow.root + $"\\mods\\{modName.Text}\"", "Created Info.xml", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
     }
 }

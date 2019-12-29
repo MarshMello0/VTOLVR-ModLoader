@@ -30,5 +30,53 @@
                     Content="x">
             </Button>
         </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="1"> <!-- Dev Console -->
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Enable Dev Console" VerticalAlignment="Center"
+                           FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" Foreground="White"
+                           FontSize="20"/>
+
+                <CheckBox Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                          ToolTip="When the game is launched a new console window will show and output all the log messages"
+                          Checked="DevConsole" Unchecked="DevConsole" x:Name="devConsoleCheckbox">
+                    <CheckBox.LayoutTransform>
+                        <ScaleTransform ScaleX="2" ScaleY="2" />
+                    </CheckBox.LayoutTransform>
+                </CheckBox>
+            </Grid>
+
+            <TextBlock Grid.Row="3" Text="Mod Creator" VerticalAlignment="Center"
+                           FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" Foreground="White"
+                           FontSize="20"/>
+
+            <TextBox Grid.Row="4" Text="Name of Mod" FontSize="15" 
+                       Foreground="White" VerticalAlignment="Center"
+                   x:Name="modName" Background="#FF3D3D3D"/>
+
+            <TextBox Grid.Row="5" Text="Description of Mod" FontSize="15" 
+                       Foreground="White" x:Name="modDescription" Background="#FF3D3D3D"/>
+
+            <Button Grid.Row="6" Content="Create Mod Info.xml" FontSize="20"
+                    FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" 
+                    Foreground="White" Background="#00DDDDDD" Click="CreateInfo"/>
+
+        </Grid>
     </Grid>
 </Window>

@@ -36,7 +36,7 @@ namespace VTOLVR_ModLoader
         private static string updatesFileTemp = @"\updates_TEMP.xml";
         private static string updatesURL = @"/files/updates.xml";
         private string url = @"https://vtolvr-mods.com";
-        private string root;
+        public static string root;
         private string vtolFolder;
 
         //Startup
@@ -60,6 +60,10 @@ namespace VTOLVR_ModLoader
         private int extractedMods = 0;
         private int extractedSkins = 0;
         private int movedDep = 0;
+        //Dev Console
+        public static bool devConsole;
+        //Settings
+        public static Settings settings;
 
         private static string CalculateMD5(string filename)
         {
@@ -307,8 +311,8 @@ namespace VTOLVR_ModLoader
             GifState(gifStates.Play);
 
             //Launching the game
-            /*
-            if (updateExe)
+            
+            if (devConsole)
             {
                 string regPath = (string)Registry.GetValue(
     @"HKEY_CURRENT_USER\SOFTWARE\Valve\Steam",
@@ -317,12 +321,12 @@ namespace VTOLVR_ModLoader
 
                 Process process = new Process();
                 process.StartInfo.FileName = regPath + @"\steam.exe";
-                process.StartInfo.Arguments = @"-applaunch 667970" + " -updateLauncher " + newExeVersion;
+                process.StartInfo.Arguments = @"-applaunch 667970" + " dev";
                 process.Start();
             }
                 
             else
-            */
+            
             Process.Start("steam://run/667970");
 
             //Searching For Process
@@ -605,20 +609,6 @@ namespace VTOLVR_ModLoader
             Process.Start("https://discord.gg/49HDD7m");
         }
 
-        private void ModCreator(object sender, RoutedEventArgs e)
-        {
-            Mod newMod = new Mod();
-            newMod.name = "Mod Name";
-            newMod.description = "Mod Description";
-            using (FileStream stream = new FileStream(root + @"\info.xml", FileMode.Create))
-            {
-                XmlSerializer xml = new XmlSerializer(typeof(Mod));
-                xml.Serialize(stream, newMod);
-            }
-
-            MessageBox.Show("Created info.xml in \n\"" + root + "\"", "Created Info.xml", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
         private void Quit(object sender, RoutedEventArgs e)
         {
             Quit();
@@ -656,6 +646,17 @@ namespace VTOLVR_ModLoader
         }
 
         #endregion
+
+        private void OpenSettings(object sender, RoutedEventArgs e)
+        {
+            if (settings != null)
+            {
+                settings.Activate();
+                return;
+            }
+            settings = new Settings();
+            settings.Show();
+        }
     }
 
     public class Mod
@@ -663,5 +664,11 @@ namespace VTOLVR_ModLoader
         public string name;
         public string description;
         public Mod() { }
+
+        public Mod(string name, string description)
+        {
+            this.name = name;
+            this.description = description;
+        }
     }
 }
