@@ -504,13 +504,30 @@ namespace VTOLVR_ModLoader
                         {
                             split = depFiles[k].Split('\\');
                             fileName = split[split.Length - 1];
-                            Console.WriteLine("Moved file \n" + Directory.GetParent(root).FullName +
+
+                            if (File.Exists(Directory.GetParent(root).FullName +
+                                        @"\VTOLVR_Data\Managed\" + fileName))
+                            {
+                                string oldHash = CalculateMD5(Directory.GetParent(root).FullName +
                                         @"\VTOLVR_Data\Managed\" + fileName);
-                            File.Copy(depFiles[k], Directory.GetParent(root).FullName +
+                                string newHash = CalculateMD5(depFiles[k]);
+                                if (!oldHash.Equals(newHash))
+                                {
+                                    File.Copy(depFiles[k], Directory.GetParent(root).FullName +
                                         @"\VTOLVR_Data\Managed\" + fileName,
                                         true);
-
-                            movedDep++;
+                                    movedDep++;
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("Moved file \n" + Directory.GetParent(root).FullName +
+                                        @"\VTOLVR_Data\Managed\" + fileName);
+                                File.Copy(depFiles[k], Directory.GetParent(root).FullName +
+                                            @"\VTOLVR_Data\Managed\" + fileName,
+                                            true);
+                                movedDep++;
+                            }
                         }
                         break;
                     }
