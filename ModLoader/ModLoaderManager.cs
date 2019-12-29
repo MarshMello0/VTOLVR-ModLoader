@@ -110,7 +110,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
 
             discord = gameObject.AddComponent<DiscordController>();
             discordDetail = "Launching Game";
-            discordState = "Using . Marsh.Mello .'s Mod Loader";
+            discordState = ". Marsh.Mello .'s Mod Loader";
             UpdateDiscord();
 
             SteamAPI.Init();
