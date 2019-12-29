@@ -611,19 +611,17 @@ namespace VTOLVR_ModLoader
             Process.GetCurrentProcess().Kill();
         }
 
-        private void WebsiteMods(object sender, RoutedEventArgs e)
+        private void Website(object sender, RoutedEventArgs e)
         {
-            Process.Start("https://vtolvr-mods.com/mods.php");
+            Process.Start("https://vtolvr-mods.com");
         }
-
-        private void WebsiteSkins(object sender, RoutedEventArgs e)
-        {
-            Process.Start("https://vtolvr-mods.com/skins.php");
-        }
-
         private void Discord(object sender, RoutedEventArgs e)
         {
             Process.Start("https://discord.gg/49HDD7m");
+        }
+        private void Patreon(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://www.patreon.com/vtolvrmods");
         }
 
         private void Quit(object sender, RoutedEventArgs e)
@@ -674,6 +672,8 @@ namespace VTOLVR_ModLoader
             settings = new Settings();
             settings.Show();
         }
+
+
     }
 
     public class Mod
