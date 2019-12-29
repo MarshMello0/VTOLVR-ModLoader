@@ -58,7 +58,7 @@ public class DiscordController : MonoBehaviour
         }
 
         presence.smallImageKey = "logo";
-        presence.smallImageText = "VTOL VR Mod Loader";
+        presence.smallImageText = "VTOL VR Mod Loader\nhttps://vtolvr-mods.com/";
         presence.details = detail;
         presence.state = state;
         //presence.joinSecret = "MTI4NzM0OjFpMmhuZToxMjMxMjM";

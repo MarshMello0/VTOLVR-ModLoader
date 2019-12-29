@@ -105,15 +105,12 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                 Debug.Log("Created Console");
             }
 
-            if (args.Contains("-updateLauncher"))
-                UpdateLauncher();
-
             CreateAPI();
 
 
             discord = gameObject.AddComponent<DiscordController>();
             discordDetail = "Launching Game";
-            discordState = "Using . Marsh.Mello .'s Mod Loader";
+            discordState = ". Marsh.Mello .'s Mod Loader";
             UpdateDiscord();
 
             SteamAPI.Init();
@@ -128,50 +125,6 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             api.CreateCommand("print", PrintMessage);
             api.CreateCommand("help", api.ShowHelp);
 
-        }
-
-        private void UpdateLauncher()
-        {
-            int newVersion = 200;
-            for (int i = 0; i < args.Length; i++)
-            {
-                if (args[i].Equals("-updateLauncher"))
-                {
-                    if (int.TryParse(args[i + 1],out newVersion))
-                    {
-                        using (client = new WebClient())
-                        {
-                            Debug.Log("Downloading Launcher Update from : " + "https://vtolvr-mods.com/files/updates/exe/" + newVersion.ToString() + "/VTOLVR-ModLoader.exe");
-                            if (File.Exists(rootPath + @"\VTOLVR-ModLoader_TEMP.exe"))
-                                File.Delete(rootPath + @"\VTOLVR-ModLoader_TEMP.exe");
-                            client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(LauncherProgress);
-                            client.DownloadFileCompleted += new AsyncCompletedEventHandler(LauncherDone);
-                            client.DownloadFileAsync(new Uri(@"https://vtolvr-mods.com/files/updates/exe/" + newVersion.ToString() + "/VTOLVR-ModLoader.exe"), rootPath + @"\VTOLVR-ModLoader_TEMP.exe");
-                        }
-                    }
-                }
-            }
-
-        }
-
-        private void LauncherDone(object sender, AsyncCompletedEventArgs e)
-        {
-            if (!e.Cancelled && e.Error == null)
-            {
-                if (File.Exists(rootPath + @"\VTOLVR-ModLoader.exe"))
-                    File.Delete(rootPath + @"\VTOLVR-ModLoader.exe");
-                File.Move(rootPath + @"\VTOLVR-ModLoader_TEMP.exe", rootPath + @"\VTOLVR-ModLoader.exe");
-                Debug.Log("Updated Launcher");
-            }
-            else if (e.Error != null)
-            {
-                Debug.Log("Error happened when updating the launcher\n" + e.Error.ToString());
-            }
-        }
-
-        private void LauncherProgress(object sender, DownloadProgressChangedEventArgs e)
-        {
-            Debug.Log("New Launcher Progress = " + e.ProgressPercentage / 100);
         }
 
         private void ConsoleInput(string obj)

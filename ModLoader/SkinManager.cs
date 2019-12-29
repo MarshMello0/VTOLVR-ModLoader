@@ -55,6 +55,7 @@ namespace ModLoader
             Material[] materials = Resources.FindObjectsOfTypeAll(typeof(Material)) as Material[];
             defaultTextures = new Dictionary<string, Texture>(materials.Length);
 
+            Texture texture;
             for (int i = 0; i < materials.Length; i++)
             {
                 if (!defaultTextures.ContainsKey(materials[i].name))
@@ -166,14 +167,6 @@ namespace ModLoader
                 if (File.Exists(folder + @"\0.png")) //AV-42C
                 {
                     currentSkin.hasAv42c = true;
-                    if (File.Exists(folder + @"\vtol4Exterior.png"))
-                        currentSkin.textures.Add("vtol4Exterior", folder + @"\vtol4Exterior.png");
-                    if (File.Exists(folder + @"\vtol4Exterior2.png"))
-                        currentSkin.textures.Add("vtol4Exterior2", folder + @"\vtol4Exterior2.png");
-                    if (File.Exists(folder + @"\vtol4Interior.png"))
-                        currentSkin.textures.Add("vtol4Interior", folder + @"\vtol4Interior.png");
-                    if (File.Exists(folder + @"\vtol4TiltEngine.png"))
-                        currentSkin.textures.Add("vtol4TiltEngine", folder + @"\vtol4TiltEngine.png");
                 }
 
                 if (File.Exists(folder + @"\1.png")) //FA26B
@@ -237,9 +230,6 @@ namespace ModLoader
                 materials.Add(new Mat(mats[i].name, mats[i]));
             }
         }
-        /*
-         * Current Issue, when reverting back text is broken.
-         */
         private void RevertTextures()
         {
             Log("Reverting Textures");
@@ -251,9 +241,6 @@ namespace ModLoader
                     LogError($"Tried to get material {materials[i].name} but it wasn't in the default dictonary");
             }
         }
-        /*
-         * On my test skin everything seemed to be an odd red and it messed with the text as well.
-         */
         private void Apply()
         {
             Log("Applying Skin Number " + selectedSkin);
@@ -265,11 +252,15 @@ namespace ModLoader
 
             Skin selected = installedSkins[selectedSkin];
 
-            Log("\nSkin: " + selected.name + " \nPath: " + selected.folderPath + "\nHasAV42C: " + selected.hasAv42c);
+            Log("\nSkin: " + selected.name + " \nPath: " + selected.folderPath);
 
             for (int i = 0; i < materials.Count; i++)
             {
-                StartCoroutine(UpdateTexture(selected.folderPath + @"\" + materials[i].name + ".png", materials[i].material));
+                if (File.Exists(selected.folderPath + @"\" + materials[i].name + ".png"))
+                    StartCoroutine(UpdateTexture(selected.folderPath + @"\" + materials[i].name + ".png", materials[i].material));
+                else
+                    Log("File Doesn't exist for skin\n" +
+                        selected.folderPath + @"\" + materials[i].name + ".png");
             }
         }
 
@@ -670,7 +661,6 @@ namespace ModLoader
             public string name;
             public bool hasAv42c, hasFA26B, hasF45A;
             public string folderPath;
-            public Dictionary<string, string> textures = new Dictionary<string, string>();
         }
     }
 }
