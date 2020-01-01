@@ -369,7 +369,7 @@ namespace VTOLVR_ModLoader
                     //If we couldn't find it, go back to how it was at the start
                     GifState(gifStates.Paused);
                     SetProgress(100, "Couldn't find VTOLVR process.");
-                    SetPlayButton(true);
+                    SetPlayButton(false);
                     return;
                 }
             }
