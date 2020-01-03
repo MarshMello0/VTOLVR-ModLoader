@@ -449,7 +449,14 @@ namespace VTOLVR_ModLoader
             if (files.Length == 0)
             {
                 SetPlayButton(false);
-                SetProgress(100, "No new skins were found");
+                SetProgress(100,
+                    (extractedMods == 0 ? "0 Mods" : (extractedMods == 1 ? "1 Mod" : extractedMods + " Mods")) +
+                    " and " +
+                    (extractedSkins == 0 ? "0 Skins" : (extractedSkins == 1 ? "1 Skin" : extractedSkins + " Skins")) +
+                    " extracted" +
+                    " and " +
+                    (movedDep == 0 ? "0 Dependencies" : (movedDep == 1 ? "1 Dependencies" : movedDep + " Dependencies")) +
+                    " moved");
                 return;
             }
             float zipAmount = 100 / files.Length;
