@@ -32,6 +32,7 @@ namespace VTOLVR_ModLoader
         public Settings()
         {
             InitializeComponent();
+            devConsoleCheckbox.IsChecked = MainWindow.devConsole;
         }
 
         private void Quit(object sender, RoutedEventArgs e)
