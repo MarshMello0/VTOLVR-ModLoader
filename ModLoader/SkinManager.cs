@@ -29,6 +29,7 @@ namespace ModLoader
         /// The default textures so we can revert back
         /// </summary>
         private Dictionary<string, Texture> defaultTextures;
+        private string[] matsNotToTouch = new string[] { "Font Material", "Font Material_0", "Font Material_1", "Font Material_2", "Font Material_3", "Font Material_4", "Font Material_5", "Font Material_6" };
         private struct Mat
         {
             public string name;
@@ -55,10 +56,10 @@ namespace ModLoader
             Material[] materials = Resources.FindObjectsOfTypeAll(typeof(Material)) as Material[];
             defaultTextures = new Dictionary<string, Texture>(materials.Length);
 
-            Texture texture;
+            
             for (int i = 0; i < materials.Length; i++)
             {
-                if (!defaultTextures.ContainsKey(materials[i].name))
+                if (!matsNotToTouch.Contains(materials[i].name) && !defaultTextures.ContainsKey(materials[i].name))
                     defaultTextures.Add(materials[i].name, materials[i].GetTexture("_MainTex"));
             }
 

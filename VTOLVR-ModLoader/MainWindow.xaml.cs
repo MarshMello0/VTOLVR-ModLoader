@@ -1,20 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.IO;
 using System.IO.Compression;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 using WpfAnimatedGif;
 using System.Net;
@@ -369,7 +358,7 @@ namespace VTOLVR_ModLoader
                     //If we couldn't find it, go back to how it was at the start
                     GifState(gifStates.Paused);
                     SetProgress(100, "Couldn't find VTOLVR process.");
-                    SetPlayButton(true);
+                    SetPlayButton(false);
                     return;
                 }
             }
@@ -449,7 +438,14 @@ namespace VTOLVR_ModLoader
             if (files.Length == 0)
             {
                 SetPlayButton(false);
-                SetProgress(100, "No new skins were found");
+                SetProgress(100,
+                    (extractedMods == 0 ? "0 Mods" : (extractedMods == 1 ? "1 Mod" : extractedMods + " Mods")) +
+                    " and " +
+                    (extractedSkins == 0 ? "0 Skins" : (extractedSkins == 1 ? "1 Skin" : extractedSkins + " Skins")) +
+                    " extracted" +
+                    " and " +
+                    (movedDep == 0 ? "0 Dependencies" : (movedDep == 1 ? "1 Dependencies" : movedDep + " Dependencies")) +
+                    " moved");
                 return;
             }
             float zipAmount = 100 / files.Length;
@@ -623,6 +619,10 @@ namespace VTOLVR_ModLoader
         {
             Process.Start("https://www.patreon.com/vtolvrmods");
         }
+        private void OpenFolder(object sender, RoutedEventArgs e)
+        {
+            Process.Start(root);
+        }
 
         private void Quit(object sender, RoutedEventArgs e)
         {
@@ -672,8 +672,6 @@ namespace VTOLVR_ModLoader
             settings = new Settings();
             settings.Show();
         }
-
-
     }
 
     public class Mod

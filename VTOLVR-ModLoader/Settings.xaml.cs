@@ -1,19 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
+﻿using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Xml.Serialization;
 
 namespace VTOLVR_ModLoader
@@ -27,11 +15,11 @@ namespace VTOLVR_ModLoader
         //Moving Window
         private bool holdingDown;
         private Point lm = new Point();
-        private bool isBusy;
 
         public Settings()
         {
             InitializeComponent();
+            devConsoleCheckbox.IsChecked = MainWindow.devConsole;
         }
 
         private void Quit(object sender, RoutedEventArgs e)
