@@ -630,6 +630,10 @@ namespace VTOLVR_ModLoader
         {
             Process.Start("https://www.patreon.com/vtolvrmods");
         }
+        private void OpenFolder(object sender, RoutedEventArgs e)
+        {
+            Process.Start(root);
+        }
 
         private void Quit(object sender, RoutedEventArgs e)
         {
@@ -679,8 +683,6 @@ namespace VTOLVR_ModLoader
             settings = new Settings();
             settings.Show();
         }
-
-
     }
 
     public class Mod

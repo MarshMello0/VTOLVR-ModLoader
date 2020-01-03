@@ -115,8 +115,8 @@
                     </Grid.ColumnDefinitions>
 
                     <Button Grid.Column="1" Grid.Row="1" FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"
-                            Content="Patreon" Foreground="White" Background="#FF3D3D3D" BorderBrush="{x:Null}" 
-                            Click="Patreon"/>
+                            Content="Open Folder" Foreground="White" Background="#FF3D3D3D" BorderBrush="{x:Null}" 
+                            Click="OpenFolder"/>
                 </Grid>
 
                 <Grid Grid.Row="4">
