@@ -118,8 +118,6 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             SteamAPI.Init();
 
             SceneManager.sceneLoaded += SceneLoaded;
-            
-            CreateAssetBundle();
 
             //gameObject.AddComponent<CSharp>();
 
@@ -170,17 +168,6 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
         private void SetPaths()
         {
             rootPath = Directory.GetCurrentDirectory() + @"\VTOLVR_Modloader";
-        }
-        public void CreateAssetBundle()
-        {
-            //Stopped Loading of asset bundle as its not used
-            return;
-            assets = AssetBundle.LoadFromFile(rootPath + assetsPath);
-            if (assets == null)
-            {
-                Debug.Log("Failed to load AssetBundle!");
-                return;
-            }
         }
         private void SceneLoaded(Scene arg0, LoadSceneMode arg1)
         {
