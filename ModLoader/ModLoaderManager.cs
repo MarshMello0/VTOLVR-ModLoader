@@ -105,6 +105,8 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                 Debug.Log("Created Console");
             }
 
+            
+
             CreateAPI();
 
 
@@ -124,7 +126,6 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             api.CreateCommand("quit", delegate { Application.Quit(); });
             api.CreateCommand("print", PrintMessage);
             api.CreateCommand("help", api.ShowHelp);
-
         }
 
         private void ConsoleInput(string obj)
@@ -189,6 +190,13 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                 case "SamplerScene":
                     discordDetail = "Selecting mods";
                     StartCoroutine(CreateModLoader());
+                    for (int i = 0; i < args.Length; i++)
+                    {
+                        if (args[i].Contains("PILOT="))
+                        {
+                            StartCoroutine(LoadLevel());
+                        }
+                    }
                     break;
                 case "Akutan":
                     discordDetail = "Flying the " + PilotSaveManager.currentVehicle.vehicleName;
@@ -243,6 +251,85 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
         {
             obj.Remove(0, 5);
             Debug.Log(obj);
+        }
+
+        private IEnumerator LoadLevel()
+        {
+            Debug.Log("Loading Pilots from file");
+            PilotSaveManager.LoadPilotsFromFile();
+            yield return new WaitForSeconds(2);
+                        
+
+            string pilotName = "";
+            string cID = "";
+            string sID = "";
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i].Contains("PILOT="))
+                {
+                    pilotName = args[i].Replace("PILOT=", "");
+                }
+                else if (args[i].Contains("SCENARIO_CID="))
+                {
+                    cID = args[i].Replace("SCENARIO_CID=","");
+                }
+                else if (args[i].Contains("SCENARIO_ID="))
+                {
+                    sID = args[i].Replace("SCENARIO_ID=", "");
+                }
+            }
+
+            Debug.Log($"Loading Level\nPilot={pilotName}\ncID={cID}\nsID={sID}");
+            VTMapManager.nextLaunchMode = VTMapManager.MapLaunchModes.Scenario;
+            LoadingSceneController.LoadScene(7);
+
+            yield return new WaitForSeconds(5);
+            //After here we should be in the loader scene
+
+            Debug.Log("Setting Pilot");
+            PilotSaveManager.current = PilotSaveManager.pilots[pilotName];
+            Debug.Log("Going though All built in campaigns");
+            if (VTResources.GetBuiltInCampaigns() != null)
+            {
+                foreach (VTCampaignInfo info in VTResources.GetBuiltInCampaigns())
+                {
+                    if (info.campaignID == cID)
+                    {
+                        Debug.Log("Setting Campaign");
+                        PilotSaveManager.currentCampaign = info.ToIngameCampaign();
+                        Debug.Log("Setting Vehicle");
+                        PilotSaveManager.currentVehicle = VTResources.GetPlayerVehicle(info.vehicle);
+                        break;
+                    }
+                }
+            }
+            else
+                Debug.Log("Campaigns are null");
+
+            Debug.Log("Going though All missions in that campaign");
+            foreach (CampaignScenario cs in PilotSaveManager.currentCampaign.missions)
+            {
+                if (cs.scenarioID == sID)
+                {
+                    Debug.Log("Setting Scenario");
+                    PilotSaveManager.currentScenario = cs;
+                    break;
+                }
+            }
+
+            VTScenario.currentScenarioInfo = VTResources.GetScenario(PilotSaveManager.currentScenario.scenarioID, PilotSaveManager.currentCampaign);
+
+            Debug.Log(string.Format("Loading into game, Pilot:{3}, Campaign:{0}, Scenario:{1}, Vehicle:{2}",
+                PilotSaveManager.currentCampaign.campaignName, PilotSaveManager.currentScenario.scenarioName,
+                PilotSaveManager.currentVehicle.vehicleName, pilotName));
+
+            LoadingSceneController.instance.PlayerReady(); //<< Auto Ready
+
+            while (SceneManager.GetActiveScene().buildIndex != 7)
+            {
+                //Pausing this method till the loader scene is unloaded
+                yield return null;
+            }
         }
     }
 }

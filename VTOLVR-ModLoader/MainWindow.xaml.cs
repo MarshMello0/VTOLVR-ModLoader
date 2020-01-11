@@ -26,7 +26,7 @@ namespace VTOLVR_ModLoader
         private static string updatesURL = @"/files/updates.xml";
         private string url = @"https://vtolvr-mods.com";
         public static string root;
-        private string vtolFolder;
+        public static string vtolFolder;
 
         //Startup
         private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe", "Updater.exe" };
@@ -53,6 +53,8 @@ namespace VTOLVR_ModLoader
         public static bool devConsole;
         //Settings
         public static Settings settings;
+        public static Pilot pilotSelected;
+        public static Scenario scenarioSelected;
 
         private static string CalculateMD5(string filename)
         {
@@ -301,16 +303,25 @@ namespace VTOLVR_ModLoader
 
             //Launching the game
             
-            if (devConsole)
+            if (devConsole || (pilotSelected != null && scenarioSelected != null))
             {
                 string regPath = (string)Registry.GetValue(
     @"HKEY_CURRENT_USER\SOFTWARE\Valve\Steam",
     @"SteamPath",
     @"NULL");
+                string args = string.Empty;
+                if (pilotSelected.Name != "No Selection" && scenarioSelected.Name != "No Selection")
+                {
+                    args += $" PILOT={pilotSelected.Name} SCENARIO_CID={scenarioSelected.cID} SCENARIO_ID={scenarioSelected.ID}";
+                }
 
+                if (devConsole)
+                {
+                    args += " dev";
+                }
                 Process process = new Process();
                 process.StartInfo.FileName = regPath + @"\steam.exe";
-                process.StartInfo.Arguments = @"-applaunch 667970" + " dev";
+                process.StartInfo.Arguments = @"-applaunch 667970" + args;
                 process.Start();
             }
                 
