@@ -43,6 +43,7 @@
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="30"/>
                 <RowDefinition Height="30"/>
+                <RowDefinition Height="100"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
@@ -134,6 +135,27 @@
                            FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" Foreground="White"
                            FontSize="20"/>
 
+            <ScrollViewer Grid.Row="10" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                <ItemsControl x:Name="mods" >
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="0,0,0,0" >
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="0.1*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <CheckBox IsChecked="{Binding LoadMod}" Grid.Column="0" HorizontalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding ModName}" VerticalAlignment="Center"
+                                        FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" Foreground="White"
+                                        FontSize="10"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </Window>

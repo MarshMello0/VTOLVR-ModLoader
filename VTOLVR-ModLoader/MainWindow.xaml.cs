@@ -18,7 +18,7 @@ namespace VTOLVR_ModLoader
     {
         private enum gifStates { Paused, Play, Frame }
 
-        private static string modsFolder = @"\mods";
+        public static string modsFolder = @"\mods";
         private static string skinsFolder = @"\skins";
         private static string injector = @"\injector.exe";
         private static string updatesFile = @"\updates.xml";

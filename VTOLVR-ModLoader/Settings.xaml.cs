@@ -52,6 +52,8 @@ namespace VTOLVR_ModLoader
                     }
                 }
             }
+
+            FindMods();
         }
 
         private void Quit(object sender, RoutedEventArgs e)
@@ -185,6 +187,27 @@ namespace VTOLVR_ModLoader
         {
             MainWindow.scenarioSelected = (Scenario)ScenarioDropdown.SelectedItem;
         }
+
+        private void FindMods()
+        {
+            DirectoryInfo folder = new DirectoryInfo(MainWindow.root + MainWindow.modsFolder);
+            FileInfo[] files = folder.GetFiles("*.dll");
+            List<ModItem> mods = new List<ModItem>();
+            for (int i = 0; i < files.Length; i++)
+            {
+                mods.Add(new ModItem(files[i].Name.Split('.')[0]));
+            }
+
+            DirectoryInfo[] folders = folder.GetDirectories();
+            for (int i = 0; i < folders.Length; i++)
+            {
+                if (File.Exists(folders[i].FullName + @"\" + folders[i].Name + ".dll"))
+                {
+                    mods.Add(new ModItem(folders[i].Name));
+                }
+            }
+            this.mods.ItemsSource = mods;
+        }
     }
 
     public class Pilot
@@ -206,6 +229,17 @@ namespace VTOLVR_ModLoader
             Name = name;
             ID = iD;
             this.cID = cID;
+        }
+    }
+
+    public class ModItem
+    {
+        public string ModName { get; set; }
+        public bool LoadMod { get; set; }
+
+        public ModItem(string modName)
+        {
+            ModName = modName;
         }
     }
 
