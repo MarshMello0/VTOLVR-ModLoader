@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text.RegularExpressions;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace VTOLVR_ModLoader
 {
@@ -22,6 +23,9 @@ namespace VTOLVR_ModLoader
         //Moving Window
         private bool holdingDown;
         private Point lm = new Point();
+
+        
+        private readonly string savePath = @"settings.xml";
 
         public Settings()
         {
@@ -55,6 +59,42 @@ namespace VTOLVR_ModLoader
             }
 
             FindMods();
+            if (MainWindow.save == null && SettingsSaveExists())
+            {
+                MainWindow.save = LoadSettings();
+
+                devConsoleCheckbox.IsChecked = MainWindow.save.devConsole;
+                MainWindow.devConsole = MainWindow.save.devConsole;
+
+                if (MainWindow.pilotSelected == null)
+                {
+                    foreach (Pilot p in PilotDropdown.ItemsSource)
+                    {
+                        if (p.Name == MainWindow.save.previousPilot)
+                        {
+                            PilotDropdown.SelectedItem = p;
+                            break;
+                        }
+                    }
+                }
+                if (MainWindow.scenarioSelected == null)
+                {
+                    foreach (Scenario s in ScenarioDropdown.ItemsSource)
+                    {
+                        if (s.ID == MainWindow.save.previousScenario)
+                        {
+                            ScenarioDropdown.SelectedItem = s;
+                            break;
+                        }
+                    }
+                }
+
+                //Havn't done Mod saving because I can't find a way to get the checkboxes to enable them.
+            }
+            else if (MainWindow.save == null)
+            {
+                MainWindow.save = new SettingsSave();
+            }
         }
 
         private void Quit(object sender, RoutedEventArgs e)
@@ -63,6 +103,7 @@ namespace VTOLVR_ModLoader
         }
         private void Quit()
         {
+            SaveSettings();
             Settings s = MainWindow.settings;
             MainWindow.settings = null;
             s.Close();
@@ -106,6 +147,7 @@ namespace VTOLVR_ModLoader
                 MainWindow.devConsole = true;
             else if (devConsoleCheckbox.IsChecked == false)
                 MainWindow.devConsole = false;
+            MainWindow.save.devConsole = MainWindow.devConsole;
         }
 
         private void CreateInfo(object sender, RoutedEventArgs e)
@@ -183,11 +225,13 @@ namespace VTOLVR_ModLoader
         private void PilotChanged(object sender, EventArgs e)
         {
             MainWindow.pilotSelected = (Pilot)PilotDropdown.SelectedItem;
+            MainWindow.save.previousPilot = MainWindow.pilotSelected.Name;
         }
 
         private void ScenarioChanged(object sender, EventArgs e)
         {
             MainWindow.scenarioSelected = (Scenario)ScenarioDropdown.SelectedItem;
+            MainWindow.save.previousScenario = MainWindow.scenarioSelected.ID;
         }
 
         private void FindMods()
@@ -223,6 +267,35 @@ namespace VTOLVR_ModLoader
                 MainWindow.modsToLoad.Remove(checkBox.ToolTip.ToString());
             }
         }
+
+        private bool SettingsSaveExists()
+        {
+            return File.Exists(MainWindow.root + @"\" + savePath);
+        }
+        private SettingsSave LoadSettings()
+        {
+            using (FileStream stream = new FileStream(MainWindow.root + @"\" + savePath, FileMode.Open))
+            {
+                XmlSerializer xml = new XmlSerializer(typeof(SettingsSave));
+                return (SettingsSave)xml.Deserialize(stream);
+            }
+        }
+        private void SaveSettings()
+        {
+            using (FileStream stream = new FileStream(MainWindow.root + @"\" + savePath, FileMode.Create))
+            {
+                XmlSerializer xml = new XmlSerializer(typeof(SettingsSave));
+                xml.Serialize(stream, MainWindow.save);
+            }
+        }
+        [Serializable]
+        public class SettingsSave
+        {
+            public bool devConsole { get; set; }
+            public string previousPilot { get; set; }
+            public string previousScenario { get; set; }
+            public string[] previousModsLoaded { get; set; }
+        }
     }
 
     public class Pilot
@@ -251,6 +324,7 @@ namespace VTOLVR_ModLoader
     {
         public string ModName { get; set; }
         public bool LoadMod { get; set; }
+        public CheckBox checkBox { get; set; }
 
         public ModItem(string modName)
         {

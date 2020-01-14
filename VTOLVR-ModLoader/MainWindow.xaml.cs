@@ -57,6 +57,7 @@ namespace VTOLVR_ModLoader
         public static Pilot pilotSelected;
         public static Scenario scenarioSelected;
         public static List<string> modsToLoad = new List<string>();
+        public static Settings.SettingsSave save;
 
         private static string CalculateMD5(string filename)
         {
