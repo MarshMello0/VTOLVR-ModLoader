@@ -36,7 +36,7 @@ namespace VTOLVR_ModLoader
                 devConsoleCheckbox.IsChecked = MainWindow.save.devConsole;
                 MainWindow.devConsole = MainWindow.save.devConsole;
 
-                if (MainWindow.pilotSelected == null)
+                if (MainWindow.pilotSelected == null && MainWindow.save.previousPilot != null)
                 {
                     foreach (Pilot p in PilotDropdown.ItemsSource)
                     {
@@ -47,7 +47,7 @@ namespace VTOLVR_ModLoader
                         }
                     }
                 }
-                if (MainWindow.scenarioSelected == null)
+                if (MainWindow.scenarioSelected == null && MainWindow.save.previousScenario != null)
                 {
                     foreach (Scenario s in ScenarioDropdown.ItemsSource)
                     {
