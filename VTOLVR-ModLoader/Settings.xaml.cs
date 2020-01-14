@@ -40,7 +40,7 @@ namespace VTOLVR_ModLoader
                 {
                     foreach (Pilot p in PilotDropdown.ItemsSource)
                     {
-                        if (p.Name == MainWindow.save.previousPilot)
+                        if (p.Name == MainWindow.save.previousPilot.Name)
                         {
                             PilotDropdown.SelectedItem = p;
                             break;
@@ -51,7 +51,7 @@ namespace VTOLVR_ModLoader
                 {
                     foreach (Scenario s in ScenarioDropdown.ItemsSource)
                     {
-                        if (s.ID == MainWindow.save.previousScenario)
+                        if (s.ID == MainWindow.save.previousScenario.ID)
                         {
                             ScenarioDropdown.SelectedItem = s;
                             break;
@@ -195,13 +195,13 @@ namespace VTOLVR_ModLoader
         private void PilotChanged(object sender, EventArgs e)
         {
             MainWindow.pilotSelected = (Pilot)PilotDropdown.SelectedItem;
-            MainWindow.save.previousPilot = MainWindow.pilotSelected.Name;
+            MainWindow.save.previousPilot = MainWindow.pilotSelected;
         }
 
         private void ScenarioChanged(object sender, EventArgs e)
         {
             MainWindow.scenarioSelected = (Scenario)ScenarioDropdown.SelectedItem;
-            MainWindow.save.previousScenario = MainWindow.scenarioSelected.ID;
+            MainWindow.save.previousScenario = MainWindow.scenarioSelected;
         }
 
         private void FindMods()
@@ -246,29 +246,6 @@ namespace VTOLVR_ModLoader
             }
         }
     }
-
-    public class Pilot
-    {
-        public string Name { get; set; }
-        public Pilot(string name)
-        {
-            Name = name;
-        }
-    }
-
-    public class Scenario
-    {
-        public string Name { get; set; }
-        public string ID;
-        public string cID;
-        public Scenario(string name, string cID,string iD)
-        {
-            Name = name;
-            ID = iD;
-            this.cID = cID;
-        }
-    }
-
     public class ModItem
     {
         public string ModName { get; set; }

@@ -113,7 +113,12 @@ namespace VTOLVR_ModLoader
 
             GetData();
             if (SettingsSaveExists())
+            {
                 save = LoadSettings();
+                devConsole = save.devConsole;
+                pilotSelected = save.previousPilot;
+                scenarioSelected = save.previousScenario;
+            }
         }
         private void URICheck()
         {
