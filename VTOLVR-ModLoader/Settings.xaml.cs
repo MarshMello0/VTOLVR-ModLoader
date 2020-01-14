@@ -23,10 +23,6 @@ namespace VTOLVR_ModLoader
         //Moving Window
         private bool holdingDown;
         private Point lm = new Point();
-
-        
-        private readonly string savePath = @"settings.xml";
-
         public Settings()
         {
             InitializeComponent();
@@ -34,35 +30,9 @@ namespace VTOLVR_ModLoader
             FindPilots();
             AddDefaultScenarios();
 
-            if (MainWindow.pilotSelected != null)
-            {
-                foreach (Pilot p in PilotDropdown.ItemsSource)
-                {
-                    if (p.Name == MainWindow.pilotSelected.Name)
-                    {
-                        PilotDropdown.SelectedItem = p;
-                        break;
-                    }
-                }
-            }
-
-            if (MainWindow.scenarioSelected != null)
-            {
-                foreach (Scenario s in ScenarioDropdown.ItemsSource)
-                {
-                    if (s.ID == MainWindow.scenarioSelected.ID)
-                    {
-                        ScenarioDropdown.SelectedItem = s;
-                        break;
-                    }
-                }
-            }
-
             FindMods();
-            if (MainWindow.save == null && SettingsSaveExists())
+            if (MainWindow.save != null)
             {
-                MainWindow.save = LoadSettings();
-
                 devConsoleCheckbox.IsChecked = MainWindow.save.devConsole;
                 MainWindow.devConsole = MainWindow.save.devConsole;
 
@@ -267,34 +237,13 @@ namespace VTOLVR_ModLoader
                 MainWindow.modsToLoad.Remove(checkBox.ToolTip.ToString());
             }
         }
-
-        private bool SettingsSaveExists()
-        {
-            return File.Exists(MainWindow.root + @"\" + savePath);
-        }
-        private SettingsSave LoadSettings()
-        {
-            using (FileStream stream = new FileStream(MainWindow.root + @"\" + savePath, FileMode.Open))
-            {
-                XmlSerializer xml = new XmlSerializer(typeof(SettingsSave));
-                return (SettingsSave)xml.Deserialize(stream);
-            }
-        }
         private void SaveSettings()
         {
-            using (FileStream stream = new FileStream(MainWindow.root + @"\" + savePath, FileMode.Create))
+            using (FileStream stream = new FileStream(MainWindow.root + @"\" + MainWindow.savePath, FileMode.Create))
             {
                 XmlSerializer xml = new XmlSerializer(typeof(SettingsSave));
                 xml.Serialize(stream, MainWindow.save);
             }
-        }
-        [Serializable]
-        public class SettingsSave
-        {
-            public bool devConsole { get; set; }
-            public string previousPilot { get; set; }
-            public string previousScenario { get; set; }
-            public string[] previousModsLoaded { get; set; }
         }
     }
 

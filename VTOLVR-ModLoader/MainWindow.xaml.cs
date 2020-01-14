@@ -57,7 +57,8 @@ namespace VTOLVR_ModLoader
         public static Pilot pilotSelected;
         public static Scenario scenarioSelected;
         public static List<string> modsToLoad = new List<string>();
-        public static Settings.SettingsSave save;
+        public static SettingsSave save;
+        public static readonly string savePath = @"settings.xml";
 
         private static string CalculateMD5(string filename)
         {
@@ -111,6 +112,8 @@ namespace VTOLVR_ModLoader
                 CheckBaseFolder();
 
             GetData();
+            if (SettingsSaveExists())
+                save = LoadSettings();
         }
         private void URICheck()
         {
@@ -697,6 +700,20 @@ namespace VTOLVR_ModLoader
             }
             settings = new Settings();
             settings.Show();
+        }
+
+        private bool SettingsSaveExists()
+        {
+            return File.Exists(root + @"\" + savePath);
+        }
+
+        private SettingsSave LoadSettings()
+        {
+            using (FileStream stream = new FileStream(root + @"\" + savePath, FileMode.Open))
+            {
+                XmlSerializer xml = new XmlSerializer(typeof(SettingsSave));
+                return (SettingsSave)xml.Deserialize(stream);
+            }
         }
     }
 
