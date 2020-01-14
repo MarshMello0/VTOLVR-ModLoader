@@ -178,6 +178,7 @@ namespace VTOLVR_ModLoader
                 new Scenario("F-45A - Free Flight", "f45-quickFlight", "f45-freeFlight"),
                 new Scenario("F-45A - Stealth Strike", "f45-quickFlight", "f45_quickMission1")
             };
+            ScenarioDropdown.SelectedIndex = 0;
         }
         private void PilotChanged(object sender, EventArgs e)
         {
