@@ -43,13 +43,14 @@ namespace ModLoader
 Thank you for download VTOL VR Mod loader by . Marsh.Mello .
 
 Please don't report bugs unless you can reproduce them without any mods loaded
-if you are having any issues with mods and would like to report a bug, please contact @. Marsh.Mello .#3194 
+if you are having any issues with mods and would like to report a bug, please contact @. Marsh.Mello .#0001 
 on the offical VTOL VR Discord or post an issue on github. 
 
-VTOL VR Discord Server: https://discord.gg/azNkZHj
+VTOL VR Modding Discord Server: https://discord.gg/XZeeafp
 Mod Loader Github: https://github.com/MarshMello0/VTOLVR-ModLoader
+Mod Loader Website: https://vtolvr-mods.com/
 
-Special Thanks to Ketkev and Nebriv with help in testing and modding.
+Special Thanks to Ketkev for his continuous support to the mod loader and the website.
 
  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  ##### 
                                                                                                          
