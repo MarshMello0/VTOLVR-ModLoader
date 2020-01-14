@@ -146,7 +146,8 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <CheckBox IsChecked="{Binding LoadMod}" Grid.Column="0" HorizontalAlignment="Center"/>
+                                    <CheckBox IsChecked="{Binding LoadMod}" Grid.Column="0" HorizontalAlignment="Center"
+                                              Checked="ModChecked" Unchecked="ModChecked" ToolTip="{Binding ModName}"/>
                                     <TextBlock Grid.Column="1" Text="{Binding ModName}" VerticalAlignment="Center"
                                         FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" Foreground="White"
                                         FontSize="10"/>

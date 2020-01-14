@@ -11,6 +11,7 @@ using System.Xml.Serialization;
 using System.ComponentModel;
 using Microsoft.Win32;
 using System.Security.Cryptography;
+using System.Collections.Generic;
 
 namespace VTOLVR_ModLoader
 {
@@ -55,6 +56,7 @@ namespace VTOLVR_ModLoader
         public static Settings settings;
         public static Pilot pilotSelected;
         public static Scenario scenarioSelected;
+        public static List<string> modsToLoad = new List<string>();
 
         private static string CalculateMD5(string filename)
         {
@@ -73,7 +75,7 @@ namespace VTOLVR_ModLoader
         {
             SearchForProcess();
 #if DEBUG
-            url = "http://localhost:8080";
+            url = "http://localhost";
 #endif
             InitializeComponent();
         }
@@ -303,14 +305,17 @@ namespace VTOLVR_ModLoader
 
             //Launching the game
             
-            if (devConsole || (pilotSelected != null && scenarioSelected != null))
+            if (devConsole || 
+                (pilotSelected != null && scenarioSelected != null) || 
+                (modsToLoad != null && modsToLoad.Count > 0))
             {
                 string regPath = (string)Registry.GetValue(
     @"HKEY_CURRENT_USER\SOFTWARE\Valve\Steam",
     @"SteamPath",
     @"NULL");
                 string args = string.Empty;
-                if (pilotSelected.Name != "No Selection" && scenarioSelected.Name != "No Selection")
+                if (pilotSelected != null && scenarioSelected != null &&
+                    pilotSelected.Name != "No Selection" && scenarioSelected.Name != "No Selection")
                 {
                     args += $" PILOT={pilotSelected.Name} SCENARIO_CID={scenarioSelected.cID} SCENARIO_ID={scenarioSelected.ID}";
                 }
@@ -319,6 +324,15 @@ namespace VTOLVR_ModLoader
                 {
                     args += " dev";
                 }
+
+                if (modsToLoad != null && modsToLoad.Count > 0)
+                {
+                    for (int i = 0; i < modsToLoad.Count; i++)
+                    {
+                        args += " mod=" + modsToLoad[i] + ""; //Example " mod=NoGravity\NoGravity.dll "
+                    }
+                }
+
                 Process process = new Process();
                 process.StartInfo.FileName = regPath + @"\steam.exe";
                 process.StartInfo.Arguments = @"-applaunch 667970" + args;

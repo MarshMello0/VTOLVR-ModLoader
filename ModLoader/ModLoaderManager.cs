@@ -108,7 +108,7 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             
 
             CreateAPI();
-
+            
 
             discord = gameObject.AddComponent<DiscordController>();
             discordDetail = "Launching Game";
@@ -116,6 +116,8 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
             UpdateDiscord();
 
             SteamAPI.Init();
+
+            LoadStartupMods();
 
             SceneManager.sceneLoaded += SceneLoaded;
 
@@ -317,6 +319,62 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                 //Pausing this method till the loader scene is unloaded
                 yield return null;
             }
+        }
+
+        private void LoadStartupMods()
+        {
+            List<string> modsToLoad = new List<string>();
+            string path;
+            for (int i = 0; i < args.Length; i++)
+            {
+                Debug.Log("ARG=\n" + args[i]);
+                if (args[i].Contains("mod="))
+                {
+                    Debug.Log("Found mod line\n" + args[i]);
+                    //This is removeing "mod="
+                    path = args[i].Remove(0,4);
+                    modsToLoad.Add(path);
+                    Debug.Log("Start up mod added, path = " + path);
+                }
+            }
+            if (modsToLoad.Count == 0)
+                return;
+
+
+            for (int i = 0; i < modsToLoad.Count; i++)
+            {
+                try
+                {
+                    Debug.Log(rootPath + @"\mods\" + modsToLoad[i]);
+                    IEnumerable<Type> source =
+              from t in Assembly.Load(File.ReadAllBytes(rootPath + @"\mods\" + modsToLoad[i])).GetTypes()
+              where t.IsSubclassOf(typeof(VTOLMOD))
+              select t;
+                    if (source != null && source.Count() == 1)
+                    {
+                        GameObject newModGo = new GameObject(modsToLoad[i], source.First());
+                        VTOLMOD mod = newModGo.GetComponent<VTOLMOD>();
+                        mod.SetModInfo(new Mod(modsToLoad[i], "STARTUPMOD", modsToLoad[i]));
+                        newModGo.name = modsToLoad[i];
+                        DontDestroyOnLoad(newModGo);
+                        mod.ModLoaded();
+
+                        ModLoaderManager.instance.loadedModsCount++;
+                        ModLoaderManager.instance.UpdateDiscord();
+                    }
+                    else
+                    {
+                        Debug.LogError("Source is null");
+                    }
+
+                    Debug.Log("Loaded Startup mod from path = " + modsToLoad[i]);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Error when loading startup mod\n" + e.ToString());
+                }
+            }
+            
         }
     }
 }

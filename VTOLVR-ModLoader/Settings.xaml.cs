@@ -9,6 +9,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text.RegularExpressions;
+using System.Windows.Controls;
 
 namespace VTOLVR_ModLoader
 {
@@ -195,7 +196,7 @@ namespace VTOLVR_ModLoader
             List<ModItem> mods = new List<ModItem>();
             for (int i = 0; i < files.Length; i++)
             {
-                mods.Add(new ModItem(files[i].Name.Split('.')[0]));
+                mods.Add(new ModItem(files[i].Name));
             }
 
             DirectoryInfo[] folders = folder.GetDirectories();
@@ -203,10 +204,23 @@ namespace VTOLVR_ModLoader
             {
                 if (File.Exists(folders[i].FullName + @"\" + folders[i].Name + ".dll"))
                 {
-                    mods.Add(new ModItem(folders[i].Name));
+                    mods.Add(new ModItem(folders[i].Name + @"\" + folders[i].Name + ".dll"));
                 }
             }
             this.mods.ItemsSource = mods;
+        }
+
+        private void ModChecked(object sender, RoutedEventArgs e)
+        {
+            CheckBox checkBox = (CheckBox)sender;
+            if (checkBox.IsChecked == true)
+            {
+                MainWindow.modsToLoad.Add(checkBox.ToolTip.ToString());
+            }
+            else if (checkBox.IsChecked == false)
+            {
+                MainWindow.modsToLoad.Remove(checkBox.ToolTip.ToString());
+            }
         }
     }
 
