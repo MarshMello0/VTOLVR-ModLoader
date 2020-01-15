@@ -11,6 +11,7 @@ using System.Xml.Serialization;
 using System.ComponentModel;
 using Microsoft.Win32;
 using System.Security.Cryptography;
+using System.Collections.Generic;
 
 namespace VTOLVR_ModLoader
 {
@@ -18,7 +19,7 @@ namespace VTOLVR_ModLoader
     {
         private enum gifStates { Paused, Play, Frame }
 
-        private static string modsFolder = @"\mods";
+        public static string modsFolder = @"\mods";
         private static string skinsFolder = @"\skins";
         private static string injector = @"\injector.exe";
         private static string updatesFile = @"\updates.xml";
@@ -26,7 +27,7 @@ namespace VTOLVR_ModLoader
         private static string updatesURL = @"/files/updates.xml";
         private string url = @"https://vtolvr-mods.com";
         public static string root;
-        private string vtolFolder;
+        public static string vtolFolder;
 
         //Startup
         private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe", "Updater.exe" };
@@ -53,6 +54,11 @@ namespace VTOLVR_ModLoader
         public static bool devConsole;
         //Settings
         public static Settings settings;
+        public static Pilot pilotSelected;
+        public static Scenario scenarioSelected;
+        public static List<string> modsToLoad = new List<string>();
+        public static SettingsSave save;
+        public static readonly string savePath = @"settings.xml";
 
         private static string CalculateMD5(string filename)
         {
@@ -71,7 +77,7 @@ namespace VTOLVR_ModLoader
         {
             SearchForProcess();
 #if DEBUG
-            url = "http://localhost:8080";
+            url = "http://localhost";
 #endif
             InitializeComponent();
         }
@@ -106,6 +112,13 @@ namespace VTOLVR_ModLoader
                 CheckBaseFolder();
 
             GetData();
+            if (SettingsSaveExists())
+            {
+                save = LoadSettings();
+                devConsole = save.devConsole;
+                pilotSelected = save.previousPilot;
+                scenarioSelected = save.previousScenario;
+            }
         }
         private void URICheck()
         {
@@ -301,16 +314,37 @@ namespace VTOLVR_ModLoader
 
             //Launching the game
             
-            if (devConsole)
+            if (devConsole || 
+                (pilotSelected != null && scenarioSelected != null) || 
+                (modsToLoad != null && modsToLoad.Count > 0))
             {
                 string regPath = (string)Registry.GetValue(
     @"HKEY_CURRENT_USER\SOFTWARE\Valve\Steam",
     @"SteamPath",
     @"NULL");
+                string args = string.Empty;
+                if (pilotSelected != null && scenarioSelected != null &&
+                    pilotSelected.Name != "No Selection" && scenarioSelected.Name != "No Selection")
+                {
+                    args += $" PILOT={pilotSelected.Name} SCENARIO_CID={scenarioSelected.cID} SCENARIO_ID={scenarioSelected.ID}";
+                }
+
+                if (devConsole)
+                {
+                    args += " dev";
+                }
+
+                if (modsToLoad != null && modsToLoad.Count > 0)
+                {
+                    for (int i = 0; i < modsToLoad.Count; i++)
+                    {
+                        args += " mod=" + modsToLoad[i] + ""; //Example " mod=NoGravity\NoGravity.dll "
+                    }
+                }
 
                 Process process = new Process();
                 process.StartInfo.FileName = regPath + @"\steam.exe";
-                process.StartInfo.Arguments = @"-applaunch 667970" + " dev";
+                process.StartInfo.Arguments = @"-applaunch 667970" + args;
                 process.Start();
             }
                 
@@ -671,6 +705,20 @@ namespace VTOLVR_ModLoader
             }
             settings = new Settings();
             settings.Show();
+        }
+
+        private bool SettingsSaveExists()
+        {
+            return File.Exists(root + @"\" + savePath);
+        }
+
+        private SettingsSave LoadSettings()
+        {
+            using (FileStream stream = new FileStream(root + @"\" + savePath, FileMode.Open))
+            {
+                XmlSerializer xml = new XmlSerializer(typeof(SettingsSave));
+                return (SettingsSave)xml.Deserialize(stream);
+            }
         }
     }
 

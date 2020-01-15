@@ -43,13 +43,14 @@ namespace ModLoader
 Thank you for download VTOL VR Mod loader by . Marsh.Mello .
 
 Please don't report bugs unless you can reproduce them without any mods loaded
-if you are having any issues with mods and would like to report a bug, please contact @. Marsh.Mello .#3194 
+if you are having any issues with mods and would like to report a bug, please contact @. Marsh.Mello .#0001 
 on the offical VTOL VR Discord or post an issue on github. 
 
-VTOL VR Discord Server: https://discord.gg/azNkZHj
+VTOL VR Modding Discord Server: https://discord.gg/XZeeafp
 Mod Loader Github: https://github.com/MarshMello0/VTOLVR-ModLoader
+Mod Loader Website: https://vtolvr-mods.com/
 
-Special Thanks to Ketkev and Nebriv with help in testing and modding.
+Special Thanks to Ketkev for his continuous support to the mod loader and the website.
 
  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  #####  ##### 
                                                                                                          
@@ -105,8 +106,10 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                 Debug.Log("Created Console");
             }
 
-            CreateAPI();
+            
 
+            CreateAPI();
+            
 
             discord = gameObject.AddComponent<DiscordController>();
             discordDetail = "Launching Game";
@@ -115,16 +118,15 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
 
             SteamAPI.Init();
 
+            LoadStartupMods();
+
             SceneManager.sceneLoaded += SceneLoaded;
-            
-            CreateAssetBundle();
 
             //gameObject.AddComponent<CSharp>();
 
             api.CreateCommand("quit", delegate { Application.Quit(); });
             api.CreateCommand("print", PrintMessage);
             api.CreateCommand("help", api.ShowHelp);
-
         }
 
         private void ConsoleInput(string obj)
@@ -170,17 +172,6 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
         {
             rootPath = Directory.GetCurrentDirectory() + @"\VTOLVR_Modloader";
         }
-        public void CreateAssetBundle()
-        {
-            //Stopped Loading of asset bundle as its not used
-            return;
-            assets = AssetBundle.LoadFromFile(rootPath + assetsPath);
-            if (assets == null)
-            {
-                Debug.Log("Failed to load AssetBundle!");
-                return;
-            }
-        }
         private void SceneLoaded(Scene arg0, LoadSceneMode arg1)
         {
             string sceneName = arg0.name;
@@ -189,6 +180,13 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
                 case "SamplerScene":
                     discordDetail = "Selecting mods";
                     StartCoroutine(CreateModLoader());
+                    for (int i = 0; i < args.Length; i++)
+                    {
+                        if (args[i].Contains("PILOT="))
+                        {
+                            StartCoroutine(LoadLevel());
+                        }
+                    }
                     break;
                 case "Akutan":
                     discordDetail = "Flying the " + PilotSaveManager.currentVehicle.vehicleName;
@@ -243,6 +241,141 @@ Special Thanks to Ketkev and Nebriv with help in testing and modding.
         {
             obj.Remove(0, 5);
             Debug.Log(obj);
+        }
+
+        private IEnumerator LoadLevel()
+        {
+            Debug.Log("Loading Pilots from file");
+            PilotSaveManager.LoadPilotsFromFile();
+            yield return new WaitForSeconds(2);
+                        
+
+            string pilotName = "";
+            string cID = "";
+            string sID = "";
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i].Contains("PILOT="))
+                {
+                    pilotName = args[i].Replace("PILOT=", "");
+                }
+                else if (args[i].Contains("SCENARIO_CID="))
+                {
+                    cID = args[i].Replace("SCENARIO_CID=","");
+                }
+                else if (args[i].Contains("SCENARIO_ID="))
+                {
+                    sID = args[i].Replace("SCENARIO_ID=", "");
+                }
+            }
+
+            Debug.Log($"Loading Level\nPilot={pilotName}\ncID={cID}\nsID={sID}");
+            VTMapManager.nextLaunchMode = VTMapManager.MapLaunchModes.Scenario;
+            LoadingSceneController.LoadScene(7);
+
+            yield return new WaitForSeconds(5);
+            //After here we should be in the loader scene
+
+            Debug.Log("Setting Pilot");
+            PilotSaveManager.current = PilotSaveManager.pilots[pilotName];
+            Debug.Log("Going though All built in campaigns");
+            if (VTResources.GetBuiltInCampaigns() != null)
+            {
+                foreach (VTCampaignInfo info in VTResources.GetBuiltInCampaigns())
+                {
+                    if (info.campaignID == cID)
+                    {
+                        Debug.Log("Setting Campaign");
+                        PilotSaveManager.currentCampaign = info.ToIngameCampaign();
+                        Debug.Log("Setting Vehicle");
+                        PilotSaveManager.currentVehicle = VTResources.GetPlayerVehicle(info.vehicle);
+                        break;
+                    }
+                }
+            }
+            else
+                Debug.Log("Campaigns are null");
+
+            Debug.Log("Going though All missions in that campaign");
+            foreach (CampaignScenario cs in PilotSaveManager.currentCampaign.missions)
+            {
+                if (cs.scenarioID == sID)
+                {
+                    Debug.Log("Setting Scenario");
+                    PilotSaveManager.currentScenario = cs;
+                    break;
+                }
+            }
+
+            VTScenario.currentScenarioInfo = VTResources.GetScenario(PilotSaveManager.currentScenario.scenarioID, PilotSaveManager.currentCampaign);
+
+            Debug.Log(string.Format("Loading into game, Pilot:{3}, Campaign:{0}, Scenario:{1}, Vehicle:{2}",
+                PilotSaveManager.currentCampaign.campaignName, PilotSaveManager.currentScenario.scenarioName,
+                PilotSaveManager.currentVehicle.vehicleName, pilotName));
+
+            LoadingSceneController.instance.PlayerReady(); //<< Auto Ready
+
+            while (SceneManager.GetActiveScene().buildIndex != 7)
+            {
+                //Pausing this method till the loader scene is unloaded
+                yield return null;
+            }
+        }
+
+        private void LoadStartupMods()
+        {
+            List<string> modsToLoad = new List<string>();
+            string path;
+            for (int i = 0; i < args.Length; i++)
+            {
+                Debug.Log("ARG=\n" + args[i]);
+                if (args[i].Contains("mod="))
+                {
+                    Debug.Log("Found mod line\n" + args[i]);
+                    //This is removeing "mod="
+                    path = args[i].Remove(0,4);
+                    modsToLoad.Add(path);
+                    Debug.Log("Start up mod added, path = " + path);
+                }
+            }
+            if (modsToLoad.Count == 0)
+                return;
+
+
+            for (int i = 0; i < modsToLoad.Count; i++)
+            {
+                try
+                {
+                    Debug.Log(rootPath + @"\mods\" + modsToLoad[i]);
+                    IEnumerable<Type> source =
+              from t in Assembly.Load(File.ReadAllBytes(rootPath + @"\mods\" + modsToLoad[i])).GetTypes()
+              where t.IsSubclassOf(typeof(VTOLMOD))
+              select t;
+                    if (source != null && source.Count() == 1)
+                    {
+                        GameObject newModGo = new GameObject(modsToLoad[i], source.First());
+                        VTOLMOD mod = newModGo.GetComponent<VTOLMOD>();
+                        mod.SetModInfo(new Mod(modsToLoad[i], "STARTUPMOD", modsToLoad[i]));
+                        newModGo.name = modsToLoad[i];
+                        DontDestroyOnLoad(newModGo);
+                        mod.ModLoaded();
+
+                        ModLoaderManager.instance.loadedModsCount++;
+                        ModLoaderManager.instance.UpdateDiscord();
+                    }
+                    else
+                    {
+                        Debug.LogError("Source is null");
+                    }
+
+                    Debug.Log("Loaded Startup mod from path = " + modsToLoad[i]);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Error when loading startup mod\n" + e.ToString());
+                }
+            }
+            
         }
     }
 }

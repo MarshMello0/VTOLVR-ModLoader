@@ -33,15 +33,23 @@
 
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="10"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="10"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
                 <RowDefinition Height="30"/>
                 <RowDefinition Height="30"/>
                 <RowDefinition Height="100"/>
+                <RowDefinition Height="20"/>
                 <RowDefinition Height="30"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="100"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Text="Mod Development Tools" VerticalAlignment="Center" HorizontalAlignment="Center"
+                           FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" Foreground="White"
+                           FontSize="15"/>
 
             <Grid Grid.Row="1"> <!-- Dev Console -->
                 <Grid.ColumnDefinitions>
@@ -62,21 +70,93 @@
                 </CheckBox>
             </Grid>
 
-            <TextBlock Grid.Row="3" Text="Mod Creator" VerticalAlignment="Center"
+            <TextBlock Grid.Row="2" Text="Mod Creator" VerticalAlignment="Center"
                            FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" Foreground="White"
                            FontSize="20"/>
 
-            <TextBox Grid.Row="4" Text="Name of Mod" FontSize="15" 
+            <TextBox Grid.Row="3" Text="Name of Mod" FontSize="15" 
                        Foreground="White" VerticalAlignment="Center"
                    x:Name="modName" Background="#FF3D3D3D"/>
 
-            <TextBox Grid.Row="5" Text="Description of Mod" FontSize="15" 
+            <TextBox Grid.Row="4" Text="Description of Mod" FontSize="15" 
                        Foreground="White" x:Name="modDescription" Background="#FF3D3D3D"/>
 
-            <Button Grid.Row="6" Content="Create Mod Info.xml" FontSize="20"
+            <Button Grid.Row="5" Content="Create Mod Info.xml" FontSize="15"
                     FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" 
                     Foreground="White" Background="#00DDDDDD" Click="CreateInfo"/>
 
+
+            <TextBlock Grid.Row="6" Text="Mission Loading" VerticalAlignment="Center" HorizontalAlignment="Center"
+                           FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" Foreground="White"
+                           FontSize="20"/>
+            
+            <Grid Grid.Row="7">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="Pilot" VerticalAlignment="Center" HorizontalAlignment="Center"
+                           FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" Foreground="White"
+                           FontSize="15"/>
+                <TextBlock Grid.Column="1" Text="Scenario" VerticalAlignment="Center" HorizontalAlignment="Center"
+                           FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" Foreground="White"
+                           FontSize="15"/>
+
+
+            </Grid>
+
+            <Grid Grid.Row="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <ComboBox Name="PilotDropdown" Grid.Column="0" DropDownClosed="PilotChanged">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <ComboBox Name="ScenarioDropdown" Grid.Column="1" DropDownClosed="ScenarioChanged">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+
+            </Grid>
+            
+            <TextBlock Grid.Row="9" Text="Mod Loading" VerticalAlignment="Center" HorizontalAlignment="Center"
+                           FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" Foreground="White"
+                           FontSize="20"/>
+
+            <ScrollViewer Grid.Row="10" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                <ItemsControl x:Name="mods" >
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="0,0,0,0" >
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="0.1*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <CheckBox IsChecked="{Binding LoadMod}" Grid.Column="0" HorizontalAlignment="Center"
+                                              Checked="ModChecked" Unchecked="ModChecked" ToolTip="{Binding ModName}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding ModName}" VerticalAlignment="Center"
+                                        FontFamily="/VTOLVR-ModLoader;component/#Squares Bold" Foreground="White"
+                                        FontSize="10"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </Window>
