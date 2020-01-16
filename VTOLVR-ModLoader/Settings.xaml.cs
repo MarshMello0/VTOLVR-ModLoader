@@ -35,23 +35,22 @@ namespace VTOLVR_ModLoader
             {
                 devConsoleCheckbox.IsChecked = MainWindow.save.devConsole;
                 MainWindow.devConsole = MainWindow.save.devConsole;
-
-                if (MainWindow.pilotSelected == null && MainWindow.save.previousPilot != null)
+                if (MainWindow.pilotSelected != null)
                 {
                     foreach (Pilot p in PilotDropdown.ItemsSource)
                     {
-                        if (p.Name == MainWindow.save.previousPilot.Name)
+                        if (p.Name == MainWindow.pilotSelected.Name)
                         {
                             PilotDropdown.SelectedItem = p;
                             break;
                         }
                     }
                 }
-                if (MainWindow.scenarioSelected == null && MainWindow.save.previousScenario != null)
+                if (MainWindow.scenarioSelected != null)
                 {
                     foreach (Scenario s in ScenarioDropdown.ItemsSource)
                     {
-                        if (s.ID == MainWindow.save.previousScenario.ID)
+                        if (s.ID == MainWindow.scenarioSelected.ID)
                         {
                             ScenarioDropdown.SelectedItem = s;
                             break;
@@ -60,10 +59,6 @@ namespace VTOLVR_ModLoader
                 }
 
                 //Havn't done Mod saving because I can't find a way to get the checkboxes to enable them.
-            }
-            else if (MainWindow.save == null)
-            {
-                MainWindow.save = new SettingsSave();
             }
         }
 

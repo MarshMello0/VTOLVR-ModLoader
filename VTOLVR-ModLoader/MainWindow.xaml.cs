@@ -119,6 +119,8 @@ namespace VTOLVR_ModLoader
                 pilotSelected = save.previousPilot;
                 scenarioSelected = save.previousScenario;
             }
+            else
+                save = new SettingsSave();
         }
         private void URICheck()
         {
