@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using ModLoader;
 public class Settings
 {
     public List<SubSetting> subSettings { private set; get; } = new List<SubSetting>();
