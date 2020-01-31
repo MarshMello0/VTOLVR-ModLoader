@@ -24,6 +24,7 @@ public class VTOLAPI : MonoBehaviour
     /// This should be the safest way to start running code when a level is loaded.
     /// </summary>
     public static UnityAction<VTOLScenes> SceneLoaded;
+    public static VTOLScenes currentScene { get; private set; }
 
     private void Awake()
     {
@@ -93,6 +94,7 @@ public class VTOLAPI : MonoBehaviour
     }
     private void CallSceneLoaded(VTOLScenes Scene)
     {
+        currentScene = Scene;
         if (SceneLoaded != null)
             SceneLoaded.Invoke(Scene);
     }
