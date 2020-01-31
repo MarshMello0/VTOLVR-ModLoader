@@ -6,14 +6,24 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using ModLoader;
+using UnityEngine.SceneManagement;
+using UnityEngine.Events;
+using System.Collections;
 
 public enum VTOLVehicles { None, AV42C, FA26B, F45A }
+public enum VTOLScenes { SplashScene, SamplerScene, ReadyRoom, VehicleConfiguration, LoadingScene, MeshTerrain, OpenWater, Akutan, VTEditMenu, VTEditLoadingScene, VTMapEditMenu, CustomMapBase, CommRadioTest, ShaderVariantsScene };
 public class VTOLAPI : MonoBehaviour
 {
     public static VTOLAPI instance { get; private set; }
     private string gamePath;
     private string modsPath = @"\VTOLVR_ModLoader\mods";
     private Dictionary<string, Action<string>> commands = new Dictionary<string, Action<string>>();
+
+    /// <summary>
+    /// This gets invoked when the scene has changed and finished loading. 
+    /// This should be the safest way to start running code when a level is loaded.
+    /// </summary>
+    public static UnityAction<VTOLScenes> SceneLoaded;
 
     private void Awake()
     {
@@ -22,6 +32,69 @@ public class VTOLAPI : MonoBehaviour
         DontDestroyOnLoad(this.gameObject);
         instance = this;
         gamePath = Directory.GetCurrentDirectory();
+        SceneManager.activeSceneChanged += ActiveSceneChanged;
+    }
+
+    private void ActiveSceneChanged(Scene current, Scene next)
+    {
+        switch (next.buildIndex)
+        {
+            case 0:
+                CallSceneLoaded(VTOLScenes.SplashScene);
+                break;
+            case 1:
+                CallSceneLoaded(VTOLScenes.SamplerScene);
+                break;
+            case 2:
+                CallSceneLoaded(VTOLScenes.ReadyRoom);
+                break;
+            case 3:
+                CallSceneLoaded(VTOLScenes.VehicleConfiguration);
+                break;
+            case 4:
+                CallSceneLoaded(VTOLScenes.LoadingScene);
+                break;
+            case 5:
+                CallSceneLoaded(VTOLScenes.MeshTerrain);
+                break;
+            case 6:
+                CallSceneLoaded(VTOLScenes.OpenWater);
+                break;
+            case 7:
+                StartCoroutine(WaitForScenario(VTOLScenes.Akutan));
+                break;
+            case 8:
+                CallSceneLoaded(VTOLScenes.VTEditMenu);
+                break;
+            case 9:
+                CallSceneLoaded(VTOLScenes.VTEditLoadingScene);
+                break;
+            case 10:
+                CallSceneLoaded(VTOLScenes.VTMapEditMenu);
+                break;
+            case 11:
+                StartCoroutine(WaitForScenario(VTOLScenes.CustomMapBase));
+                break;
+            case 12:
+                CallSceneLoaded(VTOLScenes.CommRadioTest);
+                break;
+            case 13:
+                CallSceneLoaded(VTOLScenes.ShaderVariantsScene);
+                break;
+        }
+    }
+    private IEnumerator WaitForScenario(VTOLScenes Scene)
+    {
+        while (VTMapManager.fetch == null || !VTMapManager.fetch.scenarioReady)
+        {
+            yield return null;
+        }
+        CallSceneLoaded(Scene);
+    }
+    private void CallSceneLoaded(VTOLScenes Scene)
+    {
+        if (SceneLoaded != null)
+            SceneLoaded.Invoke(Scene);
     }
 
     /// <summary>
