@@ -84,6 +84,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Debuging\DebugRectTransform.cs" />
     <Compile Include="Dev Console\ConsoleInput.cs" />
     <Compile Include="Dev Console\ConsoleWindow.cs" />
     <Compile Include="CSharp.cs" />

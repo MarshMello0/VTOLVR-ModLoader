@@ -151,7 +151,7 @@ namespace ModLoader
         [XmlIgnore]
         public string dllPath;
         [XmlIgnore]
-        public GameObject listGO, settingsGO;
+        public GameObject listGO, settingsGO,settingsHolerGO;
         [XmlIgnore]
         public bool isLoaded;
         [XmlIgnore]

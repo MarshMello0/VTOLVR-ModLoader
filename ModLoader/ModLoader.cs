@@ -114,7 +114,8 @@ namespace ModLoader
             modsPage.transform.GetChild(6).GetComponentInChildren<Text>().text = "Mod\nSettings";
             VRInteractable settingsInteractable = modsPage.transform.GetChild(6).GetComponent<VRInteractable>();
             settingsInteractable.interactableName = "Comming soon!";
-            settingsInteractable.OnInteract = GenerateEvent(delegate { Debug.Log("Pressed the mods setting button"); });//settingsInteractable.OnInteract = GenerateEvent(delegate { OpenPage(Pages.Settings); });
+            settingsInteractable.OnInteract = GenerateEvent(delegate { OpenPage(Pages.Settings); });
+            //settingsInteractable.OnInteract = GenerateEvent(delegate { Debug.Log("Pressed the mods setting button"); });
 
             //Creating the Settings Page
             settingsPage = Instantiate(CampaignDisplay,CampaignDisplay.transform.parent);
@@ -142,17 +143,20 @@ namespace ModLoader
             settingsScrollBoxView.content.transform.GetChild(0).GetComponent<RectTransform>().sizeDelta = new Vector2(905.2f, 100);
 
             s_BoolTemplate = Instantiate(settingsScrollBoxView.content.transform.GetChild(1).gameObject, settingsScrollBoxView.content);
-            s_BoolTemplate.transform.GetChild(1).GetComponent<RectTransform>().localPosition = new Vector3(-224,0);
-            s_BoolTemplate.transform.GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(446.2f, 80.6f);
-            s_BoolTemplate.transform.GetChild(2).GetComponent<RectTransform>().localPosition = new Vector3(226, 0);
-            s_BoolTemplate.transform.GetChild(2).GetComponent<RectTransform>().sizeDelta = new Vector2(280.7f, 50.7f);
+            s_BoolTemplate.transform.GetChild(1).GetComponent<RectTransform>().anchoredPosition = new Vector3(-224,0);
+            s_BoolTemplate.transform.GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(446.2f, 48.2f);
+            s_BoolTemplate.transform.GetChild(2).GetComponent<RectTransform>().anchoredPosition = new Vector3(600, 20);
+            s_BoolTemplate.transform.GetChild(2).GetComponent<RectTransform>().sizeDelta = new Vector2(280.7f, 48.2f);
             s_BoolTemplate.transform.GetChild(2).GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
             s_BoolTemplate.transform.GetChild(2).GetComponent<VRInteractable>().interactableName = "Toggle Bool";
             Instantiate(s_BoolTemplate.transform.GetChild(1).gameObject, s_BoolTemplate.transform.GetChild(2));
             s_BoolTemplate.transform.GetChild(2).GetComponentInChildren<Text>().text = "Bool";
-            s_BoolTemplate.transform.GetChild(2).GetComponentInChildren<RectTransform>().localPosition = new Vector3(0, 0);
-            s_BoolTemplate.transform.GetChild(2).GetComponentInChildren<RectTransform>().sizeDelta = new Vector2(280.7f, 50.7f);
-
+            s_BoolTemplate.transform.GetChild(2).GetComponentInChildren<RectTransform>().localPosition = new Vector3(0, 0,-1);
+            s_BoolTemplate.transform.GetChild(2).GetComponentInChildren<RectTransform>().sizeDelta = new Vector2(280.7f, 48.2f);
+            s_BoolTemplate.transform.GetChild(0).gameObject.SetActive(false);
+            s_BoolTemplate.AddComponent<DebugRectTransform>().SetColour(Color.green);
+            s_BoolTemplate.transform.GetChild(1).gameObject.AddComponent<DebugRectTransform>().SetColour(Color.blue);
+            s_BoolTemplate.transform.GetChild(2).gameObject.AddComponent<DebugRectTransform>().SetColour(Color.red);
             s_BoolTemplate.SetActive(false);
 
 
@@ -346,38 +350,41 @@ namespace ModLoader
         }
         public void CreateSettingsMenu(Settings settings)
         {
+            int currentModIndex = -1;
             for (int i = 0; i < currentMods.Count; i++)
             {
-                if (currentMods[i].name.Equals(settings.Mod.name))
+                if (currentMods[i].name.Equals(settings.Mod.thisMod.name))
                 {
                     Log("Found " + settings.Mod.name);
-                    currentMods[i].settingsGO = Instantiate(settingsCampaignListTemplate, settingsScrollView.content);
-                    currentMods[i].settingsGO.SetActive(true);
-                    currentMods[i].settingsGO.transform.localPosition = new Vector3(0f, -(settingsScrollView.content.childCount - 5) * buttonHeight, 0f);
-                    currentMods[i].settingsGO.GetComponent<VRUIListItemTemplate>().Setup(currentMods[i].name, i, OpenSetting);
-                    currentSettings.Add(settings);
+                    currentModIndex = i;
                     break;
                 }
             }
 
-            GameObject holder = new GameObject(settings.Mod.name);
-            holder.transform.SetParent(settingsScrollBoxView.content);
+            currentMods[currentModIndex].settingsGO = Instantiate(settingsCampaignListTemplate, settingsScrollView.content);
+            currentMods[currentModIndex].settingsGO.SetActive(true);
+            currentMods[currentModIndex].settingsGO.transform.localPosition = new Vector3(0f, -(settingsScrollView.content.childCount - 5) * buttonHeight, 0f);
+            currentMods[currentModIndex].settingsGO.GetComponent<VRUIListItemTemplate>().Setup(currentMods[currentModIndex].name, currentModIndex, OpenSetting);
+            currentSettings.Add(settings);
+
+            currentMods[currentModIndex].settingsHolerGO = new GameObject(settings.Mod.name, typeof(RectTransform));
+            currentMods[currentModIndex].settingsHolerGO.transform.SetParent(settingsScrollBoxView.content,false);
 
             for (int i = 0; i < settings.subSettings.Count; i++)
             {
                 if (settings.subSettings[i] is Settings.BoolSetting)
                 {
-                    Debug.Log("Spawning Bool Setting");
                     Settings.BoolSetting currentBool = (Settings.BoolSetting)settings.subSettings[i];
-                    GameObject boolGO = Instantiate(s_BoolTemplate, holder.transform,true);
+                    GameObject boolGO = Instantiate(s_BoolTemplate, currentMods[currentModIndex].settingsHolerGO.transform, false);
+                    boolGO.transform.localPosition = new Vector3(0f, -i * 5, 0f);
                     boolGO.transform.GetChild(1).GetComponent<Text>().text = currentBool.settingName;
                     boolGO.transform.GetChild(2).GetComponentInChildren<Text>().text = currentBool.defaultValue.ToString();
-                    for (int j = 0; j < currentBool.callbacks.Length; j++)
-                    {
-                        boolGO.transform.GetChild(2).GetComponent<VRInteractable>().OnInteract.AddListener(delegate { currentBool.callbacks[j].Invoke(!currentBool.currentValue); });
-                    }
+                    boolGO.transform.GetChild(2).GetComponent<VRInteractable>().OnInteract.AddListener(delegate { Debug.Log("Bool Pressed"); if (currentBool != null) currentBool.callback.Invoke(!currentBool.currentValue); });
+                    boolGO.SetActive(true);
+                    Debug.Log($"Spawned Bool Setting. Name:{currentBool.settingName} Default Value:{currentBool.defaultValue}");
                 }
             }
+            currentMods[currentModIndex].settingsHolerGO.SetActive(false);
             Debug.Log("Done spawning " + settings.subSettings.Count + " settings");
             RefreashSettings();
         }
@@ -407,8 +414,7 @@ namespace ModLoader
             {
                 settingsScrollBoxView.content.GetChild(i).gameObject.SetActive(false);
             }
-
-            settingsScrollBoxView.content.Find(selectedMod.name).gameObject.SetActive(true);
+            selectedMod.settingsHolerGO.SetActive(true);
         }
     }
 }
