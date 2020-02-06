@@ -5,27 +5,29 @@ using System.Text;
 using UnityEngine;
 using System.Collections;
 using Valve.VR;
+using UnityEngine.Events;
+
 public class NoGravity : VTOLMOD
 {
     private bool isDisabled, onCoolDown;
     private float coolDown = 2f;
     private float currentTimer;
+    private static Settings setting;
+    private static UnityAction<float> AmountChanged;
+    private static float gravityAmount = 0;
 
     public override void ModLoaded()
     {
         base.ModLoaded();
-
-        Settings setting = new Settings(thisMod);
-        setting.CreateBoolSetting("Bool Setting", new Action<bool>[] { Test});
-        setting.CreateFloatSetting("Float Setting", null);
-        setting.CreateIntSetting("Int Setting", null);
-        setting.CreateStringSetting("String Setting", null);
-
+        AmountChanged += ChangedValue;
+        setting = new Settings(this);
+        setting.CreateFloatSetting("Toggled Amount", AmountChanged, gravityAmount);
         VTOLAPI.CreateSettingsMenu(setting);
     }
-    public void Test(bool state)
+
+    public void ChangedValue(float amount)
     {
-        Log("Test " + state);
+        gravityAmount = amount;
     }
 
     private void Update()
@@ -45,7 +47,7 @@ public class NoGravity : VTOLMOD
         else if (VRHandController.controllers[0].thumbButtonPressed &&
             VRHandController.controllers[1].thumbButtonPressed)
         {
-            Physics.gravity = new Vector3(0, isDisabled ? 0f : -9.3f, 0);
+            Physics.gravity = new Vector3(0, isDisabled ? gravityAmount : -9.3f, 0);
             isDisabled = !isDisabled;
             Log("Set gravity to " + isDisabled);
             onCoolDown = true;
