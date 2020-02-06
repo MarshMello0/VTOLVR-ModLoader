@@ -18,8 +18,10 @@ namespace ModLoader
 
         //Vehicle Config scene only
         private int currentSkin;
-        private Text scenarioName;
+        private Text scenarioName, scenarioDescription;
         private RawImage skinPreview;
+
+        private static GameObject prefab;
 
         /// <summary>
         /// All the materials in the game
@@ -77,83 +79,45 @@ namespace ModLoader
                     GetDefaultTextures();
                 else
                     RevertTextures();
-                StartCoroutine(VehicleConfigurationScene());
+                SpawnMenu();
             }
         }
-        private IEnumerator VehicleConfigurationScene()
+        private void SpawnMenu()
         {
-            //Vehicle scene is now the active one
-            /*
-              Dupe the left panel
-              Delete its contents
-              Find the skins
-              Add my contents depnding on how many skins there are
-              Change main vehicles skin when the select one
-             */
-
-            GameObject MissionLauncher = GameObject.Find("MissionLauncher");
-
-            yield return new WaitForSeconds(2);
-            GameObject pannel = Instantiate(MissionLauncher);
-            pannel.GetComponent<VehicleConfigScenarioUI>().enabled = false;
-            pannel.GetComponent<TimedEvents>().enabled = false;
+            if (prefab == null)
+                prefab = ModLoader.assetBundle.LoadAsset<GameObject>("SkinLoaderMenu");
+            
+            //Setting Position
+            GameObject pannel = Instantiate(prefab);
             pannel.transform.position = new Vector3(-83.822f, -15.68818f, 5.774f);
             pannel.transform.rotation = Quaternion.Euler(-180, 62.145f, 180);
 
-            //Reusing the item already there
             Transform scenarioDisplayObject = pannel.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(1);
-            Text pageTitle = scenarioDisplayObject.GetChild(0).GetComponent<Text>();
-            pageTitle.text = "Skins";
-            PoseBounds pb = pannel.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponentInChildren<PoseBounds>();
 
-            //Destroying Quit Button
-            Destroy(scenarioDisplayObject.GetChild(2).gameObject);
+            //Storing Objects for later use
+            scenarioName = scenarioDisplayObject.GetChild(1).GetChild(3).GetComponent<Text>();
+            scenarioDescription = scenarioDisplayObject.GetChild(1).GetChild(2).GetComponent<Text>();
+            skinPreview = scenarioDisplayObject.GetChild(1).GetChild(1).GetComponent<RawImage>();
 
-            //Main Contents Page
-            Transform selectMapPage = scenarioDisplayObject.GetChild(1);
-
-            scenarioName = selectMapPage.GetChild(3).GetComponent<Text>();
-            scenarioName.text = "No Skins Found";
-            skinPreview = selectMapPage.GetChild(1).GetComponent<RawImage>();
-
-            selectMapPage.GetChild(4).GetComponentInChildren<Text>().text = "Select";
-            VRInteractable launchMissionButton = selectMapPage.GetChild(4).GetComponent<VRInteractable>();
-            ModLoader.SetDefaultInteractable(launchMissionButton, pb);
-            launchMissionButton.interactableName = "Select Skin";
-            launchMissionButton.OnInteract.AddListener(delegate { SelectSkin();Apply(); });
-
-            Transform EnvironmentSelectObject = selectMapPage.GetChild(6);
-
-            VRInteractable NextENVButton = EnvironmentSelectObject.GetChild(1).GetComponent<VRInteractable>();
-            VRInteractable PrevENVButton = EnvironmentSelectObject.GetChild(2).GetComponent<VRInteractable>();
-            ModLoader.SetDefaultInteractable(NextENVButton, pb);
-            ModLoader.SetDefaultInteractable(PrevENVButton, pb);
-            NextENVButton.interactableName = "Next";
-            PrevENVButton.interactableName = "Previous";
+            //Linking buttons with methods
+            VRInteractable NextENVButton = scenarioDisplayObject.GetChild(1).GetChild(5).GetComponent<VRInteractable>();
+            VRInteractable PrevENVButton = scenarioDisplayObject.GetChild(1).GetChild(6).GetComponent<VRInteractable>();
             NextENVButton.OnInteract.AddListener(Next);
             PrevENVButton.OnInteract.AddListener(Previous);
 
-            //Destroying Things
-            Destroy(selectMapPage.GetChild(2).gameObject); //Description
-            Destroy(EnvironmentSelectObject.GetChild(0).gameObject); // envName
+            VRInteractable ResetButton = scenarioDisplayObject.GetChild(2).GetComponent<VRInteractable>();
+            ResetButton.OnInteract.AddListener(RevertTextures);
 
-            /* # Moving Up "Animation"
-             Not doing the animation because it just doesn't go to the correct height,
-             Instead I am duping it once the first one has finished its animation.
-
-            Transform liftArm = pannel.transform.GetChild(0).GetChild(0).GetChild(0);
-            TranslationToggle translationToggle = liftArm.GetComponent<TranslationToggle>();
-
-            translationToggle.Toggle(); //For some reason our pannel goes too high.
-            yield return new WaitForSeconds(2);
-            liftArm.GetChild(0).GetComponent<RotationToggle>().Toggle();
-            */
+            VRInteractable ApplyButton = scenarioDisplayObject.GetChild(1).GetChild(4).GetComponent<VRInteractable>();
+            ApplyButton.OnInteract.AddListener(delegate { SelectSkin(); Apply(); });
 
             FindSkins();
             UpdateUI();
+
         }
         private void FindSkins()
         {
+            Log("Searching for Skins!");
             string path = ModLoaderManager.instance.rootPath + @"\skins";
             foreach (string folder in Directory.GetDirectories(path))
             {
@@ -163,32 +127,42 @@ namespace ModLoader
                 if (File.Exists(folder + @"\0.png")) //AV-42C
                 {
                     currentSkin.hasAv42c = true;
+                    Log($"[{folder}] has a skin for the AV-42C");
                 }
 
                 if (File.Exists(folder + @"\1.png")) //FA26B
                 {
                     currentSkin.hasFA26B = true;
+                    Log($"[{folder}] has a skin for the FA-26B");
                 }
 
                 if (File.Exists(folder + @"\2.png")) //F45A
                 {
                     currentSkin.hasF45A = true;
+                    Log($"[{folder}] has a skin for the F-45A");
                 }
 
                 if (VTOLAPI.GetPlayersVehicleEnum() == VTOLVehicles.AV42C && currentSkin.hasAv42c)
                 {
                     currentSkin.folderPath = folder;
                     installedSkins.Add(currentSkin);
+                    Log("Added that skin to the list");
                 }
                 else if (VTOLAPI.GetPlayersVehicleEnum() == VTOLVehicles.FA26B && currentSkin.hasFA26B)
                 {
                     currentSkin.folderPath = folder;
                     installedSkins.Add(currentSkin);
+                    Log("Added that skin to the list");
                 }
                 else if (VTOLAPI.GetPlayersVehicleEnum() == VTOLVehicles.F45A && currentSkin.hasF45A)
                 {
                     currentSkin.folderPath = folder;
                     installedSkins.Add(currentSkin);
+                    Log("Added that skin to the list");
+                }
+                else if (!currentSkin.hasAv42c && !currentSkin.hasF45A && !currentSkin.hasF45A)
+                {
+                    LogError($"It seems that a folder doesn't have any skins in it. Folder: {folder}");
                 }
 
             }
@@ -226,7 +200,7 @@ namespace ModLoader
                 materials.Add(new Mat(mats[i].name, mats[i]));
             }
         }
-        private void RevertTextures()
+        public void RevertTextures()
         {
             Log("Reverting Textures");
             for (int i = 0; i < materials.Count; i++)
