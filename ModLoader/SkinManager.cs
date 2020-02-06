@@ -46,7 +46,7 @@ namespace ModLoader
             Mod mod = new Mod();
             mod.name = "Skin Manger";
             SetModInfo(mod);
-            SceneManager.sceneLoaded += SceneLoaded;
+            VTOLAPI.SceneLoaded += SceneLoaded;
             Directory.CreateDirectory(ModLoaderManager.instance.rootPath + @"\skins");           
         }
 
@@ -67,9 +67,9 @@ namespace ModLoader
             FindMaterials(materials);
         }
 
-        private void SceneLoaded(Scene arg0, LoadSceneMode arg1)
+        private void SceneLoaded(VTOLScenes scene)
         {
-            if (arg0.buildIndex == 3)
+            if (scene == VTOLScenes.VehicleConfiguration)
             {
                 //Vehicle Configuration Room
                 Log("Started Skins Vehicle Config room");
@@ -82,11 +82,6 @@ namespace ModLoader
         }
         private IEnumerator VehicleConfigurationScene()
         {
-            while (SceneManager.GetActiveScene().buildIndex != 3)
-            {
-                yield return null;
-            }
-            yield return new WaitForSeconds(1);
             //Vehicle scene is now the active one
             /*
               Dupe the left panel
@@ -654,7 +649,7 @@ namespace ModLoader
         }
         private void OnDestroy()
         {
-            SceneManager.sceneLoaded -= SceneLoaded;
+            VTOLAPI.SceneLoaded -= SceneLoaded;
         }
         
         private class Skin
