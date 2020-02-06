@@ -16,6 +16,7 @@ namespace ModLoader
     public class ModLoader : VTOLMOD
     {
         public enum Pages { MainMenu,Mods,Settings}
+        public enum KeyboardType { DisableAll, Int, Float, String }
         public static ModLoader instance { get; private set; }
         public static AssetBundle assetBundle;
         private ModLoaderManager manager;
@@ -274,19 +275,6 @@ namespace ModLoader
             }
         }
 
-        public static VRInteractable SetDefaultInteractable(VRInteractable interactable, PoseBounds pb)
-        {
-            VRInteractable returnValue = interactable;
-            returnValue.radius = 0.06f;
-            returnValue.sqrRadius = 0.0036f;
-            returnValue.OnInteract = new UnityEvent();
-            returnValue.OnInteracting = new UnityEvent();
-            returnValue.OnStopInteract = new UnityEvent();
-            returnValue.poseBounds = pb;
-            returnValue.button = VRInteractable.Buttons.Trigger;
-            return returnValue;
-        }
-
         private IEnumerator SetModPreviewImage(RawImage raw, string path)
         {
             if (raw == null)
@@ -333,7 +321,7 @@ namespace ModLoader
                     currentFloat.text = floatGO.transform.GetChild(2).GetComponent<Text>();
                     currentFloat.text.text = currentFloat.value.ToString();
                     floatGO.transform.GetChild(3).GetComponent<VRInteractable>().OnInteract.AddListener(delegate {
-                        floatKeyboard.Display(currentFloat.value.ToString(),32, new UnityAction<string>(currentFloat.SetValue)); 
+                        OpenKeyboard(KeyboardType.Float, currentFloat.value.ToString(), 32, new UnityAction<string>(currentFloat.SetValue)); 
                     });
                     floatGO.SetActive(true);
                     Log($"Spawned Float setting called {currentFloat.settingName} at {floatGO.transform.position}");
@@ -347,7 +335,7 @@ namespace ModLoader
                     currentInt.text = intGO.transform.GetChild(2).GetComponent<Text>();
                     currentInt.text.text = currentInt.value.ToString();
                     intGO.transform.GetChild(3).GetComponent<VRInteractable>().OnInteract.AddListener(delegate {
-                        intKeyboard.Display(currentInt.value.ToString(), 32, new UnityAction<string>(currentInt.SetValue));
+                        OpenKeyboard(KeyboardType.Int, currentInt.value.ToString(), 32, new UnityAction<string>(currentInt.SetValue));
                     });
                     intGO.SetActive(true);
                     Log($"Spawned Int setting called {currentInt.settingName} at {intGO.transform.position}");
@@ -361,8 +349,8 @@ namespace ModLoader
                     stringGO.transform.GetChild(1).GetComponent<Text>().text = currentString.settingName;
                     currentString.text = stringGO.transform.GetChild(2).GetComponentInChildren<Text>();
                     currentString.text.text = currentString.value;
-                    stringGO.transform.GetChild(3).GetComponent<VRInteractable>().OnInteract.AddListener(delegate {
-                        stringKeyboard.Display(currentString.value, 32, new UnityAction<string>(currentString.SetValue));
+                    stringGO.transform.GetChild(3).GetComponent<VRInteractable>().OnInteract.AddListener(delegate { 
+                        OpenKeyboard(KeyboardType.String, currentString.value, 32, new UnityAction<string>(currentString.SetValue)); 
                     });
                     stringGO.SetActive(true);
                     Log($"Spawned String setting called {currentString.settingName} at {stringGO.transform.position}");
@@ -451,6 +439,32 @@ namespace ModLoader
                 }
             }
             return returnValue;
+        }
+        public void OpenKeyboard(KeyboardType keyboardType,string startingText, int maxChars, UnityAction<string> onEntered, UnityAction onCancelled = null)
+        {
+            OpenKeyboard(KeyboardType.DisableAll); //Closing them all first incase one is opened
+            if (keyboardType == KeyboardType.DisableAll)
+                return;
+            switch (keyboardType)
+            {
+                case KeyboardType.Int:
+                    intKeyboard.Display(startingText, maxChars, onEntered, onCancelled);
+                    break;
+                case KeyboardType.Float:
+                    floatKeyboard.Display(startingText, maxChars, onEntered, onCancelled);
+                    break;
+                case KeyboardType.String:
+                    stringKeyboard.Display(startingText, maxChars, onEntered, onCancelled);
+                    break;
+            }
+        }
+        public void OpenKeyboard(KeyboardType keyboardType)
+        {
+            if (keyboardType != KeyboardType.DisableAll)
+                return;
+            stringKeyboard.gameObject.SetActive(false);
+            intKeyboard.gameObject.SetActive(false);
+            floatKeyboard.gameObject.SetActive(false);
         }
     }
 }
