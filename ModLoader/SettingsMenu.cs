@@ -28,6 +28,10 @@ public class Settings
     {
         subSettings.Add(new FloatSetting(settingName, callback, currentValue, minValue, maxValue));
     }
+    public void CreateCustomLabel(string text)
+    {
+        subSettings.Add(new CustomLabel(text));
+    }
 
     public class SubSetting
     {
@@ -110,7 +114,6 @@ public class Settings
             }
         }
     }
-
     public class FloatSetting : SubSetting
     {
         public UnityAction<float> callback;
@@ -143,6 +146,13 @@ public class Settings
                 SetValue(result);
             }
 
+        }
+    }
+    public class CustomLabel : SubSetting
+    {
+        public CustomLabel(string text)
+        {
+            settingName = text;
         }
     }
 

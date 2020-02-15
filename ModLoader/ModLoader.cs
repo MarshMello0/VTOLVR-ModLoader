@@ -355,6 +355,15 @@ namespace ModLoader
                     stringGO.SetActive(true);
                     Log($"Spawned String setting called {currentString.settingName} at {stringGO.transform.position}");
                 }
+                else if (settings.subSettings[i] is Settings.CustomLabel)
+                {
+                    Log("Found a custom label");
+                    Settings.CustomLabel currentLabel = (Settings.CustomLabel)settings.subSettings[i];
+                    GameObject label = Instantiate(s_CustomLabel, currentMods[currentModIndex].settingsHolerGO.transform, false);
+                    label.GetComponentInChildren<Text>().text = currentLabel.settingName;
+                    label.SetActive(true);
+                    Log($"Spawned a custom label with the text:\n{currentLabel.settingName}");
+                }
             }
             currentMods[currentModIndex].settingsHolerGO.SetActive(false);
             Debug.Log("Done spawning " + settings.subSettings.Count + " settings");
