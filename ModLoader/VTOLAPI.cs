@@ -9,8 +9,13 @@ using ModLoader;
 using UnityEngine.SceneManagement;
 using UnityEngine.Events;
 using System.Collections;
-
+/// <summary>
+/// Enum of the different vehicles in the game.
+/// </summary>
 public enum VTOLVehicles { None, AV42C, FA26B, F45A }
+/// <summary>
+/// All the different scenes in order.
+/// </summary>
 public enum VTOLScenes { SplashScene, SamplerScene, ReadyRoom, VehicleConfiguration, LoadingScene, MeshTerrain, OpenWater, Akutan, VTEditMenu, VTEditLoadingScene, VTMapEditMenu, CustomMapBase, CommRadioTest, ShaderVariantsScene };
 public class VTOLAPI : MonoBehaviour
 {
@@ -24,6 +29,9 @@ public class VTOLAPI : MonoBehaviour
     /// This should be the safest way to start running code when a level is loaded.
     /// </summary>
     public static UnityAction<VTOLScenes> SceneLoaded;
+    /// <summary>
+    /// The current scene which is active.
+    /// </summary>
     public static VTOLScenes currentScene { get; private set; }
 
     private void Awake()
@@ -157,7 +165,12 @@ public class VTOLAPI : MonoBehaviour
                 return VTOLVehicles.None;
         }
     }
-
+    /// <summary>
+    /// Creates a settings page in the `mod settings` tab.
+    /// Make sure to fully create your settings before calling this as you 
+    /// can't change it onces it's created.
+    /// </summary>
+    /// <param name="newSettings"></param>
     public static void CreateSettingsMenu(Settings newSettings)
     {
         ModLoader.ModLoader.instance.CreateSettingsMenu(newSettings);
