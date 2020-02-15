@@ -109,8 +109,6 @@ namespace VTOLVR_ModLoader
 
             if (args.Length == 2 && args[1].Contains("vtolvrml"))
                 URICheck();
-            else if (CheckForArg("autostart"))
-                autoStart = true;
             else
                 CheckBaseFolder();
 
@@ -124,12 +122,17 @@ namespace VTOLVR_ModLoader
             }
             else
                 save = new SettingsSave();
+
+            if (CheckForArg("autostart"))
+                autoStart = true;
+            if (CheckForArg("devconsole"))
+                devConsole = true;
         }
         public bool CheckForArg(string arg)
         {
             for (int i = 0; i < args.Length; i++)
             {
-                if (args[i].Equals(arg))
+                if (args[i].ToLower().Equals(arg))
                     return true;
             }
             return false;
