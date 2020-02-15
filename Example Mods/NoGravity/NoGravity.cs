@@ -21,6 +21,8 @@ public class NoGravity : VTOLMOD
         base.ModLoaded();
         AmountChanged += ChangedValue;
         setting = new Settings(this);
+        setting.CreateCustomLabel("This will change the amount of gravity when turned on");
+        setting.CreateCustomLabel("Default = -9.3");
         setting.CreateFloatSetting("Toggled Amount", AmountChanged, gravityAmount);
         VTOLAPI.CreateSettingsMenu(setting);
     }
