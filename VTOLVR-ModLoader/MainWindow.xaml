@@ -23,7 +23,7 @@
                 <ColumnDefinition Width="0.1*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text=" VTOL VR Mod Loader 2.3.1" Grid.Column="0" Foreground="White" 
+            <TextBlock Text=" VTOL VR Mod Loader 2.4.0" Grid.Column="0" Foreground="White" 
                        FontFamily="/VTOLVR-ModLoader;component/#Squares Bold"
                        FontSize="20" VerticalAlignment="Center" 
                        MouseDown="TopBarDown" MouseUp="TopBarUp" MouseMove="TopBarMove" MouseLeave="TopBarLeave"/>
