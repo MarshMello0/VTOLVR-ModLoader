@@ -6,14 +6,33 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using ModLoader;
-
+using UnityEngine.SceneManagement;
+using UnityEngine.Events;
+using System.Collections;
+/// <summary>
+/// Enum of the different vehicles in the game.
+/// </summary>
 public enum VTOLVehicles { None, AV42C, FA26B, F45A }
+/// <summary>
+/// All the different scenes in order.
+/// </summary>
+public enum VTOLScenes { SplashScene, SamplerScene, ReadyRoom, VehicleConfiguration, LoadingScene, MeshTerrain, OpenWater, Akutan, VTEditMenu, VTEditLoadingScene, VTMapEditMenu, CustomMapBase, CommRadioTest, ShaderVariantsScene };
 public class VTOLAPI : MonoBehaviour
 {
     public static VTOLAPI instance { get; private set; }
     private string gamePath;
     private string modsPath = @"\VTOLVR_ModLoader\mods";
     private Dictionary<string, Action<string>> commands = new Dictionary<string, Action<string>>();
+
+    /// <summary>
+    /// This gets invoked when the scene has changed and finished loading. 
+    /// This should be the safest way to start running code when a level is loaded.
+    /// </summary>
+    public static UnityAction<VTOLScenes> SceneLoaded;
+    /// <summary>
+    /// The current scene which is active.
+    /// </summary>
+    public static VTOLScenes currentScene { get; private set; }
 
     private void Awake()
     {
@@ -22,6 +41,70 @@ public class VTOLAPI : MonoBehaviour
         DontDestroyOnLoad(this.gameObject);
         instance = this;
         gamePath = Directory.GetCurrentDirectory();
+        SceneManager.activeSceneChanged += ActiveSceneChanged;
+    }
+
+    private void ActiveSceneChanged(Scene current, Scene next)
+    {
+        switch (next.buildIndex)
+        {
+            case 0:
+                CallSceneLoaded(VTOLScenes.SplashScene);
+                break;
+            case 1:
+                CallSceneLoaded(VTOLScenes.SamplerScene);
+                break;
+            case 2:
+                CallSceneLoaded(VTOLScenes.ReadyRoom);
+                break;
+            case 3:
+                CallSceneLoaded(VTOLScenes.VehicleConfiguration);
+                break;
+            case 4:
+                CallSceneLoaded(VTOLScenes.LoadingScene);
+                break;
+            case 5:
+                CallSceneLoaded(VTOLScenes.MeshTerrain);
+                break;
+            case 6:
+                CallSceneLoaded(VTOLScenes.OpenWater);
+                break;
+            case 7:
+                StartCoroutine(WaitForScenario(VTOLScenes.Akutan));
+                break;
+            case 8:
+                CallSceneLoaded(VTOLScenes.VTEditMenu);
+                break;
+            case 9:
+                CallSceneLoaded(VTOLScenes.VTEditLoadingScene);
+                break;
+            case 10:
+                CallSceneLoaded(VTOLScenes.VTMapEditMenu);
+                break;
+            case 11:
+                StartCoroutine(WaitForScenario(VTOLScenes.CustomMapBase));
+                break;
+            case 12:
+                CallSceneLoaded(VTOLScenes.CommRadioTest);
+                break;
+            case 13:
+                CallSceneLoaded(VTOLScenes.ShaderVariantsScene);
+                break;
+        }
+    }
+    private IEnumerator WaitForScenario(VTOLScenes Scene)
+    {
+        while (VTMapManager.fetch == null || !VTMapManager.fetch.scenarioReady)
+        {
+            yield return null;
+        }
+        CallSceneLoaded(Scene);
+    }
+    private void CallSceneLoaded(VTOLScenes Scene)
+    {
+        currentScene = Scene;
+        if (SceneLoaded != null)
+            SceneLoaded.Invoke(Scene);
     }
 
     /// <summary>
@@ -82,7 +165,12 @@ public class VTOLAPI : MonoBehaviour
                 return VTOLVehicles.None;
         }
     }
-
+    /// <summary>
+    /// Creates a settings page in the `mod settings` tab.
+    /// Make sure to fully create your settings before calling this as you 
+    /// can't change it onces it's created.
+    /// </summary>
+    /// <param name="newSettings"></param>
     public static void CreateSettingsMenu(Settings newSettings)
     {
         ModLoader.ModLoader.instance.CreateSettingsMenu(newSettings);

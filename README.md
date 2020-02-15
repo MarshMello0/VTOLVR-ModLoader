@@ -1,41 +1,44 @@
 # VTOL VR Mod Loader 
 
-[![Discord](https://img.shields.io/discord/597153468834119710?label=VTOL%20VR%20Modding&logo=discord&style=flat-square)](https://discord.gg/XZeeafp "Discord Invite") [![Total Downloads](https://img.shields.io/github/downloads/MarshMello0/VTOLVR-ModLoader/total?label=Total%20Downloads&style=flat-square)](https://vtolvr-mods.com/ "Mod Loader's Website")<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+[![Discord](https://img.shields.io/discord/597153468834119710?label=VTOL%20VR%20Modding&logo=discord&style=flat-square)](https://discord.gg/XZeeafp "Discord Invite") [![Total Downloads](https://img.shields.io/github/downloads/MarshMello0/VTOLVR-ModLoader/total?label=Total%20Downloads&style=flat-square)](https://vtolvr-mods.com/ "Mod Loader's Website") [![GitHub release (latest by date)](https://img.shields.io/github/v/release/MarshMello0/VTOLVR-ModLoader?label=Current%20Release&style=flat-square)](https://github.com/MarshMello0/VTOLVR-ModLoader/releases "Releases Tab") ![Website](https://img.shields.io/website?down_message=Offline&label=Website%20Status&up_message=Online&style=flat-square&url=https%3A%2F%2Fvtolvr-mods.com%2F)
 
 ![Mod Loader Program](https://vtolvr-mods.com/files/modloader2.gif#)
 
-VTOLVR Modding aims to add more user-created content into the game as mods. With the mod loader, players can add custom code into the game to add extra features that they wanted.
-Anyone can create mods with a bit of knowledge of Unity and C# using the Wiki, also the mod loader is open source, so anyone can help out improving the mod loader it's self.
+VTOLVR-Modloader is an application to inject mods into [VTOL VR on steam](https://github.com/warbler/SharpMonoInjector "VTOL VR Steam Page"). The mod loader was created by . Marsh.Mello . using WPF for the launcher and [SharpMonoInjector](https://github.com/warbler/SharpMonoInjector "Github Repository for SharpMonoInjector") for the injector into the game. 
 
-Please note, modding in VTOL VR isn't officially supported by the developers. Mods will break from time to time, this isn't the developers' fault, please don't blame them or report bugs to the developers while running the mod loader or any mods. If there are any issues with the mod loader, please report them to @. Marsh.Mello .#3194 on the [official VTOLVR Discord](https://discord.gg/u7X72wc "official VTOLVR Discord").
+This repository contains most of the things which are used for VTOLVR modding.
+ 
+- Mod Loader DLL
+- Mod Launcher WPF Application 
+- Updater WPF Application 
+- Logo/Promotional Art [Photoshop & Illustrator]
+- No Gravity Example Mod DLL
 
 
+## Installation
 
-## Contributing to the mod loader
-This is this all the source code for the launcher, mod loader.dll, logo files and unity project. 
-This project is open-source, so anyone can help out improving. Just create a fork, improve upon the code, and do a pull request. However, if you just want to create a mod you don't need to touch this source code, head over to the [creating a mod page](https://vtolvr-mods.com/creating-a-mod.php "creating a mod page") on the website to learn how.
+All you need is .NET framework 4.5 and the games dlls listed in dll folder.
 
-The logo was created in Adobe Illustrator and the gif was created in Adobe Photoshop.
-Modloader, Installer and Launcher are all in one visual studio project in C#.
+### Setting up visual studio projects
 
-## Contributors ✨
+Once you have cloned the repository, you need to head over to VTOLVR's game directory and head to ``VTOL VR\VTOLVR_Data\Managed``
 
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+Then following the ``instructions.txt`` inside the dll folder, drag the required dlls into that folder.
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tr>
-    <td align="center"><a href="https://ben-w.com"><img src="https://avatars1.githubusercontent.com/u/33008390?v=4" width="100px;" alt=""/><br /><sub><b>Ben Wilson</b></sub></a><br /><a href="#a11y-MarshMello0" title="Accessibility">️️️️♿️</a> <a href="https://github.com/MarshMello0/VTOLVR-ModLoader/issues?q=author%3AMarshMello0" title="Bug reports">🐛</a> <a href="https://github.com/MarshMello0/VTOLVR-ModLoader/commits?author=MarshMello0" title="Code">💻</a> <a href="#content-MarshMello0" title="Content">🖋</a> <a href="https://github.com/MarshMello0/VTOLVR-ModLoader/commits?author=MarshMello0" title="Documentation">📖</a> <a href="#design-MarshMello0" title="Design">🎨</a> <a href="#example-MarshMello0" title="Examples">💡</a> <a href="#financial-MarshMello0" title="Financial">💵</a> <a href="#ideas-MarshMello0" title="Ideas, Planning, & Feedback">🤔</a> <a href="#maintenance-MarshMello0" title="Maintenance">🚧</a> <a href="#projectManagement-MarshMello0" title="Project Management">📆</a> <a href="https://github.com/MarshMello0/VTOLVR-ModLoader/pulls?q=is%3Apr+reviewed-by%3AMarshMello0" title="Reviewed Pull Requests">👀</a> <a href="#question-MarshMello0" title="Answering Questions">💬</a> <a href="#tool-MarshMello0" title="Tools">🔧</a> <a href="https://github.com/MarshMello0/VTOLVR-ModLoader/commits?author=MarshMello0" title="Tests">⚠️</a> <a href="#tutorial-MarshMello0" title="Tutorials">✅</a> <a href="#talk-MarshMello0" title="Talks">📢</a></td>
-    <td align="center"><a href="http://kevinjoosten.nl"><img src="https://avatars2.githubusercontent.com/u/7689239?v=4" width="100px;" alt=""/><br /><sub><b>Kevin</b></sub></a><br /><a href="https://github.com/MarshMello0/VTOLVR-ModLoader/commits?author=ketkev#3774" title="Code">💻</a> <a href="#infra-ketkev#3774" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="https://github.com/MarshMello0/VTOLVR-ModLoader/issues?q=author%3Aketkev#3774" title="Bug reports">🐛</a> <a href="#ideas-ketkev#3774" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/MarshMello0/VTOLVR-ModLoader/pulls?q=is%3Apr+reviewed-by%3Aketkev#3774" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/MarshMello0/VTOLVR-ModLoader/commits?author=ketkev#3774" title="Tests">⚠️</a> <a href="#talk-ketkev#3774" title="Talks">📢</a> <a href="#tutorial-ketkev#3774" title="Tutorials">✅</a> <a href="#a11y-ketkev#3774" title="Accessibility">️️️️♿️</a></td>
-  </tr>
-</table>
+### Setting up Unity Project
+ 
+To set up the unity project for use. You need to extract VTOL VR into a unity project using [UTinyRipper](https://sourceforge.net/projects/utinyripper/files/ "UTinyRipper Download") then place it in the VTOL VR Unity Project then you can open up the unity project and see the mod loaders assets.
 
-<!-- markdownlint-enable -->
-<!-- prettier-ignore-end -->
-<!-- ALL-CONTRIBUTORS-LIST:END -->
+## [Creating a mod](https://vtolvr-mods.com/creating-a-mod.php "Guide on creating a mod")
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+If you just want to create a mod for the mod loader. You can follow the guide at [vtolvr-mods.com](https://vtolvr-mods.com/creating-a-mod.php "Guide on how to create a mod") to get started with creating mods. To create a mod it requires some basic knowledge how [Unity](https://unity.com/ "Unity Game Engine") game engine works and C# but people have still managed to learn it on the go.
+
+## Contributors
+
+A special thanks to all these people for their help in creating the mod loader to what it is today.
+
+[Ketkev](https://github.com/ketkev "Ketkev's Github") for all his work on the website, hosting the website, maintaining the website and assistant with managing the project.
+
+[Nebriv](https://github.com/nebriv "Nebriv's Github") for his early support to the mod loader and help with bug testing.
+
+

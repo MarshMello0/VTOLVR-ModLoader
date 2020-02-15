@@ -33,6 +33,7 @@ namespace VTOLVR_ModLoader
         private string[] needFiles = new string[] { "SharpMonoInjector.dll", "injector.exe", "Updater.exe" };
         private string[] neededDLLFiles = new string[] { @"\Plugins\discord-rpc.dll", @"\Managed\0Harmony.dll" };
         private string[] args;
+        private bool autoStart;
 
         //Moving Window
         private bool holdingDown;
@@ -121,6 +122,20 @@ namespace VTOLVR_ModLoader
             }
             else
                 save = new SettingsSave();
+
+            if (CheckForArg("autostart"))
+                autoStart = true;
+            if (CheckForArg("devconsole"))
+                devConsole = true;
+        }
+        public bool CheckForArg(string arg)
+        {
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i].ToLower().Equals(arg))
+                    return true;
+            }
+            return false;
         }
         private void URICheck()
         {
@@ -219,6 +234,8 @@ namespace VTOLVR_ModLoader
                     LoadData();
                 SetProgress(100, "Failed to connect to the internet");
                 SetPlayButton(false);
+                if (autoStart)
+                    OpenGame(null, null);
             }
         }
         private void UpdatesProgress(object sender, DownloadProgressChangedEventArgs e)
@@ -254,8 +271,8 @@ namespace VTOLVR_ModLoader
                 //Updating Feed from file
                 updateFeed.ItemsSource = deserialized.Updates;
 
-                //Checking versions
-                if (CheckForInternet())
+                //Checking versions. If auto start is true, skip checking for updates.
+                if (autoStart == false && CheckForInternet())
                 {
                     bool needsUpdate = false;
                     Update lastUpdate = deserialized.Updates[0];
@@ -482,6 +499,8 @@ namespace VTOLVR_ModLoader
                     " and " +
                     (movedDep == 0 ? "0 Dependencies" : (movedDep == 1 ? "1 Dependencies" : movedDep + " Dependencies")) +
                     " moved");
+                if (autoStart)
+                    OpenGame(null, null);
                 return;
             }
             float zipAmount = 100 / files.Length;
@@ -513,6 +532,8 @@ namespace VTOLVR_ModLoader
                 " and " +
                 (movedDep == 0 ? "0 Dependencies" : (movedDep == 1 ? "1 Dependencies" : movedDep + " Dependencies")) +
                 " moved");
+            if (autoStart)
+                OpenGame(null, null);
         }
 
         private void MoveDependencies()

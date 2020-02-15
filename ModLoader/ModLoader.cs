@@ -16,12 +16,14 @@ namespace ModLoader
     public class ModLoader : VTOLMOD
     {
         public enum Pages { MainMenu,Mods,Settings}
+        public enum KeyboardType { DisableAll, Int, Float, String }
         public static ModLoader instance { get; private set; }
+        public static AssetBundle assetBundle;
         private ModLoaderManager manager;
         private VTOLAPI api;
         
         private GameObject modsPage, settingsPage, CampaignListTemplate, settingsCampaignListTemplate,settingsScrollBox;
-        private GameObject s_StringTemplate, s_BoolTemplate, s_FloatTemplate, s_IntTemplate;
+        private GameObject s_StringTemplate, s_BoolTemplate, s_FloatTemplate, s_IntTemplate,s_CustomLabel,s_Holder;
         private ScrollRect Scroll_View,settingsScrollView,settingsScrollBoxView;
         private Text SelectButton;
         private RectTransform selectionTF, settingsSelection;
@@ -30,6 +32,8 @@ namespace ModLoader
         private List<Mod> currentMods = new List<Mod>();
         private List<Settings> currentSettings = new List<Settings>();
         private VRPointInteractableCanvas InteractableCanvasScript;
+        private VRKeyboard stringKeyboard, floatKeyboard, intKeyboard;
+        private string currentSelectedSetting = string.Empty;
 
 
         private GameObject MainScreen;
@@ -43,6 +47,7 @@ namespace ModLoader
             Mod mod = new Mod();
             mod.name = "Mod Loader";
             SetModInfo(mod);
+            StartCoroutine(LoadAssetBundle());
         }
         private void Start()
         {
@@ -65,118 +70,56 @@ namespace ModLoader
                     break;
             }
         }
+        private IEnumerator LoadAssetBundle()
+        {
+            Log("Loading Asset Bundle");
+            AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(Directory.GetCurrentDirectory() + @"\VTOLVR_ModLoader\modloader.assets");
+            yield return request;
+            assetBundle = request.assetBundle;
+            Log("AssetBundle Loaded");
+        }
         private void CreateUI()
         {
-            Debug.Log("Creating UI for Ready Room");
+            if (!assetBundle)
+                LogError("Asset Bundle is null");
+
+            Log("Creating UI for Ready Room");
             GameObject InteractableCanvas = GameObject.Find("InteractableCanvas");
             InteractableCanvasScript = InteractableCanvas.GetComponent<VRPointInteractableCanvas>();
-            GameObject NewPilotButton = GameObject.Find("NewPilotButton");
             GameObject CampaignDisplay = InteractableCanvas.transform.GetChild(0).GetChild(7).GetChild(0).GetChild(0).gameObject;
+            CampaignDisplay.SetActive(true);
             MainScreen = GameObject.Find("MainScreen");
+            stringKeyboard = Instantiate(assetBundle.LoadAsset<GameObject>("StringKeyboard")).GetComponent<VRKeyboard>();
+            floatKeyboard = Instantiate(assetBundle.LoadAsset<GameObject>("FloatKeyboard")).GetComponent<VRKeyboard>();
+            intKeyboard = Instantiate(assetBundle.LoadAsset<GameObject>("IntKeyboard")).GetComponent<VRKeyboard>();
+            stringKeyboard.gameObject.SetActive(false);
+            floatKeyboard.gameObject.SetActive(false);
+            intKeyboard.gameObject.SetActive(false);
 
-            //Creating Mods Button on Main Screen
-            GameObject ModsButton = Instantiate(NewPilotButton, NewPilotButton.transform.parent);
+            Log("Creating Mods Button");//Mods Button
+            GameObject NewPilotButton = GameObject.Find("NewPilotButton");
+            GameObject ModsButton = Instantiate(assetBundle.LoadAsset<GameObject>("ModsButton"), NewPilotButton.transform.parent);
             Vector3 oldPos = NewPilotButton.transform.position;
             ModsButton.transform.position = new Vector3(oldPos.x, oldPos.y - 0.3035235f, oldPos.z);
-
-            Image ModsButtonImage = ModsButton.GetComponent<Image>();
-
-            ModsButtonImage.color = Color.cyan;
-            ModsButton.GetComponentInChildren<Text>().text = "Mods";
-
             VRInteractable modsInteractable = ModsButton.GetComponent<VRInteractable>();
-            modsInteractable.interactableName = "Open Mods";
-            modsInteractable.OnInteract = GenerateEvent(delegate { OpenPage(Pages.Mods); SetDefaultText(); });
+            modsInteractable.OnInteract.AddListener(delegate { OpenPage(Pages.Mods); SetDefaultText(); });
 
-            modsPage = Instantiate(CampaignDisplay, CampaignDisplay.transform.parent);
-            modsPage.SetActive(true);
+            Log("Creating Mods Page");//Mods Page
+            modsPage = Instantiate(assetBundle.LoadAsset<GameObject>("ModLoaderDisplay"), CampaignDisplay.transform.parent);
 
-            //Select Button
-            SelectButton = modsPage.transform.GetChild(3).GetComponentInChildren<Text>();
-            SelectButton.text = "Load";
-            VRInteractable selectVRI = SelectButton.transform.GetComponentInParent<VRInteractable>();
-            selectVRI.interactableName = "Load Current Mod";
-            selectVRI.OnInteract = GenerateEvent(delegate { LoadMod(); });
-            selectVRI.GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
-
-            //Back Button
-            Button backButton = modsPage.transform.GetChild(4).GetComponent<Button>();
-            VRInteractable backInteractable = modsPage.transform.GetChild(4).GetComponent<VRInteractable>();
-            backInteractable.interactableName = "Back to main menu";
-            backInteractable.OnInteract = GenerateEvent(delegate { OpenPage(Pages.MainMenu); });
-            backInteractable.GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
-
-            //Mod Info Page
-            modInfoUI = modsPage.transform.GetChild(8).GetComponentInChildren<CampaignInfoUI>();
-
-            //Settings Button
-            modsPage.transform.GetChild(6).GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
-            modsPage.transform.GetChild(6).GetComponentInChildren<Text>().text = "Mod\nSettings";
-            VRInteractable settingsInteractable = modsPage.transform.GetChild(6).GetComponent<VRInteractable>();
-            settingsInteractable.interactableName = "Comming soon!";
-            settingsInteractable.OnInteract = GenerateEvent(delegate { Debug.Log("Pressed the mods setting button"); });//settingsInteractable.OnInteract = GenerateEvent(delegate { OpenPage(Pages.Settings); });
-
-            //Creating the Settings Page
-            settingsPage = Instantiate(CampaignDisplay,CampaignDisplay.transform.parent);
-            settingsPage.SetActive(true);
-
-            settingsPage.transform.GetChild(0).GetComponent<Text>().text = "Mods Settings";
-
-            VRInteractable settingsBackInteractable = settingsPage.transform.GetChild(4).GetComponent<VRInteractable>();
-            settingsBackInteractable.interactableName = "Back to mods";
-            settingsBackInteractable.OnInteract = GenerateEvent(delegate { OpenPage(Pages.Mods); });
-            settingsBackInteractable.GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
-
-            settingsScrollView = settingsPage.transform.GetChild(5).GetComponent<ScrollRect>();
-            settingsSelection = (RectTransform)settingsPage.transform.GetChild(5).GetChild(0).GetChild(0).GetChild(0).transform;
-
-            settingsCampaignListTemplate = settingsPage.transform.GetChild(5).GetChild(0).GetChild(0).GetChild(1).gameObject;
-            settingsCampaignListTemplate.SetActive(false);
-
-            settingsScrollBox = Instantiate(settingsPage.transform.GetChild(5).gameObject, settingsPage.transform);
-            RectTransform settingsScrollBoxRect = settingsScrollBox.GetComponent<RectTransform>();
-            settingsScrollBoxRect.localPosition = new Vector3(-176.2f, 1.3f, 0);
-            settingsScrollBoxRect.sizeDelta = new Vector2(923.7f, 519.9f);
-            settingsScrollBoxView = settingsScrollBox.GetComponent<ScrollRect>();
-            settingsScrollBoxView.content.transform.GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(905.2f, 100);
-            settingsScrollBoxView.content.transform.GetChild(0).GetComponent<RectTransform>().sizeDelta = new Vector2(905.2f, 100);
-
-            s_BoolTemplate = Instantiate(settingsScrollBoxView.content.transform.GetChild(1).gameObject, settingsScrollBoxView.content);
-            s_BoolTemplate.transform.GetChild(1).GetComponent<RectTransform>().localPosition = new Vector3(-224,0);
-            s_BoolTemplate.transform.GetChild(1).GetComponent<RectTransform>().sizeDelta = new Vector2(446.2f, 80.6f);
-            s_BoolTemplate.transform.GetChild(2).GetComponent<RectTransform>().localPosition = new Vector3(226, 0);
-            s_BoolTemplate.transform.GetChild(2).GetComponent<RectTransform>().sizeDelta = new Vector2(280.7f, 50.7f);
-            s_BoolTemplate.transform.GetChild(2).GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
-            s_BoolTemplate.transform.GetChild(2).GetComponent<VRInteractable>().interactableName = "Toggle Bool";
-            Instantiate(s_BoolTemplate.transform.GetChild(1).gameObject, s_BoolTemplate.transform.GetChild(2));
-            s_BoolTemplate.transform.GetChild(2).GetComponentInChildren<Text>().text = "Bool";
-            s_BoolTemplate.transform.GetChild(2).GetComponentInChildren<RectTransform>().localPosition = new Vector3(0, 0);
-            s_BoolTemplate.transform.GetChild(2).GetComponentInChildren<RectTransform>().sizeDelta = new Vector2(280.7f, 50.7f);
-
-            s_BoolTemplate.SetActive(false);
-
-
-            //Destorying Gameobjects that are not being used
-            Destroy(modsPage.transform.GetChild(8).GetChild(0).GetChild(3).gameObject);//percentCompleteText
-            Destroy(modsPage.transform.GetChild(2).gameObject);//PrevButton
-            Destroy(modsPage.transform.GetChild(1).gameObject);//NextButton
-            Destroy(settingsPage.transform.GetChild(8).gameObject);//CampselectMask
-            Destroy(settingsPage.transform.GetChild(6).gameObject);//ResetButton
-            Destroy(settingsPage.transform.GetChild(3).gameObject);//SelectButton
-            Destroy(settingsPage.transform.GetChild(2).gameObject);//PrevButton
-            Destroy(settingsPage.transform.GetChild(1).gameObject);//NextButton
-            
-            //Title 
-            modsPage.transform.GetChild(0).GetComponent<Text>().text = "Select a Mod";
-
-            //Getting the selection colour transform
-            selectionTF = (RectTransform)modsPage.transform.GetChild(5).GetChild(0).GetChild(0).GetChild(0).transform;
-
-            //Storing the prefab button for each item
-            CampaignListTemplate = modsPage.transform.GetChild(5).GetChild(0).GetChild(0).GetChild(1).gameObject;
-            Scroll_View = modsPage.transform.GetChild(5).GetComponent<ScrollRect>();
-
+            CampaignListTemplate = modsPage.transform.GetChild(3).GetChild(0).GetChild(0).GetChild(1).gameObject;
+            Scroll_View = modsPage.transform.GetChild(3).GetComponent<ScrollRect>();
             buttonHeight = ((RectTransform)CampaignListTemplate.transform).rect.height;
+            selectionTF = (RectTransform)modsPage.transform.GetChild(3).GetChild(0).GetChild(0).GetChild(0).transform;
+            modInfoUI = modsPage.transform.GetChild(5).GetComponentInChildren<CampaignInfoUI>();
+            SelectButton = modsPage.transform.GetChild(1).GetComponentInChildren<Text>();
+            VRInteractable selectVRI = SelectButton.transform.GetComponentInParent<VRInteractable>();
+            selectVRI.OnInteract.AddListener(LoadMod);
+            VRInteractable backInteractable = modsPage.transform.GetChild(2).GetComponent<VRInteractable>();
+            backInteractable.OnInteract.AddListener(delegate { OpenPage(Pages.MainMenu); });
+            VRInteractable settingsInteractable = modsPage.transform.GetChild(4).GetComponent<VRInteractable>();
+            settingsInteractable.OnInteract.AddListener(delegate { OpenPage(Pages.Settings); });
+            
 
             if (currentMods.Count == 0)
             {
@@ -186,7 +129,7 @@ namespace ModLoader
             else
             {
                 Log("Searching for any new mods\nCurrent Count = " + currentMods.Count);
-                if (ModReader.GetNewMods(ModLoaderManager.instance.rootPath + @"\mods",ref currentMods))
+                if (ModReader.GetNewMods(ModLoaderManager.instance.rootPath + @"\mods", ref currentMods))
                 {
                     Log("Found new mods\nNew count = " + currentMods.Count);
                 }
@@ -195,38 +138,48 @@ namespace ModLoader
                     Log("Didn't find any new mods");
                 }
             }
-            
+
 
             for (int i = 0; i < currentMods.Count; i++)
             {
                 currentMods[i].listGO = Instantiate(CampaignListTemplate, Scroll_View.content);
                 currentMods[i].listGO.transform.localPosition = new Vector3(0f, -i * buttonHeight, 0f);
-                currentMods[i].listGO.GetComponent<VRUIListItemTemplate>().Setup(currentMods[i].name,i,OpenMod);
+                currentMods[i].listGO.GetComponent<VRUIListItemTemplate>().Setup(currentMods[i].name, i, OpenMod);
                 //Button currentButton = currentMods[i].listGO.transform.GetChild(2).GetComponent<Button>();
                 //currentButton.onClick.RemoveAllListeners(); //Trying to remove the existing button click
                 Log("Added Mod:\n" + currentMods[i].name + "\n" + currentMods[i].description);
             }
 
             Log("Loaded " + currentMods.Count + " mods");
+
+            Log("Mod Settings");//Mod Setttings
+            settingsPage = Instantiate(assetBundle.LoadAsset<GameObject>("Mod Settings"), CampaignDisplay.transform.parent);
+            settingsSelection = (RectTransform)settingsPage.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).transform;
+            
+            Transform s_content = settingsPage.transform.GetChild(2).GetChild(0).GetChild(0);
+            s_BoolTemplate = assetBundle.LoadAsset<GameObject>("BoolTemplate");
+            s_StringTemplate = assetBundle.LoadAsset<GameObject>("StringTemplate");
+            s_IntTemplate = assetBundle.LoadAsset<GameObject>("NumberTemplate");
+            s_CustomLabel = assetBundle.LoadAsset<GameObject>("CustomLabel");
+            s_FloatTemplate = s_IntTemplate;
+            s_Holder = modsPage.transform.GetChild(5).gameObject;
+
+            settingsCampaignListTemplate = settingsPage.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1).gameObject;
+            settingsCampaignListTemplate.SetActive(false);
+            VRInteractable settingsBackInteractable = settingsPage.transform.GetChild(3).GetComponent<VRInteractable>();
+            settingsBackInteractable.OnInteract.AddListener(delegate { OpenPage(Pages.Mods); });
+            settingsScrollBox = settingsPage.transform.GetChild(2).gameObject;
+            settingsScrollBoxView = settingsScrollBox.GetComponent<ScrollRect>();
+            settingsScrollView = settingsPage.transform.GetChild(1).GetComponent<ScrollRect>();
+
+            Log("Finished clearning up");//Finished and clearning up
+            OpenPage(Pages.MainMenu);
             Scroll_View.content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, (2f + currentMods.Count) * buttonHeight);
             Scroll_View.ClampVertical();
             InteractableCanvasScript.RefreshInteractables();
             CampaignDisplay.SetActive(false);
             CampaignListTemplate.SetActive(false);
-            OpenPage(Pages.MainMenu);
-
             SetDefaultText();
-        }
-        /// <summary>
-        /// Removes existing events and creates a new unity event with an action
-        /// </summary>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        private UnityEvent GenerateEvent(UnityAction action)
-        {
-            UnityEvent returnValue = new UnityEvent();
-            returnValue.AddListener(action);
-            return returnValue;
         }
         public void LoadMod()
         {
@@ -292,7 +245,7 @@ namespace ModLoader
         }
         private void SetDefaultText()
         {
-            Debug.Log("Setting Default Text for mod");
+            Log("Setting Default Text for mod");
             modInfoUI.campaignName.text = "";
             modInfoUI.campaignDescription.text = "";
             modInfoUI.campaignImage.color = new Color(0, 0, 0, 0);
@@ -322,19 +275,6 @@ namespace ModLoader
             }
         }
 
-        public static VRInteractable SetDefaultInteractable(VRInteractable interactable, PoseBounds pb)
-        {
-            VRInteractable returnValue = interactable;
-            returnValue.radius = 0.06f;
-            returnValue.sqrRadius = 0.0036f;
-            returnValue.OnInteract = new UnityEvent();
-            returnValue.OnInteracting = new UnityEvent();
-            returnValue.OnStopInteract = new UnityEvent();
-            returnValue.poseBounds = pb;
-            returnValue.button = VRInteractable.Buttons.Trigger;
-            return returnValue;
-        }
-
         private IEnumerator SetModPreviewImage(RawImage raw, string path)
         {
             if (raw == null)
@@ -346,38 +286,86 @@ namespace ModLoader
         }
         public void CreateSettingsMenu(Settings settings)
         {
-            for (int i = 0; i < currentMods.Count; i++)
-            {
-                if (currentMods[i].name.Equals(settings.Mod.name))
-                {
-                    Log("Found " + settings.Mod.name);
-                    currentMods[i].settingsGO = Instantiate(settingsCampaignListTemplate, settingsScrollView.content);
-                    currentMods[i].settingsGO.SetActive(true);
-                    currentMods[i].settingsGO.transform.localPosition = new Vector3(0f, -(settingsScrollView.content.childCount - 5) * buttonHeight, 0f);
-                    currentMods[i].settingsGO.GetComponent<VRUIListItemTemplate>().Setup(currentMods[i].name, i, OpenSetting);
-                    currentSettings.Add(settings);
-                    break;
-                }
-            }
+            int currentModIndex = FindModIndex(settings.Mod.thisMod.name);
 
-            GameObject holder = new GameObject(settings.Mod.name);
-            holder.transform.SetParent(settingsScrollBoxView.content);
+            currentMods[currentModIndex].settingsGO = Instantiate(settingsCampaignListTemplate, settingsScrollView.content);
+            currentMods[currentModIndex].settingsGO.SetActive(true);
+            currentMods[currentModIndex].settingsGO.transform.localPosition = new Vector3(0f, -(settingsScrollView.content.childCount - 5) * buttonHeight, 0f);
+            currentMods[currentModIndex].settingsGO.GetComponent<VRUIListItemTemplate>().Setup(currentMods[currentModIndex].name, currentModIndex, OpenSetting);
+            currentSettings.Add(settings);
+
+            currentMods[currentModIndex].settingsHolerGO = new GameObject(currentMods[currentModIndex].name, typeof(RectTransform));
+            currentMods[currentModIndex].settingsHolerGO.transform.SetParent(s_Holder.transform, false);
 
             for (int i = 0; i < settings.subSettings.Count; i++)
             {
                 if (settings.subSettings[i] is Settings.BoolSetting)
                 {
-                    Debug.Log("Spawning Bool Setting");
+                    Log("Found Bool Setting");
                     Settings.BoolSetting currentBool = (Settings.BoolSetting)settings.subSettings[i];
-                    GameObject boolGO = Instantiate(s_BoolTemplate, holder.transform,true);
+                    GameObject boolGO = Instantiate(s_BoolTemplate, currentMods[currentModIndex].settingsHolerGO.transform, false);
                     boolGO.transform.GetChild(1).GetComponent<Text>().text = currentBool.settingName;
-                    boolGO.transform.GetChild(2).GetComponentInChildren<Text>().text = currentBool.defaultValue.ToString();
-                    for (int j = 0; j < currentBool.callbacks.Length; j++)
-                    {
-                        boolGO.transform.GetChild(2).GetComponent<VRInteractable>().OnInteract.AddListener(delegate { currentBool.callbacks[j].Invoke(!currentBool.currentValue); });
-                    }
+                    currentBool.text = boolGO.transform.GetChild(2).GetComponentInChildren<Text>();
+                    currentBool.text.text = currentBool.defaultValue.ToString();
+                    boolGO.transform.GetChild(2).GetComponent<VRInteractable>().OnInteract.AddListener(delegate { currentBool.Invoke(); });
+                    boolGO.SetActive(true);
+                    
+                    Log($"Spawned Bool Setting. Name:{currentBool.settingName} at {boolGO.transform.position}");
+                }
+                else if (settings.subSettings[i] is Settings.FloatSetting)
+                {
+                    Log("Found Float Setting");
+                    Settings.FloatSetting currentFloat = (Settings.FloatSetting)settings.subSettings[i];
+                    GameObject floatGO = Instantiate(s_FloatTemplate, currentMods[currentModIndex].settingsHolerGO.transform, false);
+                    floatGO.transform.GetChild(1).GetComponent<Text>().text = currentFloat.settingName;
+                    currentFloat.text = floatGO.transform.GetChild(2).GetComponent<Text>();
+                    currentFloat.text.text = currentFloat.value.ToString();
+                    floatGO.transform.GetChild(3).GetComponent<VRInteractable>().OnInteract.AddListener(delegate {
+                        OpenKeyboard(KeyboardType.Float, currentFloat.value.ToString(), 32, new UnityAction<string>(currentFloat.SetValue)); 
+                    });
+                    floatGO.SetActive(true);
+                    Log($"Spawned Float setting called {currentFloat.settingName} at {floatGO.transform.position}");
+                }
+                else if (settings.subSettings[i] is Settings.IntSetting)
+                {
+                    Log("Found Int Setting");
+                    Settings.IntSetting currentInt = (Settings.IntSetting)settings.subSettings[i];
+                    GameObject intGO = Instantiate(s_IntTemplate, currentMods[currentModIndex].settingsHolerGO.transform, false);
+                    intGO.transform.GetChild(1).GetComponent<Text>().text = currentInt.settingName;
+                    currentInt.text = intGO.transform.GetChild(2).GetComponent<Text>();
+                    currentInt.text.text = currentInt.value.ToString();
+                    intGO.transform.GetChild(3).GetComponent<VRInteractable>().OnInteract.AddListener(delegate {
+                        OpenKeyboard(KeyboardType.Int, currentInt.value.ToString(), 32, new UnityAction<string>(currentInt.SetValue));
+                    });
+                    intGO.SetActive(true);
+                    Log($"Spawned Int setting called {currentInt.settingName} at {intGO.transform.position}");
+
+                }
+                else if (settings.subSettings[i] is Settings.StringSetting)
+                {
+                    Log("Found String Setting");
+                    Settings.StringSetting currentString = (Settings.StringSetting)settings.subSettings[i];
+                    GameObject stringGO = Instantiate(s_StringTemplate, currentMods[currentModIndex].settingsHolerGO.transform, false);
+                    stringGO.transform.GetChild(1).GetComponent<Text>().text = currentString.settingName;
+                    currentString.text = stringGO.transform.GetChild(2).GetComponentInChildren<Text>();
+                    currentString.text.text = currentString.value;
+                    stringGO.transform.GetChild(3).GetComponent<VRInteractable>().OnInteract.AddListener(delegate { 
+                        OpenKeyboard(KeyboardType.String, currentString.value, 32, new UnityAction<string>(currentString.SetValue)); 
+                    });
+                    stringGO.SetActive(true);
+                    Log($"Spawned String setting called {currentString.settingName} at {stringGO.transform.position}");
+                }
+                else if (settings.subSettings[i] is Settings.CustomLabel)
+                {
+                    Log("Found a custom label");
+                    Settings.CustomLabel currentLabel = (Settings.CustomLabel)settings.subSettings[i];
+                    GameObject label = Instantiate(s_CustomLabel, currentMods[currentModIndex].settingsHolerGO.transform, false);
+                    label.GetComponentInChildren<Text>().text = currentLabel.settingName;
+                    label.SetActive(true);
+                    Log($"Spawned a custom label with the text:\n{currentLabel.settingName}");
                 }
             }
+            currentMods[currentModIndex].settingsHolerGO.SetActive(false);
             Debug.Log("Done spawning " + settings.subSettings.Count + " settings");
             RefreashSettings();
         }
@@ -403,12 +391,89 @@ namespace ModLoader
             settingsSelection.position = selectedMod.settingsGO.transform.position;
             settingsSelection.GetComponent<Image>().color = new Color(0.3529411764705882f, 0.196078431372549f, 0);
 
-            for (int i = 0; i < settingsScrollBoxView.content.childCount; i++)
+            if(currentSelectedSetting != string.Empty) 
             {
-                settingsScrollBoxView.content.GetChild(i).gameObject.SetActive(false);
+                //There already is something on the content of the settings scroll box.
+                MoveBackToPool(currentSelectedSetting);
+            }
+            MoveToSettingsView(selectedMod.settingsHolerGO.transform);
+            RefreashSettings();
+        }
+        private void MoveToSettingsView(Transform parent)
+        {
+            currentSelectedSetting = parent.name;
+            //They need to be stored in a temp array so that we can move them all.
+            Transform[] children = new Transform[parent.childCount];
+            for (int i = 0; i < parent.childCount; i++)
+            {
+                children[i] = parent.GetChild(i);
+            }
+            for (int i = 0; i < children.Length; i++)
+            {
+                children[i].SetParent(settingsScrollBoxView.content, false);
+            }
+        }
+        private void MoveBackToPool(string name)
+        {
+            int modIndex = FindModIndex(name);
+            Transform holder = s_Holder.transform.Find(currentMods[modIndex].settingsHolerGO.name);
+            if (holder == null)
+            {
+                //Couldn't find the holder for some reason in the pool.
+                holder = new GameObject(currentMods[modIndex].name, typeof(RectTransform)).transform;
+                holder.SetParent(s_Holder.transform, false);
+                currentMods[modIndex].settingsHolerGO = holder.gameObject;
             }
 
-            settingsScrollBoxView.content.Find(selectedMod.name).gameObject.SetActive(true);
+            for (int i = 0; i < settingsScrollBoxView.content.childCount; i++)
+            {
+                Debug.LogWarning($"Moving {settingsScrollBoxView.content.GetChild(i)} Back to holder");
+                settingsScrollBoxView.content.GetChild(i).SetParent(holder, false);
+            }
+        }
+        /// <summary>
+        /// Finds the index of the current mod by its name.
+        /// </summary>
+        /// <param name="name">Mod.name value of what you want to find</param>
+        /// <returns>The index of where this mod is in the currentMods list</returns>
+        private int FindModIndex(string name)
+        {
+            int returnValue = -1;
+            for (int i = 0; i < currentMods.Count; i++)
+            {
+                if (currentMods[i].name.Equals(name))
+                {
+                    returnValue = i;
+                    break;
+                }
+            }
+            return returnValue;
+        }
+        public void OpenKeyboard(KeyboardType keyboardType,string startingText, int maxChars, UnityAction<string> onEntered, UnityAction onCancelled = null)
+        {
+            OpenKeyboard(KeyboardType.DisableAll); //Closing them all first incase one is opened
+            if (keyboardType == KeyboardType.DisableAll)
+                return;
+            switch (keyboardType)
+            {
+                case KeyboardType.Int:
+                    intKeyboard.Display(startingText, maxChars, onEntered, onCancelled);
+                    break;
+                case KeyboardType.Float:
+                    floatKeyboard.Display(startingText, maxChars, onEntered, onCancelled);
+                    break;
+                case KeyboardType.String:
+                    stringKeyboard.Display(startingText, maxChars, onEntered, onCancelled);
+                    break;
+            }
+        }
+        public void OpenKeyboard(KeyboardType keyboardType)
+        {
+            if (keyboardType != KeyboardType.DisableAll)
+                return;
+            stringKeyboard.gameObject.SetActive(false);
+            intKeyboard.gameObject.SetActive(false);
+            floatKeyboard.gameObject.SetActive(false);
         }
     }
 }

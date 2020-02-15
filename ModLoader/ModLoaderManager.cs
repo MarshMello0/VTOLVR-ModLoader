@@ -68,12 +68,9 @@ Special Thanks to Ketkev for his continuous support to the mod loader and the we
         public static ModLoaderManager instance { get; private set; }
 
 
-        public AssetBundle assets;
         private VTOLAPI api;
         public string rootPath;
-        private string assetsPath = @"\modloader.assets";
         private string[] args;
-        private WebClient client;
 
         //Discord
         private DiscordController discord;
@@ -175,6 +172,7 @@ Special Thanks to Ketkev for his continuous support to the mod loader and the we
         private void SceneLoaded(Scene arg0, LoadSceneMode arg1)
         {
             string sceneName = arg0.name;
+            Debug.Log("Scene Loaded = " + sceneName);
             switch (sceneName)
             {
                 case "SamplerScene":
