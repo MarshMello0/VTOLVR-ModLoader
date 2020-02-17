@@ -85,10 +85,18 @@ namespace ModLoader
 
             Log("Creating UI for Ready Room");
             GameObject InteractableCanvas = GameObject.Find("InteractableCanvas");
+            if (InteractableCanvas == null)
+                LogError("InteractableCanvas was null");
             InteractableCanvasScript = InteractableCanvas.GetComponent<VRPointInteractableCanvas>();
             GameObject CampaignDisplay = InteractableCanvas.transform.GetChild(0).GetChild(7).GetChild(0).GetChild(0).gameObject;
+            if (CampaignDisplay == null)
+                LogError("CampaignDisplay was null");
             CampaignDisplay.SetActive(true);
             MainScreen = GameObject.Find("MainScreen");
+            if (MainScreen == null)
+                LogError("Main Screen was null");
+
+            Log("Spawning Keyboards");
             stringKeyboard = Instantiate(assetBundle.LoadAsset<GameObject>("StringKeyboard")).GetComponent<VRKeyboard>();
             floatKeyboard = Instantiate(assetBundle.LoadAsset<GameObject>("FloatKeyboard")).GetComponent<VRKeyboard>();
             intKeyboard = Instantiate(assetBundle.LoadAsset<GameObject>("IntKeyboard")).GetComponent<VRKeyboard>();
@@ -113,9 +121,13 @@ namespace ModLoader
             selectionTF = (RectTransform)modsPage.transform.GetChild(3).GetChild(0).GetChild(0).GetChild(0).transform;
             modInfoUI = modsPage.transform.GetChild(5).GetComponentInChildren<CampaignInfoUI>();
             SelectButton = modsPage.transform.GetChild(1).GetComponentInChildren<Text>();
-            VRInteractable selectVRI = SelectButton.transform.GetComponentInParent<VRInteractable>();
+            VRInteractable selectVRI = modsPage.transform.GetChild(1).GetComponent<VRInteractable>();
+            if (selectVRI == null)
+                LogError("selectVRI is null");
             selectVRI.OnInteract.AddListener(LoadMod);
             VRInteractable backInteractable = modsPage.transform.GetChild(2).GetComponent<VRInteractable>();
+            if (backInteractable == null)
+                LogError("backInteractable is null");
             backInteractable.OnInteract.AddListener(delegate { OpenPage(Pages.MainMenu); });
             VRInteractable settingsInteractable = modsPage.transform.GetChild(4).GetComponent<VRInteractable>();
             settingsInteractable.OnInteract.AddListener(delegate { OpenPage(Pages.Settings); });
