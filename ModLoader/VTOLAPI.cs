@@ -178,9 +178,15 @@ public class VTOLAPI : MonoBehaviour
 
     public void CheckConsoleCommand(string command)
     {
-        if (commands.ContainsKey(command.ToLower()))
+        string[] lastCommand = command.Split(' ');
+        if (lastCommand == null || lastCommand.Length == 0)
         {
-            commands[command.ToLower()].Invoke(command.ToLower());
+            Debug.LogError("The command seemed to be less than 0");
+            return;
+        }
+        if (commands.ContainsKey(lastCommand[0].ToLower()))
+        {
+            commands[lastCommand[0].ToLower()].Invoke(command);
         }
     }
 
