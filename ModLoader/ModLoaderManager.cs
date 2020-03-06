@@ -124,6 +124,7 @@ Special Thanks to Ketkev for his continuous support to the mod loader and the we
             api.CreateCommand("quit", delegate { Application.Quit(); });
             api.CreateCommand("print", PrintMessage);
             api.CreateCommand("help", api.ShowHelp);
+            api.CreateCommand("vrinteract", VRInteract);
         }
 
         private void ConsoleInput(string obj)
@@ -220,6 +221,7 @@ Special Thanks to Ketkev for his continuous support to the mod loader and the we
         }
         public void UpdateDiscord()
         {
+            Debug.Log("Updating Discord...");
             discord.UpdatePresence(loadedModsCount, discordDetail, discordState);
         }
         private IEnumerator CreateModLoader()
@@ -235,10 +237,29 @@ Special Thanks to Ketkev for his continuous support to the mod loader and the we
             DontDestroyOnLoad(modloader);
         }
 
-        public void PrintMessage(string obj)
+        public static void PrintMessage(string obj)
         {
             obj.Remove(0, 5);
             Debug.Log(obj);
+        }
+        public static void VRInteract(string message)
+        {
+            message = message.Replace("vrinteract ","");
+            Debug.Log($"Searching for gameobject :{message}");
+            GameObject go = GameObject.Find(message);
+            if (go == null)
+            {
+                Debug.LogError($"Couldn't find gameobject :{message}");
+                return;
+            }
+            VRInteractable interactable = go.GetComponent<VRInteractable>();
+            if (interactable == null)
+            {
+                Debug.LogError($"The object ({message}) does not have a VRInteractable attached");
+                return;
+            }
+            HarmonyLib.Traverse.Create(interactable).Method("StartInteraction").GetValue();
+            Debug.Log($"Invoked OnInteract on GameObject {message}");
         }
 
         private IEnumerator LoadLevel()
