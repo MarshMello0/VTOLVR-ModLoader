@@ -2,7 +2,6 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!5 &1
 TimeManager:
-  m_ObjectHideFlags: 0
   Fixed Timestep: 0.02222222
   Maximum Allowed Timestep: 0.3333333
   m_TimeScale: 1

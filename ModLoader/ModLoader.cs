@@ -85,37 +85,48 @@ namespace ModLoader
 
             Log("Creating UI for Ready Room");
             GameObject InteractableCanvas = GameObject.Find("InteractableCanvas");
+            if (InteractableCanvas == null)
+                LogError("InteractableCanvas was null");
             InteractableCanvasScript = InteractableCanvas.GetComponent<VRPointInteractableCanvas>();
-            GameObject CampaignDisplay = InteractableCanvas.transform.GetChild(0).GetChild(7).GetChild(0).GetChild(0).gameObject;
+            GameObject CampaignDisplay = GameObject.Find("CampaignSelector").transform.GetChild(0).GetChild(0).gameObject;
+            if (CampaignDisplay == null)
+                LogError("CampaignDisplay was null");
             CampaignDisplay.SetActive(true);
             MainScreen = GameObject.Find("MainScreen");
+            if (MainScreen == null)
+                LogError("Main Screen was null");
+
+            Log("Spawning Keyboards");
             stringKeyboard = Instantiate(assetBundle.LoadAsset<GameObject>("StringKeyboard")).GetComponent<VRKeyboard>();
             floatKeyboard = Instantiate(assetBundle.LoadAsset<GameObject>("FloatKeyboard")).GetComponent<VRKeyboard>();
             intKeyboard = Instantiate(assetBundle.LoadAsset<GameObject>("IntKeyboard")).GetComponent<VRKeyboard>();
             stringKeyboard.gameObject.SetActive(false);
             floatKeyboard.gameObject.SetActive(false);
             intKeyboard.gameObject.SetActive(false);
-
+            
             Log("Creating Mods Button");//Mods Button
-            GameObject NewPilotButton = GameObject.Find("NewPilotButton");
-            GameObject ModsButton = Instantiate(assetBundle.LoadAsset<GameObject>("ModsButton"), NewPilotButton.transform.parent);
-            Vector3 oldPos = NewPilotButton.transform.position;
-            ModsButton.transform.position = new Vector3(oldPos.x, oldPos.y - 0.3035235f, oldPos.z);
+            GameObject SettingsButton = MainScreen.transform.GetChild(0).GetChild(0).GetChild(8).gameObject;
+            GameObject ModsButton = Instantiate(assetBundle.LoadAsset<GameObject>("ModsButton"), SettingsButton.transform.parent);
+            ModsButton.transform.localPosition = new Vector3(-811,-112,0);
             VRInteractable modsInteractable = ModsButton.GetComponent<VRInteractable>();
             modsInteractable.OnInteract.AddListener(delegate { OpenPage(Pages.Mods); SetDefaultText(); });
 
             Log("Creating Mods Page");//Mods Page
             modsPage = Instantiate(assetBundle.LoadAsset<GameObject>("ModLoaderDisplay"), CampaignDisplay.transform.parent);
-
+            
             CampaignListTemplate = modsPage.transform.GetChild(3).GetChild(0).GetChild(0).GetChild(1).gameObject;
             Scroll_View = modsPage.transform.GetChild(3).GetComponent<ScrollRect>();
             buttonHeight = ((RectTransform)CampaignListTemplate.transform).rect.height;
             selectionTF = (RectTransform)modsPage.transform.GetChild(3).GetChild(0).GetChild(0).GetChild(0).transform;
             modInfoUI = modsPage.transform.GetChild(5).GetComponentInChildren<CampaignInfoUI>();
             SelectButton = modsPage.transform.GetChild(1).GetComponentInChildren<Text>();
-            VRInteractable selectVRI = SelectButton.transform.GetComponentInParent<VRInteractable>();
+            VRInteractable selectVRI = modsPage.transform.GetChild(1).GetComponent<VRInteractable>();
+            if (selectVRI == null)
+                LogError("selectVRI is null");
             selectVRI.OnInteract.AddListener(LoadMod);
             VRInteractable backInteractable = modsPage.transform.GetChild(2).GetComponent<VRInteractable>();
+            if (backInteractable == null)
+                LogError("backInteractable is null");
             backInteractable.OnInteract.AddListener(delegate { OpenPage(Pages.MainMenu); });
             VRInteractable settingsInteractable = modsPage.transform.GetChild(4).GetComponent<VRInteractable>();
             settingsInteractable.OnInteract.AddListener(delegate { OpenPage(Pages.Settings); });
@@ -153,10 +164,10 @@ namespace ModLoader
             Log("Loaded " + currentMods.Count + " mods");
 
             Log("Mod Settings");//Mod Setttings
-            settingsPage = Instantiate(assetBundle.LoadAsset<GameObject>("Mod Settings"), CampaignDisplay.transform.parent);
+            settingsPage = Instantiate(assetBundle.LoadAsset<GameObject>("ModSettings"), CampaignDisplay.transform.parent);
             settingsSelection = (RectTransform)settingsPage.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(0).transform;
             
-            Transform s_content = settingsPage.transform.GetChild(2).GetChild(0).GetChild(0);
+            
             s_BoolTemplate = assetBundle.LoadAsset<GameObject>("BoolTemplate");
             s_StringTemplate = assetBundle.LoadAsset<GameObject>("StringTemplate");
             s_IntTemplate = assetBundle.LoadAsset<GameObject>("NumberTemplate");
@@ -164,11 +175,12 @@ namespace ModLoader
             s_FloatTemplate = s_IntTemplate;
             s_Holder = modsPage.transform.GetChild(5).gameObject;
 
+            Log("Setting up settings buttons");
             settingsCampaignListTemplate = settingsPage.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1).gameObject;
             settingsCampaignListTemplate.SetActive(false);
-            VRInteractable settingsBackInteractable = settingsPage.transform.GetChild(3).GetComponent<VRInteractable>();
+            VRInteractable settingsBackInteractable = settingsPage.transform.GetChild(2).GetComponent<VRInteractable>();
             settingsBackInteractable.OnInteract.AddListener(delegate { OpenPage(Pages.Mods); });
-            settingsScrollBox = settingsPage.transform.GetChild(2).gameObject;
+            settingsScrollBox = settingsPage.transform.GetChild(4).gameObject;
             settingsScrollBoxView = settingsScrollBox.GetComponent<ScrollRect>();
             settingsScrollView = settingsPage.transform.GetChild(1).GetComponent<ScrollRect>();
 

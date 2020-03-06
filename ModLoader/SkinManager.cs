@@ -227,10 +227,15 @@ namespace ModLoader
             for (int i = 0; i < materials.Count; i++)
             {
                 if (File.Exists(selected.folderPath + @"\" + materials[i].name + ".png"))
+                {
                     StartCoroutine(UpdateTexture(selected.folderPath + @"\" + materials[i].name + ".png", materials[i].material));
-                else
-                    Log("File Doesn't exist for skin\n" +
-                        selected.folderPath + @"\" + materials[i].name + ".png");
+                    continue;
+                }
+                
+                if (materials[i].name.Equals("mat_afighterExt2_livery") && File.Exists(selected.folderPath + @"\mat_aFighterExt2.png"))
+                {
+                    StartCoroutine(UpdateTexture(selected.folderPath + @"\mat_aFighterExt2.png", materials[i].material));
+                }
             }
         }
 
@@ -573,11 +578,26 @@ namespace ModLoader
             }
             else
             {
+                //In update 0.0.15 mat_afighterExt1 changed to mat_afighterExt1_livery
+                path = CheckForOldName(path, material);
                 WWW www = new WWW("file:///" + path);
                 while (!www.isDone)
                     yield return null;
                 material.SetTexture("_MainTex", www.texture);
+                Log($"Set Material for {material.name} to texture located at {path}");
             }
+        }
+
+        private string CheckForOldName(string path, Material material)
+        {
+            if (material.name.Equals("mat_afighterExt1") || material.name.Equals("mat_afighterExt2_livery"))
+            {
+                string newPath = path.Replace(".png", "_livery.png");
+                File.Move(path, newPath);
+                LogWarning($"Detected an old material name {material.name} , it has been renamed to the new format \nOld: ({path})\nNew: ({newPath})");
+                return newPath;
+            }
+            return path;
         }
 
         private void ClampCount()

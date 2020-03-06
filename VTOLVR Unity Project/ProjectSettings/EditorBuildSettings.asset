@@ -2,48 +2,51 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1045 &1
 EditorBuildSettings:
-  m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
     path: Assets/Scenes/LaunchSplashScene.unity
-    guid: bea6c5734b50cbbd40ef4636ee3a8ebc
+    guid: 003ec409afa27e54a85119346a0ae5f1
   - enabled: 1
     path: Assets/Scenes/SamplerScene.unity
-    guid: 54388d3abd6266834fd3c996b5c21b73
+    guid: ee6f343b19ffd4247950bb31a9dca249
   - enabled: 1
     path: Assets/Scenes/ReadyRoom.unity
-    guid: 14618d0777f3a8bd421cf8f7399a505b
+    guid: 75f584a1c825705439122fe156e47e6e
   - enabled: 1
     path: Assets/Scenes/VehicleConfiguration.unity
-    guid: 6d3e3c55448073b84ef6260d7312662b
+    guid: 47e7306671d46a749933045cc4cc7f51
   - enabled: 1
     path: Assets/Scenes/LoadingScene.unity
-    guid: 93d58e898d5cacac445234db11bd5bfc
+    guid: 4c797e23feb61f24d89f9079b6aa8201
   - enabled: 1
     path: Assets/Scenes/MeshTerrain.unity
-    guid: ce74cb4906c7c4bc4d6c6d63fe59cd4c
+    guid: 7d356b2b63a833d46b0ce317f8003331
   - enabled: 1
     path: Assets/Scenes/OpenWater.unity
-    guid: f41b86f7a1771b8641c76d94b6da9f3d
+    guid: f37001be186464944a829372bb729790
   - enabled: 1
     path: Assets/Scenes/Maps/Akutan.unity
-    guid: 332aa839a1e054a240ef8df9543068b8
+    guid: 2aa039ed46c00fe4ea524ec7210a10f3
   - enabled: 1
     path: Assets/Scenes/VTEditMenu.unity
-    guid: 9bc7bf16b12a3dbb4c0a0c9aec56116b
+    guid: f36ccffd40a019f409fc35b58eb88e2e
   - enabled: 1
     path: Assets/Scenes/VTEditLoadingScene.unity
-    guid: d4d458fc7d1d46b14db702654005a021
+    guid: 9f658c190bc3d53449621e5fbc0d4945
   - enabled: 1
     path: Assets/Scenes/VTMapEditMenu.unity
-    guid: fb29005dced461b9448f5c96345cdc96
+    guid: 9fdc4aa6b9386834eacfb6a935dd5a11
   - enabled: 1
     path: Assets/Scenes/Maps/CustomMapBase.unity
-    guid: e345ce16b3915fa9422ad29c540cebf1
+    guid: 18dc8653d35e21d488959833fbd8365d
   - enabled: 1
     path: Assets/Scenes/TestScenes/CommRadioTest.unity
-    guid: a3f5a3943812eebf45143487eaa53a93
+    guid: 7678e102f6f45cb42b621ff3958c8f8a
   - enabled: 1
     path: Assets/Scenes/ShaderVariantsScene.unity
-    guid: e8f604537b0536894638bd8f1a3f1628
+    guid: e78e6229ec963864ebbec663a5a461f2
+  - enabled: 1
+    path: Assets/Scenes/Maps/CustomMapBase_OverCloud.unity
+    guid: cc91d6ad84db28c448e4e6c7454d1585
+  m_configObjects: {}

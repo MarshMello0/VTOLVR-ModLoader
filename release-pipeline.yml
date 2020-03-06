@@ -122,11 +122,15 @@ jobs:
   - task: DownloadSecureFile@1
     inputs:
       secureFile: 'SharpMonoInjector.dll'
+  - task: DownloadSecureFile@1
+    inputs:
+      secureFile: 'modloader.assets'
 
   - bash: mv d:/a/_temp/discord-rpc.dll installerFiles/VTOLVR_Data/Plugins
   - bash: mv d:/a/_temp/mscorlib.dll installerFiles/VTOLVR_Data/Managed
   - bash: mv ModLoader/bin/Release/0Harmony.dll installerFiles/VTOLVR_Data/Managed
   - bash: mv d:/a/_temp/injector.exe installerFiles/VTOLVR_ModLoader
+  - bash: mv d:/a/_temp/modloader.assets installerFiles/VTOLVR_ModLoader
   - bash: mv d:/a/_temp/SharpMonoInjector.dll installerFiles/VTOLVR_ModLoader
   - bash: mv ModLoader/bin/Release/ModLoader.dll installerFiles/VTOLVR_ModLoader
   - bash: mv Updater/bin/Release/Updater.exe installerFiles/VTOLVR_ModLoader
@@ -188,6 +192,10 @@ jobs:
   - bash: rm -v -r InstallerBuild/
 
   - bash: echo "Release should go here"
+  - bash: md5sum installerFiles/VTOLVR_ModLoader/modloader.assets
+  - bash: md5sum installerFiles/VTOLVR_ModLoader/ModLoader.dll
+  - bash: md5sum installerFiles/VTOLVR_ModLoader/VTOLVR-ModLoader.exe
+
 
   - task: PublishBuildArtifacts@1
     inputs:
