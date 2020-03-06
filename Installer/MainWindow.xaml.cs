@@ -125,6 +125,7 @@ namespace Installer
                 //Delete the files we are going to place in there
                 TryDelete(vtFolder + @"VTOLVR_ModLoader\injector.exe");
                 TryDelete(vtFolder + @"VTOLVR_ModLoader\ModLoader.dll");
+                TryDelete(vtFolder + @"VTOLVR_ModLoader\modloader.assets");
                 TryDelete(vtFolder + @"VTOLVR_ModLoader\SharpMonoInjector.dll");
                 TryDelete(vtFolder + @"VTOLVR_ModLoader\VTOLVR-ModLoader.exe");
                 TryDelete(vtFolder + @"VTOLVR_ModLoader\WpfAnimatedGif.dll");
@@ -144,7 +145,6 @@ namespace Installer
                 TryDelete(vtFolder + @"VTOLVR_Data\Plugins\discord-rpc.dll");
                 TryDelete(vtFolder + @"VTOLVR_Data\Managed\0Harmony.dll");
                 TryDelete(vtFolder + @"VTOLVR_Data\Managed\mscorlib.dll");
-
 
                 ZipFile.ExtractToDirectory(vtFolder + @"ModLoader.zip", vtFolder);
                 SetProgress(50);
