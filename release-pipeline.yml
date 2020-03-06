@@ -192,9 +192,9 @@ jobs:
   - bash: rm -v -r InstallerBuild/
 
   - bash: echo "Release should go here"
-  - bash: md5sum installerFiles/VTOLVR_ModLoader/modloader.assets
-  - bash: md5sum installerFiles/VTOLVR_ModLoader/ModLoader.dll
-  - bash: md5sum installerFiles/VTOLVR_ModLoader/VTOLVR-ModLoader.exe
+  - bash: md5sum installerFiles/VTOLVR_ModLoader/modloader.assets | awk '{ print $1 }
+  - bash: md5sum installerFiles/VTOLVR_ModLoader/ModLoader.dll | awk '{ print $1 }
+  - bash: md5sum installerFiles/VTOLVR_ModLoader/VTOLVR-ModLoader.exe  | awk '{ print $1 }
 
 
   - task: PublishBuildArtifacts@1
