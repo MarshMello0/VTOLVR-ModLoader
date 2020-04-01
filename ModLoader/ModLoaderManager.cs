@@ -258,7 +258,7 @@ Special Thanks to Ketkev for his continuous support to the mod loader and the we
                 Debug.LogError($"The object ({message}) does not have a VRInteractable attached");
                 return;
             }
-            Harmony.Traverse.Create(interactable).Method("StartInteraction").GetValue();
+            HarmonyLib.Traverse.Create(interactable).Method("StartInteraction").GetValue();
             Debug.Log($"Invoked OnInteract on GameObject {message}");
         }
 

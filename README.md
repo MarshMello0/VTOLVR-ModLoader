@@ -1,4 +1,6 @@
-# VTOL VR Mod Loader 
+# [This repository has been moved to GitLab to make use of the built-in CI/CD.](https://gitlab.com/vtolvr-mods/ModLoader "GitLab link")
+
+## VTOL VR Mod Loader 
 
 [![Discord](https://img.shields.io/discord/597153468834119710?label=VTOL%20VR%20Modding&logo=discord&style=flat-square)](https://discord.gg/XZeeafp "Discord Invite") [![Total Downloads](https://img.shields.io/github/downloads/MarshMello0/VTOLVR-ModLoader/total?label=Total%20Downloads&style=flat-square)](https://vtolvr-mods.com/ "Mod Loader's Website") [![GitHub release (latest by date)](https://img.shields.io/github/v/release/MarshMello0/VTOLVR-ModLoader?label=Current%20Release&style=flat-square)](https://github.com/MarshMello0/VTOLVR-ModLoader/releases "Releases Tab") ![Website](https://img.shields.io/website?down_message=Offline&label=Website%20Status&up_message=Online&style=flat-square&url=https%3A%2F%2Fvtolvr-mods.com%2F)
 
